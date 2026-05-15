@@ -692,7 +692,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 </div>
 
 <!-- LOGIN SCREEN -->
-<div id="screen-login" class="screen act">
+<div id="screen-loading" class="screen act" style="background:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh">
+  <img src="icon-192.png" style="width:72px;height:72px;border-radius:18px;opacity:.85" alt="Canopy Security"/>
+  <div style="font-size:12px;color:rgba(255,255,255,.35);margin-top:16px;letter-spacing:.08em;text-transform:uppercase">Canopy Security</div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="screen-login" class="screen">
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:32px;background:var(--bg-primary)">
     <div style="font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Canopy Security</div>
     <div style="font-size:13px;color:var(--text-secondary);margin-bottom:40px">Officer portal</div>
@@ -1237,7 +1243,11 @@ function getPatrolBtn(){return null;}
 function showScreen(id){
   const nav=document.getElementById('global-bottom-nav');
   if(nav)nav.style.display=(id==='main')?'flex':'none';
-  if(id==='login'){const nav2=document.getElementById('global-bottom-nav');if(nav2)nav2.style.display='none';}document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('act');s.style.display='none'});const s=document.getElementById('screen-'+id);s.style.display='block';s.classList.add('act');}
+  if(id==='login'){const nav2=document.getElementById('global-bottom-nav');if(nav2)nav2.style.display='none';}
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('act');s.style.display='none'});
+  const s=document.getElementById('screen-'+id);
+  if(s){s.style.display='block';s.classList.add('act');}
+}
 function showPane(id,btn){
   document.querySelectorAll('.pane').forEach(p=>{p.style.display='none';p.classList.remove('act')});
   const p=document.getElementById('pane-'+id);
@@ -1767,57 +1777,58 @@ const DRIVE_FOLDER='1qo-6YOspwMq9oczeNzkWlmobVGDUxp1Q';
 const SA_EMAIL='canopy-dar-backup@canopy-security.iam.gserviceaccount.com';
 const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCwMiQf2RUQhGLWAtU9f0ld0VroE6FtASHUXhi3YZWJSxiycfkAHKFz+H748PVtlC1vP3mwNcfmL4bM6Wf9rlWW8WI7ty7qMb4jMj78RclhqmHQFwu6uBfkFXekv2zkp9K+A9SxaM5VyDL9wJxT++gqcubhooj0mKAs2Ra4+RqB2gsIGYVZ1Hj+wN/uOIAJFPQd77WWjqI3tU1CEtR8S+kVAeHRo57SEWfa3Ain6h6xWNBwgYeo5G4pefmyUZBuYB2/74hUCDGPmmkNYK7gxCB8O/zINSK80KHzyG8R+AXEPgAT0rRiDpiPPvthBBFQPlm+7IcQDHgMYhS8TVpjz/ytAgMBAAECggEAGAcpI1QN/1ajyTOnCN/sOBMY0T/8FPVr5kjUGLisv9sHNIPpGmQiexeO7pFNpvKSJPMEZqIERMEud5CiUddjF1aLuEEJm351GNpSpJc6bfXiU5JmUxb6ixbdCLviNGcpN33Q6kYJ/Wtz02Rfl+8T1ityjkqwCqCAbMfzb/496H8twnrQdyqULE7QRAESNpQyoIcB7W1fWn0se0X99DAPdWN8BvEvinicI2VF46OGfoJANGiJm2+Iyy6ykoAT/MIzZD4OKM0aaN2bsq5qFq8DLcF8+jsSioOFzLuT8krhALmC1Ryd0GxVUG2mB1Jm1I+/SrP0h/UGkISBfKSBEIo4MQKBgQDZ+Kxe0jyJXtRoyl8y8cGoo/u7afBc/fD47oALP/7HebTBc5mLVq5YQzqLRo1u/B3R9I2IsY1p6LQQWggVxgqjfzSh16uO5S9j6RRPWuBI1b3lPD4bpcN5ojD3NiB/WQ649rQh3VsF+w7Ga2faX97c4GpQk0u0V5LUm6gaGGZsAwKBgQDO76JhyO3PbDPn6o+ajeFVgARUVTKzJVG0+iv6BT9Q4oVrOvHKlWQrjHA5QhSiNMUYMAGmK76f4iXzsuDqOu2Nn13CC5o5KV4Eyi5yZYKNdbPTdW4qB0HacC6cstG9dun45ejnxWAJEP2lmPuOY8qU+XSZrJAS8siMNgOczbSNjwKBgA7Nv8800h22ThDL5clM+A0fDgK9gDCgopQVhqa88u3TSz50PnJjMbYW4swAv6xQ/Sl8RXyKKoON5WTS6IeqCqDuC8IOJr2uvRg5BUMade8cbSg7fjBcgrkpFdBEYdKkVsajIrrGEN+IHInHU6dWKYmwyCeuyU53QCamZ7VWAObHAoGAFpLDZuFRN7g47UqEAbsKYpZFYqGslygyAojrtSlPX9Zl8W2LpKqpM6rtLwHLWGpjOaE6/NJ2x+AWfb/8kvB8q19ADgPP/f5KOEGJ0YbLN/0n8aA0tTb3cwmbvBIxmPZYzYLe5jF8qWCGGsNWZZDzL08K7hyJ1tdPEyRtPnSeBncCgYAQKg9GzlEQKkblB1bX1vECtmQNBtsF77Su4ZR0E9Eg5vcqqBj3MnKQnDb2Xj+SaEmRsENaWebHl4rydTrCIPsfsyq9ZxrKGcR6rMd9Nc/IvFbjiy9C7uFLVBPivSsjxfhgiMzjS/kvb/vdvVJ85AV/qtpw6CK4AViwi5JGA66e8g==\n-----END PRIVATE KEY-----\n';
 
-/* ── STARTUP — runs synchronously after DOM ready ── */
-(function initApp(){
-  // Always apply dark mode first
+/* ── STARTUP ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  // Apply dark mode immediately
   const appEl=document.getElementById('app');
   if(appEl)appEl.classList.add('dark');
   document.body.style.background='#1a1a1a';
 
-  // Try to restore active shift immediately — no async, no network
+  // Try to restore an active shift — fully synchronous, no network needed
   const restored=restoreActiveShift();
-  if(restored)return; // back in the app — done
-
-  // No active shift — check if officer name saved (pre-select on checkin)
-  // showScreen handled by Supabase auth below
-})();
-
-/* ── SUPABASE AUTH — async, only controls login vs checkin screen ── */
-window.addEventListener('DOMContentLoaded',async()=>{
-  // If shift was already restored above, do nothing except background auth
-  if(officer){
-    try{
-      window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-      await window._supabase.auth.getSession();
-    }catch(e){console.warn('Background auth:',e);}
+  if(restored){
+    // Shift is live — init Supabase silently in background for future writes
+    setTimeout(async()=>{
+      try{
+        window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+        await window._supabase.auth.getSession();
+      }catch(e){console.warn('Background auth:',e);}
+    },2000);
     return;
   }
-  // No active shift — determine login vs checkin
-  try{
-    window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-    const {data:{session}}=await window._supabase.auth.getSession();
-    if(session){
-      showScreen('checkin');
+
+  // No active shift — check Supabase session to decide login vs checkin
+  (async()=>{
+    try{
+      window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+      const {data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        showScreen('checkin');
+        if(_pendingOfficer){
+          setTimeout(()=>{
+            const sel=document.getElementById('ci-sel');
+            if(sel){sel.value=_pendingOfficer;ciReady();}
+            _pendingOfficer=null;
+          },100);
+        }
+      }else{
+        showScreen('login');
+      }
+    }catch(e){
+      console.warn('Supabase init:',e);
+      // Offline or error — if saved officer exists go to checkin, else login
       if(_pendingOfficer){
+        showScreen('checkin');
         setTimeout(()=>{
           const sel=document.getElementById('ci-sel');
           if(sel){sel.value=_pendingOfficer;ciReady();}
           _pendingOfficer=null;
         },100);
+      }else{
+        showScreen('login');
       }
-    }else{showScreen('login');}
-  }catch(e){
-    console.warn('Supabase init:',e);
-    // Network error — if we have a saved officer go to checkin, else login
-    showScreen(_pendingOfficer?'checkin':'login');
-    if(_pendingOfficer){
-      setTimeout(()=>{
-        const sel=document.getElementById('ci-sel');
-        if(sel){sel.value=_pendingOfficer;ciReady();}
-        _pendingOfficer=null;
-      },100);
     }
-  }
+  })();
 });
 
 async function doLogin(){
