@@ -36,16 +36,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg-primary:#ffffff;--bg-secondary:#f5f5f7;--bg-info:rgba(55,138,221,.08);
-  --bg-success:rgba(29,158,117,.08);--bg-warning:rgba(186,117,23,.08);
-  --bg-danger:rgba(226,75,74,.08);
-  --text-primary:#1c1c1e;--text-secondary:#6e6e73;--text-tertiary:#aeaeb2;
+  --bg-primary:#1c1c1e;--bg-secondary:#2c2c2e;--bg-info:rgba(55,138,221,.15);
+  --bg-success:rgba(29,158,117,.15);--bg-warning:rgba(186,117,23,.15);
+  --bg-danger:rgba(226,75,74,.15);
+  --text-primary:#f2f2f7;--text-secondary:#aeaeb2;--text-tertiary:#636366;
   --text-info:#378ADD;--text-success:#1D9E75;--text-warning:#BA7517;--text-danger:#E24B4A;
-  --border-primary:rgba(0,0,0,.12);--border-secondary:rgba(0,0,0,.08);
+  --border-primary:rgba(255,255,255,0.16);--border-secondary:rgba(255,255,255,0.09);
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
   --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:var(--bg-secondary);color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:#1a1a1a;color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
 html{overscroll-behavior-y:none}
 *{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{display:none}
 .screen{display:none}.screen.act{display:block}
@@ -429,10 +429,10 @@ html{overscroll-behavior-y:none}
 .meter-chart-wrap{padding:0 12px 12px}
 .meter-chart-title{font-size:10px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .meter-bldg-hdr{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;padding:8px 12px 4px;border-bottom:0.5px solid var(--border-secondary);background:var(--bg-secondary)}
-.dark .meter-card{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .meter-form{background:var(--bg-secondary)}
-.dark .meter-input-row input{background:var(--bg-primary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .meter-save{color:#111}
+.light .meter-card{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .meter-form{background:var(--bg-secondary)}
+.light .meter-input-row input{background:var(--bg-primary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .meter-save{color:#111}
 /* ── BOILER CHECK FORM ── */
 .boiler-form{padding:12px 14px 14px;border-top:0.5px solid var(--border-secondary);background:var(--bg-secondary)}
 .boiler-form-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -457,10 +457,10 @@ html{overscroll-behavior-y:none}
 .scan-patrol-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
 .scan-patrol-sub{font-size:11px;color:var(--text-secondary)}
 .scan-patrol-count{font-size:12px;font-weight:600;color:var(--text-info);white-space:nowrap;flex-shrink:0}
-.dark .scan-patrol-btn{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .scan-patrol-btn:active{background:var(--bg-secondary)}
-.dark .scan-patrol-title{color:var(--text-primary)}
-.dark .scan-patrol-sub{color:var(--text-secondary)}
+.light .scan-patrol-btn{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .scan-patrol-btn:active{background:var(--bg-secondary)}
+.light .scan-patrol-title{color:var(--text-primary)}
+.light .scan-patrol-sub{color:var(--text-secondary)}
 .home-patrol-btn{width:100%;background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);cursor:pointer;font-family:inherit;text-align:left;padding:0;transition:background .12s;overflow:hidden}
 .home-patrol-btn:active{background:var(--bg-secondary)}
 .home-patrol-btn-inner{display:flex;align-items:center;gap:12px;padding:11px 13px}
@@ -469,11 +469,11 @@ html{overscroll-behavior-y:none}
 .home-patrol-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
 .home-patrol-sub{font-size:11px;color:var(--text-secondary)}
 .home-patrol-count{font-size:12px;font-weight:600;color:var(--text-info);white-space:nowrap;flex-shrink:0}
-.dark .home-patrol-btn{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .home-patrol-btn:active{background:var(--bg-secondary)}
-.dark .home-patrol-title{color:var(--text-primary)}
-.dark .home-patrol-sub{color:var(--text-secondary)}
-.dark .bp-qr-box{border-color:var(--border-secondary)}
+.light .home-patrol-btn{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .home-patrol-btn:active{background:var(--bg-secondary)}
+.light .home-patrol-title{color:var(--text-primary)}
+.light .home-patrol-sub{color:var(--text-secondary)}
+.light .bp-qr-box{border-color:var(--border-secondary)}
 .fe-bldg-tab{flex:1;padding:7px 4px;font-size:11px;font-family:inherit;font-weight:500;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-secondary);transition:all .15s}
 .fe-bldg-tab.act{background:var(--text-primary);color:#fff;border-color:var(--text-primary);font-weight:600}
 .fe-zone-block{margin-bottom:8px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-primary)}
@@ -499,131 +499,131 @@ html{overscroll-behavior-y:none}
 .fe-name-cancel-btn{flex-shrink:0;padding:4px 8px;font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-secondary)}
 .po-fe-row{background:rgba(55,138,221,.04);border-radius:var(--radius-md)}
 /* ── DARK MODE ── */
-.dark{--bg-primary:#1c1c1e;--bg-secondary:#2c2c2e;--bg-info:rgba(55,138,221,.15);--bg-success:rgba(29,158,117,.15);--bg-warning:rgba(186,117,23,.15);--bg-danger:rgba(226,75,74,.15);--text-primary:#f2f2f7;--text-secondary:#aeaeb2;--text-tertiary:#636366;--border-primary:rgba(255,255,255,0.16);--border-secondary:rgba(255,255,255,0.09)}
+.light{--bg-primary:#ffffff;--bg-secondary:#f5f5f7;--bg-info:rgba(55,138,221,.08);--bg-success:rgba(29,158,117,.08);--bg-warning:rgba(186,117,23,.08);--bg-danger:rgba(226,75,74,.08);--text-primary:#1c1c1e;--text-secondary:#6e6e73;--text-tertiary:#aeaeb2;--border-primary:rgba(0,0,0,.12);--border-secondary:rgba(0,0,0,.08)}
 .dark input,.dark select,.dark textarea{background:var(--bg-secondary)!important;color:var(--text-primary)!important;border-color:var(--border-primary)!important;color-scheme:dark}
-.dark .nav{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
-.dark .nav-row button{color:var(--text-secondary)}
-.dark .nav-row button.act{color:var(--text-primary);border-bottom-color:var(--text-primary)}
-.dark .hdr{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
-.dark .hdr-name{color:var(--text-primary)}
-.dark .hamburger span{background:var(--text-primary)}
-.dark .menu-drawer{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .menu-item:hover{background:var(--bg-secondary)}
-.dark .menu-item-label{color:var(--text-primary)}
-.dark .toggle-track{background:var(--border-primary)}
-.dark .card,.dark .stat,.dark .nm-item,.dark .meter-card,.dark .patrol-card,.dark .step-card,
-.dark .my-assignment,.dark .rotation-card,.dark .bldg-card,.dark .preview-grid,
-.dark .saved-dar-card,.dark .pd-full-item,.dark .fe-entry-card,.dark .fe-zone-block,
-.dark .admin-section,.dark .admin-overlay{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .stat{background:var(--bg-secondary);border-color:var(--border-secondary)}
-.dark .patrol-body,.dark .zone-items,.dark .fe-ext-drag-item{background:var(--bg-primary)}
-.dark .fe-ext-drag-item:hover,.dark .fe-zone-drag-hdr{background:var(--bg-secondary)}
-.dark .checkpoint{background:var(--bg-primary)}
-.dark .checkpoint:hover{background:var(--bg-secondary)}
-.dark .cp-name{color:var(--text-primary)}
-.dark .cp-time{color:var(--text-secondary)}
-.dark .dar-entry{border-bottom-color:var(--border-secondary)}
-.dark .dar-title{color:var(--text-primary)}
-.dark .dar-detail{color:var(--text-secondary)}
-.dark .dar-time{color:var(--text-secondary)}
-.dark .saved-dar-card:hover{background:var(--bg-secondary)}
-.dark .sdc-name{color:var(--text-primary)}
-.dark .sdc-date{color:var(--text-secondary)}
-.dark .sdc-meta{color:var(--text-secondary)}
-.dark .sdc-badge{background:var(--bg-secondary);color:var(--text-secondary)}
-.dark .detail-back{color:var(--text-secondary)}
+.light .nav{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
+.light .nav-row button{color:var(--text-secondary)}
+.light .nav-row button.act{color:var(--text-primary);border-bottom-color:var(--text-primary)}
+.light .hdr{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
+.light .hdr-name{color:var(--text-primary)}
+.light .hamburger span{background:var(--text-primary)}
+.light .menu-drawer{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .menu-item:hover{background:var(--bg-secondary)}
+.light .menu-item-label{color:var(--text-primary)}
+.light .toggle-track{background:var(--border-primary)}
+.light .card,.light .stat,.light .nm-item,.light .meter-card,.light .patrol-card,.light .step-card,
+.light .my-assignment,.light .rotation-card,.light .bldg-card,.light .preview-grid,
+.light .saved-dar-card,.light .pd-full-item,.light .fe-entry-card,.light .fe-zone-block,
+.light .admin-section,.light .admin-overlay{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .stat{background:var(--bg-secondary);border-color:var(--border-secondary)}
+.light .patrol-body,.light .zone-items,.light .fe-ext-drag-item{background:var(--bg-primary)}
+.light .fe-ext-drag-item:hover,.light .fe-zone-drag-hdr{background:var(--bg-secondary)}
+.light .checkpoint{background:var(--bg-primary)}
+.light .checkpoint:hover{background:var(--bg-secondary)}
+.light .cp-name{color:var(--text-primary)}
+.light .cp-time{color:var(--text-secondary)}
+.light .dar-entry{border-bottom-color:var(--border-secondary)}
+.light .dar-title{color:var(--text-primary)}
+.light .dar-detail{color:var(--text-secondary)}
+.light .dar-time{color:var(--text-secondary)}
+.light .saved-dar-card:hover{background:var(--bg-secondary)}
+.light .sdc-name{color:var(--text-primary)}
+.light .sdc-date{color:var(--text-secondary)}
+.light .sdc-meta{color:var(--text-secondary)}
+.light .sdc-badge{background:var(--bg-secondary);color:var(--text-secondary)}
+.light .detail-back{color:var(--text-secondary)}
 .dark #detail-title{color:var(--text-primary)}
 .dark #detail-sub{color:var(--text-secondary)}
-.dark .search-highlight{background:rgba(255,220,50,.25);color:var(--text-primary)}
-.dark .no-results{color:var(--text-secondary)}
-.dark .result-count{color:var(--text-secondary)}
-.dark .modal{background:var(--bg-primary)}
-.dark .modal-title{color:var(--text-primary)}
-.dark .modal-sub{color:var(--text-secondary)}
-.dark .modal-textarea{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .modal-secondary-btn{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .ci-select{background:var(--bg-primary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .ci-btn,.dark .boiler-save,.dark .meter-save,.dark .submit-btn,.dark .start-btn,
-.dark .modal-primary-btn,.dark .add-officer-btn,.dark .unlock-btn,.dark .complete-btn,
-.dark .export-btn-sm.primary,.dark .fe-name-save-btn,.dark .facilities-btn{color:#111}
-.dark .cp-btn,.dark .meter-scan-btn,.dark .add-note-btn,.dark .export-btn-sm,
-.dark .back-btn,.dark .fe-bldg-tab,.dark .fe-name-cancel-btn,.dark .del-btn{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .del-btn{color:var(--text-danger);border-color:rgba(226,75,74,.4)}
-.dark .add-note-btn{color:var(--text-primary)!important}
-.dark .dar-tab{color:var(--text-secondary);background:none}
-.dark .dar-tab.act{background:var(--text-primary);color:#111}
-.dark .dar-tab:not(:last-child){border-color:var(--border-primary)}
+.light .search-highlight{background:rgba(255,220,50,.25);color:var(--text-primary)}
+.light .no-results{color:var(--text-secondary)}
+.light .result-count{color:var(--text-secondary)}
+.light .modal{background:var(--bg-primary)}
+.light .modal-title{color:var(--text-primary)}
+.light .modal-sub{color:var(--text-secondary)}
+.light .modal-textarea{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .modal-secondary-btn{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .ci-select{background:var(--bg-primary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .ci-btn,.light .boiler-save,.light .meter-save,.light .submit-btn,.light .start-btn,
+.light .modal-primary-btn,.light .add-officer-btn,.light .unlock-btn,.light .complete-btn,
+.light .export-btn-sm.primary,.light .fe-name-save-btn,.light .facilities-btn{color:#111}
+.light .cp-btn,.light .meter-scan-btn,.light .add-note-btn,.light .export-btn-sm,
+.light .back-btn,.light .fe-bldg-tab,.light .fe-name-cancel-btn,.light .del-btn{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .del-btn{color:var(--text-danger);border-color:rgba(226,75,74,.4)}
+.light .add-note-btn{color:var(--text-primary)!important}
+.light .dar-tab{color:var(--text-secondary);background:none}
+.light .dar-tab.act{background:var(--text-primary);color:#111}
+.light .dar-tab:not(:last-child){border-color:var(--border-primary)}
 .dark #boiler-toggle,.dark #step-toggle-btn{color:var(--text-primary);border-color:var(--border-primary);background:var(--bg-secondary)}
-.dark .ci-wrap{background:linear-gradient(160deg,#2d4a3e 0%,#1a2e26 55%,#0f1f1a 100%)}
-.dark .ci-logo,.dark .ci-note{color:rgba(255,255,255,.25)}
-.dark .ci-site{color:#fff}
-.dark .ci-select{background:rgba(255,255,255,.07);color:#fff;border-color:rgba(255,255,255,.13)}
-.dark .pd-banner{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
-.dark .pd-full-from{color:var(--text-primary)}
-.dark .pd-full-text{color:var(--text-primary)}
-.dark .pd-full-time,.dark .pd-expires{color:var(--text-secondary)}
-.dark .eos-wrap{background:var(--bg-secondary)}
-.dark .eos-title{color:var(--text-primary)}
-.dark .eos-sub{color:var(--text-secondary)}
-.dark .eos-stats{background:var(--bg-primary)}
-.dark .eos-stat-row{border-bottom-color:var(--border-secondary)}
-.dark .eos-stat-label{color:var(--text-secondary)}
-.dark .eos-stat-val{color:var(--text-primary)}
-.dark .eos-btn{color:#111}
-.dark .admin-section-title{color:var(--text-primary);border-bottom-color:var(--border-secondary)}
-.dark .officer-row-admin,.dark .patrol-order-item{border-bottom-color:var(--border-secondary)}
-.dark .o-name{color:var(--text-primary)}
-.dark .pin-input{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .fe-inline-drawer,.dark #fe-inline-drawer{background:var(--bg-secondary)}
-.dark .back-btn{color:var(--text-secondary)}
-.dark .lbl{color:var(--text-secondary)}
-.dark .top-nav{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
-.dark .tn-btn{color:var(--text-secondary)}
-.dark .tn-btn.back{color:var(--text-info)}
-.dark .tn-btn.cancel{color:var(--text-danger)}
-.dark .tn-title{color:var(--text-primary)}
-.dark .tn-divider{background:var(--border-secondary)}
-.dark .cl-header,.dark .cl-legend,.dark .zone-hdr,.dark .ext-item{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .cl-building{color:var(--text-primary)}
-.dark .cl-meta{color:var(--text-secondary)}
-.dark .ext-item:hover{background:var(--bg-secondary)}
-.dark .zone-hdr:hover{background:var(--bg-secondary)}
-.dark .zone-name{color:var(--text-primary)}
-.dark .cl-footer{background:var(--bg-secondary);border-top-color:var(--border-secondary)}
-.dark .filter-row select,.dark .search-bar input,.dark .search-bar select{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
-.dark .boiler-input{background:var(--bg-secondary)}
-.dark .boiler-input input,.dark .boiler-input select{background:var(--bg-primary);color:var(--text-primary)}
-.dark .boiler-form{background:var(--bg-secondary)}
-.dark .boiler-form-title{color:var(--text-primary)}
-.dark .yn-btn{color:var(--text-primary);border-color:var(--border-primary);background:var(--bg-primary)}
-.dark .yn-btn.yes.active{background:rgba(226,75,74,.2);border-color:var(--red);color:var(--red)}
-.dark .yn-btn.no.active{background:rgba(29,158,117,.2);border-color:var(--green);color:var(--green)}
-.dark .alarm-warn{background:rgba(186,117,23,.15);border-color:rgba(186,117,23,.3)}
-.dark .alarm-danger{background:rgba(226,75,74,.12);border-color:rgba(226,75,74,.25)}
-.dark .meter-form{background:var(--bg-secondary)}
-.dark .meter-bldg-hdr{background:var(--bg-secondary);color:var(--text-secondary);border-bottom-color:var(--border-secondary)}
-.dark .meter-name{color:var(--text-primary)}
-.dark .meter-sub{color:var(--text-tertiary)}
-.dark .seasonal-badge{background:rgba(186,117,23,.2);color:var(--text-warning)}
-.dark .milestone{color:var(--text-tertiary);border-color:var(--border-secondary)}
-.dark .milestone.reached{background:var(--bg-success);color:var(--text-success)}
-.dark .rotation-row{border-bottom-color:var(--border-secondary)}
-.dark .rot-name{color:var(--text-primary)}
-.dark .rot-building{color:var(--text-secondary)}
-.dark .bldg-name{color:var(--text-primary)}
-.dark .bldg-count{color:var(--text-secondary)}
-.dark .qa-tile{background:var(--bg-secondary);border-color:var(--border-secondary)}
-.dark .qa-tile:active{background:var(--bg-primary)}
-.dark .home-pill{background:var(--bg-secondary);border-color:var(--border-primary)}
-.dark .bottom-nav{background:var(--bg-primary);border-color:var(--border-secondary)}
-.dark .end-shift-btn{border-color:rgba(226,75,74,.3);background:rgba(226,75,74,.08)}
+.light .ci-wrap{background:linear-gradient(160deg,#2d4a3e 0%,#1a2e26 55%,#0f1f1a 100%)}
+.light .ci-logo,.light .ci-note{color:rgba(255,255,255,.25)}
+.light .ci-site{color:#fff}
+.light .ci-select{background:rgba(255,255,255,.07);color:#fff;border-color:rgba(255,255,255,.13)}
+.light .pd-banner{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+.light .pd-full-from{color:var(--text-primary)}
+.light .pd-full-text{color:var(--text-primary)}
+.light .pd-full-time,.light .pd-expires{color:var(--text-secondary)}
+.light .eos-wrap{background:var(--bg-secondary)}
+.light .eos-title{color:var(--text-primary)}
+.light .eos-sub{color:var(--text-secondary)}
+.light .eos-stats{background:var(--bg-primary)}
+.light .eos-stat-row{border-bottom-color:var(--border-secondary)}
+.light .eos-stat-label{color:var(--text-secondary)}
+.light .eos-stat-val{color:var(--text-primary)}
+.light .eos-btn{color:#111}
+.light .admin-section-title{color:var(--text-primary);border-bottom-color:var(--border-secondary)}
+.light .officer-row-admin,.light .patrol-order-item{border-bottom-color:var(--border-secondary)}
+.light .o-name{color:var(--text-primary)}
+.light .pin-input{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .fe-inline-drawer,.dark #fe-inline-drawer{background:var(--bg-secondary)}
+.light .back-btn{color:var(--text-secondary)}
+.light .lbl{color:var(--text-secondary)}
+.light .top-nav{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
+.light .tn-btn{color:var(--text-secondary)}
+.light .tn-btn.back{color:var(--text-info)}
+.light .tn-btn.cancel{color:var(--text-danger)}
+.light .tn-title{color:var(--text-primary)}
+.light .tn-divider{background:var(--border-secondary)}
+.light .cl-header,.light .cl-legend,.light .zone-hdr,.light .ext-item{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .cl-building{color:var(--text-primary)}
+.light .cl-meta{color:var(--text-secondary)}
+.light .ext-item:hover{background:var(--bg-secondary)}
+.light .zone-hdr:hover{background:var(--bg-secondary)}
+.light .zone-name{color:var(--text-primary)}
+.light .cl-footer{background:var(--bg-secondary);border-top-color:var(--border-secondary)}
+.light .filter-row select,.light .search-bar input,.light .search-bar select{background:var(--bg-secondary);color:var(--text-primary);border-color:var(--border-primary)}
+.light .boiler-input{background:var(--bg-secondary)}
+.light .boiler-input input,.light .boiler-input select{background:var(--bg-primary);color:var(--text-primary)}
+.light .boiler-form{background:var(--bg-secondary)}
+.light .boiler-form-title{color:var(--text-primary)}
+.light .yn-btn{color:var(--text-primary);border-color:var(--border-primary);background:var(--bg-primary)}
+.light .yn-btn.yes.active{background:rgba(226,75,74,.2);border-color:var(--red);color:var(--red)}
+.light .yn-btn.no.active{background:rgba(29,158,117,.2);border-color:var(--green);color:var(--green)}
+.light .alarm-warn{background:rgba(186,117,23,.15);border-color:rgba(186,117,23,.3)}
+.light .alarm-danger{background:rgba(226,75,74,.12);border-color:rgba(226,75,74,.25)}
+.light .meter-form{background:var(--bg-secondary)}
+.light .meter-bldg-hdr{background:var(--bg-secondary);color:var(--text-secondary);border-bottom-color:var(--border-secondary)}
+.light .meter-name{color:var(--text-primary)}
+.light .meter-sub{color:var(--text-tertiary)}
+.light .seasonal-badge{background:rgba(186,117,23,.2);color:var(--text-warning)}
+.light .milestone{color:var(--text-tertiary);border-color:var(--border-secondary)}
+.light .milestone.reached{background:var(--bg-success);color:var(--text-success)}
+.light .rotation-row{border-bottom-color:var(--border-secondary)}
+.light .rot-name{color:var(--text-primary)}
+.light .rot-building{color:var(--text-secondary)}
+.light .bldg-name{color:var(--text-primary)}
+.light .bldg-count{color:var(--text-secondary)}
+.light .qa-tile{background:var(--bg-secondary);border-color:var(--border-secondary)}
+.light .qa-tile:active{background:var(--bg-primary)}
+.light .home-pill{background:var(--bg-secondary);border-color:var(--border-primary)}
+.light .bottom-nav{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .end-shift-btn{border-color:rgba(226,75,74,.3);background:rgba(226,75,74,.08)}
 @keyframes scanline{0%,100%{top:10%}50%{top:90%}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<div id="app">
+<div id="app" class="dark">
 
 <!-- PASS DOWN MODAL -->
 <div class="modal-backdrop" id="pd-modal">
@@ -756,7 +756,7 @@ html{overscroll-behavior-y:none}
   <div class="menu-drawer" id="menu-drawer">
     <div class="menu-item" onclick="menuAdmin()"><span class="menu-item-label"><span class="menu-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="2.5"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></span>Admin settings</span><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.4"><path d="M6 4l4 4-4 4"/></svg></div>
     <div class="menu-divider"></div>
-    <div class="menu-item" onclick="toggleDarkMode()"><span class="menu-item-label"><span class="menu-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 9A6 6 0 0 1 5 3a6 6 0 1 0 8 6z"/></svg></span>Dark mode</span><button class="toggle-track" id="dark-toggle" onclick="event.stopPropagation();toggleDarkMode()"><div class="toggle-thumb"></div></button></div>
+    <div class="menu-item" onclick="toggleDarkMode()"><span class="menu-item-label"><span class="menu-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 9A6 6 0 0 1 5 3a6 6 0 1 0 8 6z"/></svg></span><span id="dark-mode-label">Day mode</span></span><button class="toggle-track on" id="dark-toggle" onclick="event.stopPropagation();toggleDarkMode()"><div class="toggle-thumb"></div></button></div>
     <div class="menu-divider"></div>
     <div class="menu-item" onclick="menuEndShift()"><span class="menu-item-label" style="color:var(--text-danger)"><span class="menu-icon" style="color:var(--text-danger)"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3h3v10h-3M6 11l-4-3 4-3M2 8h8"/></svg></span>End shift</span></div>
   </div>
@@ -1216,11 +1216,11 @@ const TC={checkin:{dot:'dot-checkin',tag:'t-checkin',label:'Check-in'},patrol:{d
 let officers=['Matt Dalsing','Brian Davies','Chase Montrose','Tyler Schlegelmilch','Randy Lazenby'];
 let patrolOrder=['boiler','meters-patrol','fe'];
 const patrolMeta={boiler:{label:'Boiler room checks'},['meters-patrol']:{label:'Utility meters'},fe:{label:'Fire extinguisher inspection'}};
-let adminPin='1234',officer=null,shiftStart=null,shiftId=null,timerInt=null,prevScreen='checkin';
+let adminPin='1234',officer=null,shiftStart=null,shiftId=null,timerInt=null,prevScreen='checkin',_pendingOfficer=null;
 let darLog=[],activeCatsNM=[];
 let stats={patrols:0,nm:0,checks:0};
 let stepCount=0,stepGoal=10000,stepTracking=false,stepListener=null,lastMag=null,stepCooldown=false;
-let reachedMilestones=new Set(),darkMode=false;
+let reachedMilestones=new Set(),darkMode=true;
 let viewingRecord=null,darHistory=[],passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
 const nowDate=new Date(),curMonth=nowDate.getMonth(),curYear=nowDate.getFullYear();
@@ -1281,13 +1281,13 @@ function closeMenu(){document.getElementById('hamburger-btn').classList.remove('
 function menuAdmin(){closeMenu();prevScreen='main';showScreen('admin');}
 function menuEndShift(){closeMenu();openPassDownModal();}
 function goBack(){lockAdmin();showScreen(prevScreen);}
-function toggleDarkMode(){darkMode=!darkMode;document.getElementById('dark-toggle').classList.toggle('on',darkMode);document.getElementById('app').classList.toggle('dark',darkMode);document.body.style.background=darkMode?'#1a1a1a':'';meters.forEach((m,i)=>{if(m.scanned||m.saved)setTimeout(()=>drawMeterChart(i),30);});}
+function toggleDarkMode(){darkMode=!darkMode;document.getElementById('dark-toggle').classList.toggle('on',!darkMode);document.getElementById('app').classList.toggle('dark',darkMode);document.getElementById('app').classList.toggle('light',!darkMode);document.body.style.background=darkMode?'#1a1a1a':'#f5f5f7';const lbl=document.getElementById('dark-mode-label');if(lbl)lbl.textContent=darkMode?'Day mode':'Night mode';meters.forEach((m,i)=>{if(m.scanned||m.saved)setTimeout(()=>drawMeterChart(i),30);});}
 function loadStorage(){try{const d=localStorage.getItem('dar_history');if(d)darHistory=JSON.parse(d);}catch(e){darHistory=[];}try{const p=localStorage.getItem('pass_downs');if(p)passDowns=JSON.parse(p);}catch(e){passDowns=[];}prunePassDowns();if(!darHistory.length)seedDemoData();if(!passDowns.length)seedDemoPassDowns();}
 function saveStorage(){try{localStorage.setItem('dar_history',JSON.stringify(darHistory));}catch(e){}try{localStorage.setItem('pass_downs',JSON.stringify(passDowns));}catch(e){}}
 function saveActiveShift(){
   if(!officer||!shiftStart)return;
   try{
-    localStorage.setItem('active_shift',JSON.stringify({
+    const payload={
       officer,
       shiftId,
       shiftStart:shiftStart.toISOString(),
@@ -1296,56 +1296,74 @@ function saveActiveShift(){
       stepCount,
       bpScanned,
       nmReports
-    }));
+    };
+    localStorage.setItem('active_shift',JSON.stringify(payload));
+    localStorage.setItem('current_officer',officer);
   }catch(e){console.warn('saveActiveShift error:',e);}
 }
 function clearActiveShift(){
-  try{localStorage.removeItem('active_shift');}catch(e){}
+  try{
+    localStorage.removeItem('active_shift');
+    localStorage.removeItem('current_officer');
+  }catch(e){}
 }
 function restoreActiveShift(){
   try{
     const raw=localStorage.getItem('active_shift');
-    if(!raw)return false;
-    const s=JSON.parse(raw);
-    if(!s.officer||!s.shiftStart)return false;
-    officer=s.officer;
-    shiftId=s.shiftId||'shift-'+Date.now();
-    shiftStart=new Date(s.shiftStart);
-    darLog=s.darLog.map(e=>({...e,time:new Date(e.time)}));
-    stats=s.stats||{patrols:0,nm:0,checks:0};
-    stepCount=s.stepCount||0;
-    if(s.bpScanned)Object.assign(bpScanned,s.bpScanned);
-    if(s.nmReports)nmReports=s.nmReports;
-    const av=document.getElementById('hdr-av');
-    av.textContent=officer==='Admin'?'★':initials(officer);
-    document.getElementById('hdr-name').textContent=officer==='Admin'?'Admin (test mode)':officer;
-    document.getElementById('nm-officer-display').value=officer;
-    ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
-    const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
-    updateStepDisplay();
-    timerInt=setInterval(()=>{
-      const d=Math.floor((Date.now()-shiftStart)/1000);
-      const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;
-      const p=v=>String(v).padStart(2,'0');
-      document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';
-    },1000);
-    showScreen('main');
-    showPane('home',null);
-    updateHomeTiles();
-    autoStartSteps();
-    return true;
+    const savedOfficer=localStorage.getItem('current_officer');
+    // Case 1: full active shift saved — restore everything
+    if(raw){
+      const s=JSON.parse(raw);
+      if(s.officer&&s.shiftStart){
+        officer=s.officer;
+        shiftId=s.shiftId||'shift-'+Date.now();
+        shiftStart=new Date(s.shiftStart);
+        darLog=s.darLog.map(e=>({...e,time:new Date(e.time)}));
+        stats=s.stats||{patrols:0,nm:0,checks:0};
+        stepCount=s.stepCount||0;
+        if(s.bpScanned)Object.assign(bpScanned,s.bpScanned);
+        if(s.nmReports)nmReports=s.nmReports;
+        _applyOfficerToUI(officer);
+        ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
+        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+        updateStepDisplay();
+        timerInt=setInterval(()=>{
+          const d=Math.floor((Date.now()-shiftStart)/1000);
+          const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;
+          const p=v=>String(v).padStart(2,'0');
+          document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';
+        },1000);
+        showScreen('main');
+        showPane('home',null);
+        updateHomeTiles();
+        autoStartSteps();
+        return true;
+      }
+    }
+    // Case 2: no active shift but officer name saved — go straight to check-in with name pre-selected
+    if(savedOfficer){
+      _pendingOfficer=savedOfficer;
+      return false; // let caller show checkin, we'll pre-select there
+    }
+    return false;
   }catch(e){
     console.warn('restoreActiveShift error:',e);
     clearActiveShift();
     return false;
   }
 }
+function _applyOfficerToUI(n){
+  const av=document.getElementById('hdr-av');
+  if(av){av.textContent=n==='Admin'?'★':initials(n);av.style.background=n==='Admin'?'rgba(186,117,23,.15)':'';av.style.color=n==='Admin'?'var(--text-warning)':'';}
+  const nm=document.getElementById('hdr-name');if(nm)nm.textContent=n==='Admin'?'Admin (test mode)':n;
+  const nod=document.getElementById('nm-officer-display');if(nod)nod.value=n;
+}
 function prunePassDowns(){passDowns=passDowns.filter(p=>Date.now()-new Date(p.time)<SEVEN_DAYS);}
 function seedDemoPassDowns(){const n=Date.now();passDowns=[{id:'pd-1',officer:'Matt Dalsing',text:'North parking lot light out on east side — work order submitted, ticket #4821.',time:new Date(n-26*3600000).toISOString()},{id:'pd-2',officer:'Brian Davies',text:'Badge reader at Canopy 3 side entrance is intermittent. IT notified.',time:new Date(n-10*3600000).toISOString()}];saveStorage();}
 function seedDemoData(){const n=new Date();const day=(d,h,m)=>{const x=new Date(n);x.setDate(x.getDate()-d);x.setHours(h,m,0,0);return x.toISOString();};darHistory=[{id:'dar-001',officer:'Matt Dalsing',date:day(1,6,2),dateLabel:fmtDate(new Date(day(1,6,2))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Matt Dalsing signed in.',time:day(1,6,2)},{type:'patrol',title:'Building patrol — Canopy 1',detail:'Officer conducted a patrol of Canopy 1. Tenant spaces walked.',time:day(1,6,45)},{type:'checkout',title:'Shift ended',detail:'Steps: 6,240. Duration: 7h 58m.',time:day(1,14,0)}],steps:6240},{id:'dar-002',officer:'Brian Davies',date:day(1,14,5),dateLabel:fmtDate(new Date(day(1,14,5))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Brian Davies signed in.',time:day(1,14,5)},{type:'nearmiss',title:'Near miss submitted – Canopy 3',detail:'Safety. Wet floor near east stairwell.',time:day(1,16,22)},{type:'checkout',title:'Shift ended',detail:'Steps: 8,120. Duration: 8h 0m.',time:day(1,22,5)}],steps:8120}];saveStorage();}
 function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
-function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};const av=document.getElementById('hdr-av');av.textContent=n==='Admin'?'★':initials(n);av.style.background=n==='Admin'?'rgba(186,117,23,.15)':'';av.style.color=n==='Admin'?'var(--text-warning)':'';document.getElementById('hdr-name').textContent=n==='Admin'?'Admin (test mode)':n;document.getElementById('nm-officer-display').value=n;['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();}
+function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
@@ -1368,7 +1386,21 @@ function finalizeShift(){if(stepTracking)stopStepTracking();const endTime=new Da
   }
   uploadDARtoDrive(_shiftRecord);
   clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();showScreen('eos');}
-function returnToCheckin(){renderPassDownsBanner();document.getElementById('ci-sel').value='';document.getElementById('ci-btn').disabled=true;showScreen('checkin');}
+function returnToCheckin(){
+  renderPassDownsBanner();
+  const sel=document.getElementById('ci-sel');
+  sel.value='';
+  document.getElementById('ci-btn').disabled=true;
+  showScreen('checkin');
+  if(_pendingOfficer){
+    // Pre-select the last officer's name
+    setTimeout(()=>{
+      const sel=document.getElementById('ci-sel');
+      if(sel){sel.value=_pendingOfficer;ciReady();}
+      _pendingOfficer=null;
+    },50);
+  }
+}
 function addEntry(type,title,detail){
   const entry={type,title,detail,time:new Date()};
   darLog.push(entry);
@@ -1755,23 +1787,38 @@ window.addEventListener('DOMContentLoaded',async()=>{
   // Step 1: Try to restore an active shift RIGHT NOW before anything async
   const restored=restoreActiveShift();
   if(restored){
-    // Shift restored — auth check happens silently in background, no screen change
+    // Full shift restored — Supabase check in background only
     try{
       window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
       await window._supabase.auth.getSession();
     }catch(e){console.warn('Background Supabase init:',e);}
     return;
   }
-  // Step 2: No active shift — show login screen immediately
-  showScreen('login');
-  // Step 3: Check if already authenticated, skip login if so
+  // Step 2: Supabase auth check
   try{
     window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
     const {data:{session}}=await window._supabase.auth.getSession();
-    if(session){showScreen('checkin');}
+    if(session){
+      showScreen('checkin');
+      // Pre-select last officer if available
+      if(_pendingOfficer){
+        setTimeout(()=>{
+          const sel=document.getElementById('ci-sel');
+          if(sel){sel.value=_pendingOfficer;ciReady();}
+          _pendingOfficer=null;
+        },100);
+      }
+    }else{showScreen('login');}
   }catch(e){
     console.warn('Supabase init:',e);
-    // Stay on login screen — offline or error
+    showScreen('checkin');
+    if(_pendingOfficer){
+      setTimeout(()=>{
+        const sel=document.getElementById('ci-sel');
+        if(sel){sel.value=_pendingOfficer;ciReady();}
+        _pendingOfficer=null;
+      },100);
+    }
   }
 });
 
