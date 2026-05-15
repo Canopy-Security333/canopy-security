@@ -3,6 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- App identity -->
+  <meta name="application-name" content="Canopy Security">
+  <meta name="description" content="Canopy Campus Security officer portal">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+
+  <!-- iOS home screen icon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
+
+  <!-- iOS full-screen app mode -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Canopy Security">
+
+  <!-- Android / PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a1a1e">
 <title>Canopy Campus Security</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1428,10 +1451,10 @@ const PDC_URL='https://rounds.platinumdatacenters.com';
 const dcPatrol={scans:[]};
 const bkrPatrol={scans:[]};
 function renderDCPatrol(){const n=dcPatrol.scans.length;const el=document.getElementById('datacenter-count');if(el)el.textContent=n>0?n+' round'+(n!==1?'s':''):'';}
-function _doLogDC(){const round=dcPatrol.scans.length+1;const time=fmt(new Date());dcPatrol.scans.push(time);addEntry('patrol','Data center patrol — Round '+round,'Officer '+(officer||'—')+' completed data center patrol round '+round+'.');stats.patrols++;updateStats();renderDCPatrol();showToast('datacenter-toast','✓ Round '+round+' logged');}
+function _doLogDC(){const round=dcPatrol.scans.length+1;const time=fmt(new Date());dcPatrol.scans.push(time);addEntry('patrol','Data center patrol — Round '+round,'Officer '+(officer||'—')+' completed data center patrol round '+round+'.');stats.patrols++;updateStats();renderDCPatrol();showToast('datacenter-toast','✓ Round '+round+' logged');window.open(PDC_URL,'_blank','noopener');}
 function logDCPatrol(){openQRScanner({title:'Scan QR — Data Center',sub:'Point at the Data Center QR code',token:'https://rounds.platinumdatacenters.com',wrongMsg:'Wrong QR code. Please scan the Data Center patrol code.',successLabel:'Data center patrol logged',successSub:'Round '+(dcPatrol.scans.length+1)+' — logged at '+fmt(new Date()),onSuccess:_doLogDC});}
 function renderBunkerPatrol(){const n=bkrPatrol.scans.length;const el=document.getElementById('bunker-count');if(el)el.textContent=n>0?n+' round'+(n!==1?'s':''):'';}
-function _doLogBunker(){const round=bkrPatrol.scans.length+1;const time=fmt(new Date());bkrPatrol.scans.push(time);addEntry('patrol','Bunker patrol — Round '+round,'Officer '+(officer||'—')+' completed bunker patrol round '+round+'.');stats.patrols++;updateStats();renderBunkerPatrol();showToast('bunker-toast','✓ Round '+round+' logged');}
+function _doLogBunker(){const round=bkrPatrol.scans.length+1;const time=fmt(new Date());bkrPatrol.scans.push(time);addEntry('patrol','Bunker patrol — Round '+round,'Officer '+(officer||'—')+' completed bunker patrol round '+round+'.');stats.patrols++;updateStats();renderBunkerPatrol();showToast('bunker-toast','✓ Round '+round+' logged');window.open(PDC_URL,'_blank','noopener');}
 function logBunkerPatrol(){openQRScanner({title:'Scan QR — Bunker',sub:'Point at the Bunker QR code',token:'https://rounds.platinumdatacenters.com',wrongMsg:'Wrong QR code. Please scan the Bunker patrol code.',successLabel:'Bunker patrol logged',successSub:'Round '+(bkrPatrol.scans.length+1)+' — logged at '+fmt(new Date()),onSuccess:_doLogBunker});}
 const ALL_QR_CODES=[{label:'Canopy 1',sublabel:'Building Patrol',token:'canopy-patrol-C1'},{label:'Canopy 3',sublabel:'Building Patrol',token:'canopy-patrol-C3'},{label:'Canopy 4',sublabel:'Building Patrol',token:'canopy-patrol-C4'},{label:'Canopy 5',sublabel:'Building Patrol',token:'canopy-patrol-C5'},{label:'Canopy 1',sublabel:'Boiler Room Check',token:'canopy-boiler-C1'},{label:'Canopy 3',sublabel:'Boiler Room Check',token:'canopy-boiler-C3'},{label:'Canopy 5',sublabel:'Boiler Room Check',token:'canopy-boiler-C5'},{label:'Data Center',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'Bunker',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'UPS / West',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-W'},{label:'UPS / East',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-E'},{label:'PDU 11',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU11'},{label:'PDU 12',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU12'},{label:'AC',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-AC'},{label:'2H AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2HAC'},{label:'3 Lab AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-3LAB'},{label:'AC 2FL So. IDF',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-AC2FL'},{label:'2LEW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LEW'},{label:'2LDW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LDW'},{label:'2LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LCW'},{label:'2LBW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LBW'},{label:'1LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1LCW'},{label:'1 S. IDF PW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIDF'},{label:'1 S. IDF AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIAC'}];
 let qrSelectMode=false;

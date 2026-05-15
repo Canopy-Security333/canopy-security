@@ -1,0 +1,37 @@
+{
+  "name": "Canopy Campus Security",
+  "short_name": "Canopy Security",
+  "description": "Canopy Campus Security officer portal",
+  "start_url": "/canopy-security/index.html",
+  "scope": "/canopy-security/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1a1e",
+  "theme_color": "#1a1a1e",
+  "icons": [
+    {
+      "src": "/canopy-security/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/canopy-security/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/canopy-security/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/canopy-security/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
