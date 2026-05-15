@@ -1416,7 +1416,7 @@ function toggleDictation(inputId,btnId){
 }
 function addNote(){const inp=document.getElementById('note-input');const v=inp.value.trim();if(!v)return;addEntry('note','Officer note',v);inp.value='';showToast('note-toast');}
 function addDARNote(){const inp=document.getElementById('dar-note-input');const v=inp.value.trim();if(!v)return;addEntry('note','Officer note',v);inp.value='';renderCurrentDAR();showToast('dar-note-toast');}
-function updateStats(){document.getElementById('stat-patrols').textContent=stats.patrols;document.getElementById('stat-nm').textContent=stats.nm;document.getElementById('stat-checks').textContent=stats.checks;document.getElementById('stat-entries').textContent=darLog.length;updateHomePatrolCounts();}
+function updateStats(){document.getElementById('stat-patrols').textContent=stats.patrols;document.getElementById('stat-nm').textContent=stats.nm;document.getElementById('stat-checks').textContent=stats.checks;document.getElementById('stat-entries').textContent=darLog.length;updateHomePatrolCounts();saveActiveShift();}
 function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPatrol.scans.length:0;const dcC=document.getElementById('datacenter-count');if(dcC)dcC.textContent=dcN>0?dcN+' round'+(dcN!==1?'s':''):'';const bkN=(typeof bkrPatrol!=='undefined')?bkrPatrol.scans.length:0;const bkC=document.getElementById('bunker-count');if(bkC)bkC.textContent=bkN>0?bkN+' round'+(bkN!==1?'s':''):'';}
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function renderEntries(entries,container){container.innerHTML=entries.length?entries.map(e=>{const c=TC[e.type]||TC.note;return`<div class="dar-entry"><div class="dar-time">${fmt(e.time)}</div><div class="dar-dot ${c.dot}"></div><div style="flex:1"><div class="dar-title">${e.title}</div>${e.detail?`<div class="dar-detail">${e.detail}</div>`:''}<span class="dtag ${c.tag}">${c.label}</span></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
@@ -1734,19 +1734,28 @@ const DRIVE_FOLDER='1qo-6YOspwMq9oczeNzkWlmobVGDUxp1Q';
 const SA_EMAIL='canopy-dar-backup@canopy-security.iam.gserviceaccount.com';
 const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCwMiQf2RUQhGLWAtU9f0ld0VroE6FtASHUXhi3YZWJSxiycfkAHKFz+H748PVtlC1vP3mwNcfmL4bM6Wf9rlWW8WI7ty7qMb4jMj78RclhqmHQFwu6uBfkFXekv2zkp9K+A9SxaM5VyDL9wJxT++gqcubhooj0mKAs2Ra4+RqB2gsIGYVZ1Hj+wN/uOIAJFPQd77WWjqI3tU1CEtR8S+kVAeHRo57SEWfa3Ain6h6xWNBwgYeo5G4pefmyUZBuYB2/74hUCDGPmmkNYK7gxCB8O/zINSK80KHzyG8R+AXEPgAT0rRiDpiPPvthBBFQPlm+7IcQDHgMYhS8TVpjz/ytAgMBAAECggEAGAcpI1QN/1ajyTOnCN/sOBMY0T/8FPVr5kjUGLisv9sHNIPpGmQiexeO7pFNpvKSJPMEZqIERMEud5CiUddjF1aLuEEJm351GNpSpJc6bfXiU5JmUxb6ixbdCLviNGcpN33Q6kYJ/Wtz02Rfl+8T1ityjkqwCqCAbMfzb/496H8twnrQdyqULE7QRAESNpQyoIcB7W1fWn0se0X99DAPdWN8BvEvinicI2VF46OGfoJANGiJm2+Iyy6ykoAT/MIzZD4OKM0aaN2bsq5qFq8DLcF8+jsSioOFzLuT8krhALmC1Ryd0GxVUG2mB1Jm1I+/SrP0h/UGkISBfKSBEIo4MQKBgQDZ+Kxe0jyJXtRoyl8y8cGoo/u7afBc/fD47oALP/7HebTBc5mLVq5YQzqLRo1u/B3R9I2IsY1p6LQQWggVxgqjfzSh16uO5S9j6RRPWuBI1b3lPD4bpcN5ojD3NiB/WQ649rQh3VsF+w7Ga2faX97c4GpQk0u0V5LUm6gaGGZsAwKBgQDO76JhyO3PbDPn6o+ajeFVgARUVTKzJVG0+iv6BT9Q4oVrOvHKlWQrjHA5QhSiNMUYMAGmK76f4iXzsuDqOu2Nn13CC5o5KV4Eyi5yZYKNdbPTdW4qB0HacC6cstG9dun45ejnxWAJEP2lmPuOY8qU+XSZrJAS8siMNgOczbSNjwKBgA7Nv8800h22ThDL5clM+A0fDgK9gDCgopQVhqa88u3TSz50PnJjMbYW4swAv6xQ/Sl8RXyKKoON5WTS6IeqCqDuC8IOJr2uvRg5BUMade8cbSg7fjBcgrkpFdBEYdKkVsajIrrGEN+IHInHU6dWKYmwyCeuyU53QCamZ7VWAObHAoGAFpLDZuFRN7g47UqEAbsKYpZFYqGslygyAojrtSlPX9Zl8W2LpKqpM6rtLwHLWGpjOaE6/NJ2x+AWfb/8kvB8q19ADgPP/f5KOEGJ0YbLN/0n8aA0tTb3cwmbvBIxmPZYzYLe5jF8qWCGGsNWZZDzL08K7hyJ1tdPEyRtPnSeBncCgYAQKg9GzlEQKkblB1bX1vECtmQNBtsF77Su4ZR0E9Eg5vcqqBj3MnKQnDb2Xj+SaEmRsENaWebHl4rydTrCIPsfsyq9ZxrKGcR6rMd9Nc/IvFbjiy9C7uFLVBPivSsjxfhgiMzjS/kvb/vdvVJ85AV/qtpw6CK4AViwi5JGA66e8g==\n-----END PRIVATE KEY-----\n';
 
-/* Init Supabase — auto-login if session exists */
+/* Init — restore active shift immediately (sync), then check Supabase auth in background */
 window.addEventListener('DOMContentLoaded',async()=>{
+  // Step 1: Try to restore an active shift RIGHT NOW before anything async
+  const restored=restoreActiveShift();
+  if(restored){
+    // Shift restored — auth check happens silently in background, no screen change
+    try{
+      window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+      await window._supabase.auth.getSession();
+    }catch(e){console.warn('Background Supabase init:',e);}
+    return;
+  }
+  // Step 2: No active shift — show login screen immediately
+  showScreen('login');
+  // Step 3: Check if already authenticated, skip login if so
   try{
     window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
     const {data:{session}}=await window._supabase.auth.getSession();
-    if(session){
-      const restored=restoreActiveShift();
-      if(!restored)showScreen('checkin');
-    }else{showScreen('login');}
+    if(session){showScreen('checkin');}
   }catch(e){
     console.warn('Supabase init:',e);
-    const restored=restoreActiveShift();
-    if(!restored)showScreen('login');
+    // Stay on login screen — offline or error
   }
 });
 
