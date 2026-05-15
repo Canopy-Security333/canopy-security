@@ -1443,10 +1443,8 @@ function logBPScan(id){const bldg=BP_BUILDINGS.find(b=>b.id===id);if(!bldg)retur
 let _lastY=0;
 document.addEventListener('touchstart',e=>{_lastY=e.touches[0].clientY;},{passive:true});
 document.addEventListener('touchmove',e=>{
-  const el=e.target.closest('[data-scrollable]')||e.target.closest('.pane')||e.target.closest('.scroll');
-  const atTop=!el||el.scrollTop<=0;
   const pullingDown=e.touches[0].clientY>_lastY;
-  if(atTop&&pullingDown)e.preventDefault();
+  if(pullingDown&&window.scrollY===0)e.preventDefault();
 },{passive:false});
 let qrStream=null,qrAnimFrame=null,qrDone=false,qrConfig=null;
 function openQRScanner(cfg){
