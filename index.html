@@ -45,8 +45,8 @@
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
   --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:var(--bg-secondary);color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overscroll-behavior-y:contain}
-html{overscroll-behavior-y:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:var(--bg-secondary);color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+html{overscroll-behavior-y:none}
 *{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{display:none}
 .screen{display:none}.screen.act{display:block}
 /* ── CHECK-IN ── */
@@ -1440,12 +1440,21 @@ function renderBP(){const list=document.getElementById('bp-list');if(!list)retur
 function logBPScan(id){const bldg=BP_BUILDINGS.find(b=>b.id===id);if(!bldg)return;bpScanned[id]=fmt(new Date());addEntry('patrol','Building patrol \u2014 '+bldg.name,'Officer '+(officer||'\u2014')+' conducted a patrol of '+bldg.name+'. Tenant spaces walked. No issues noted unless Near Miss filed.');stats.patrols++;updateStats();renderBP();showToast('bp-toast','\u2713 '+bldg.name+' patrol logged');}
 
 /* ── DISABLE PULL-TO-REFRESH ON ANDROID ── */
-let _lastY=0;
-document.addEventListener('touchstart',e=>{_lastY=e.touches[0].clientY;},{passive:true});
+let _ptStartY=0,_ptBlocking=false;
+document.addEventListener('touchstart',e=>{
+  _ptStartY=e.touches[0].clientY;
+  _ptBlocking=false;
+},{passive:true});
 document.addEventListener('touchmove',e=>{
-  const pullingDown=e.touches[0].clientY>_lastY;
-  if(pullingDown&&window.scrollY===0)e.preventDefault();
+  const dy=e.touches[0].clientY-_ptStartY;
+  if(dy>0&&document.scrollingElement.scrollTop===0){
+    _ptBlocking=true;
+    e.preventDefault();
+  }else if(!_ptBlocking){
+    // normal scroll — never block
+  }
 },{passive:false});
+document.addEventListener('touchend',()=>{_ptBlocking=false;},{passive:true});
 let qrStream=null,qrAnimFrame=null,qrDone=false,qrConfig=null;
 function openQRScanner(cfg){
   qrConfig=cfg;qrDone=false;
