@@ -44,6 +44,7 @@
   --border-primary:rgba(255,255,255,0.16);--border-secondary:rgba(255,255,255,0.09);
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
   --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;
+  --btn-bg:#f2f2f7;--btn-color:#1c1c1e;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:#1a1a1a;color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
 *{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{display:none}
@@ -83,7 +84,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .modal-title{font-size:18px;font-weight:600;color:var(--text-primary);margin-bottom:6px;letter-spacing:-.2px}
 .modal-sub{font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6}
 .modal-textarea{width:100%;padding:11px 12px;font-size:14px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);resize:none;height:100px;margin-bottom:12px}
-.modal-primary-btn{width:100%;padding:14px;font-size:14px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;margin-bottom:8px}
+.modal-primary-btn{width:100%;padding:14px;font-size:14px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;margin-bottom:8px}
 .modal-secondary-btn{width:100%;padding:13px;font-size:14px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary)}
 .modal-primary-btn:disabled{opacity:.35;cursor:not-allowed}
 /* ── HEADER ── */
@@ -178,7 +179,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .boiler-input{margin:4px 0 8px;padding:10px;background:var(--bg-secondary);border-radius:var(--radius-md)}
 .boiler-input label{font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;font-weight:500}
 .boiler-input input,.boiler-input select{width:100%;padding:8px 9px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);margin-bottom:8px}
-.boiler-save{width:100%;padding:8px;font-size:12px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer}
+.boiler-save{width:100%;padding:8px;font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer}
 /* ── FIRE EXT ENTRY CARD ── */
 .fe-entry-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden;cursor:pointer;transition:background .1s}
 .fe-entry-card:hover{background:var(--bg-secondary)}
@@ -201,7 +202,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .cat-pill.active-security{background:var(--bg-info);color:var(--text-info);border-color:rgba(55,138,221,.3)}
 .cat-pill.active-facilities{background:var(--bg-warning);color:var(--text-warning);border-color:rgba(186,117,23,.3)}
 .photo-upload{border:0.5px dashed var(--border-primary);border-radius:var(--radius-md);padding:14px;text-align:center;cursor:pointer;color:var(--text-secondary);font-size:13px}
-.submit-btn{width:100%;padding:11px;font-size:14px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;margin-top:4px}
+.submit-btn{width:100%;padding:11px;font-size:14px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;margin-top:4px}
 .nm-item{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:11px 12px;margin-bottom:8px}
 .nm-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .nm-title-text{font-size:13px;font-weight:600;color:var(--text-primary)}
@@ -218,12 +219,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .meter-reading-val{font-size:13px;font-weight:600;color:var(--text-success)}
 .meter-input-row{display:flex;gap:8px;margin-top:10px}
 .meter-input-row input{flex:1;padding:8px 9px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)}
-.meter-save{font-size:12px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);padding:8px 12px;cursor:pointer}
+.meter-save{font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);padding:8px 12px;cursor:pointer}
 /* ── DAR ── */
 .dar-tabs{display:flex;gap:0;margin-bottom:14px;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);overflow:hidden}
 .dar-tab{flex:1;padding:8px 4px;font-size:12px;font-family:inherit;font-weight:500;background:none;border:none;cursor:pointer;color:var(--text-secondary)}
 .dar-tab:not(:last-child){border-right:0.5px solid var(--border-primary)}
-.dar-tab.act{background:var(--text-primary);color:#fff;font-weight:600}
+.dar-tab.act{background:var(--btn-bg);color:var(--btn-color);font-weight:600}
 .dar-sub{display:none}.dar-sub.act{display:block}
 .dar-entry{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border-secondary);align-items:flex-start}
 .dar-entry:last-child{border-bottom:none}
@@ -262,7 +263,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .detail-back svg{width:14px;height:14px}
 .export-row{display:flex;gap:8px;margin-top:14px}
 .export-btn-sm{flex:1;padding:10px 8px;font-size:12px;font-family:inherit;font-weight:500;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-primary)}
-.export-btn-sm.primary{background:var(--text-primary);color:#fff;border-color:var(--text-primary)}
+.export-btn-sm.primary{background:var(--btn-bg);color:var(--btn-color);border-color:var(--text-primary)}
 .result-count{font-size:11px;color:var(--text-secondary);margin-bottom:8px}
 .add-note-row{display:flex;gap:8px}
 .add-note-row input{flex:1;padding:9px 10px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)}
@@ -300,7 +301,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .ma-progress-track{width:100%;height:7px;background:var(--bg-secondary);border-radius:4px;overflow:hidden;margin-bottom:6px}
 .ma-progress-fill{height:7px;background:var(--green);border-radius:4px;transition:width .5s ease}
 .ma-progress-label{font-size:11px;color:var(--text-secondary)}
-.start-btn{width:100%;padding:12px;font-size:14px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;margin-top:12px}
+.start-btn{width:100%;padding:12px;font-size:14px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;margin-top:12px}
 .complete-badge{display:flex;align-items:center;gap:4px;background:rgba(29,158,117,.1);border:0.5px solid rgba(29,158,117,.25);border-radius:999px;padding:3px 9px;white-space:nowrap}
 .complete-badge svg{width:12px;height:12px;color:var(--green);flex-shrink:0}
 .complete-badge span{font-size:10px;font-weight:600;color:var(--green)}
@@ -386,7 +387,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .eos-stat-row:last-child{border-bottom:none}
 .eos-stat-label{color:var(--text-secondary)}
 .eos-stat-val{font-weight:600;color:var(--text-primary)}
-.eos-btn{width:100%;padding:15px;font-size:15px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-lg);cursor:pointer;margin-top:8px}
+.eos-btn{width:100%;padding:15px;font-size:15px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-lg);cursor:pointer;margin-top:8px}
 /* ── ADMIN ── */
 .admin-section{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:12px}
 .admin-section-title{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid var(--border-secondary)}
@@ -397,12 +398,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .del-btn{font-size:11px;font-family:inherit;background:none;border:0.5px solid rgba(226,75,74,.4);border-radius:var(--radius-sm);padding:3px 8px;cursor:pointer;color:var(--text-danger)}
 .add-officer-row{display:flex;gap:8px;margin-top:10px}
 .add-officer-row input{flex:1;padding:9px 10px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)}
-.add-officer-btn{padding:9px 12px;font-size:12px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;white-space:nowrap}
+.add-officer-btn{padding:9px 12px;font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;white-space:nowrap}
 .back-btn{width:100%;padding:11px;font-size:13px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary);margin-top:4px}
 .admin-overlay{background:var(--bg-secondary);border-radius:var(--radius-lg);padding:28px 20px;margin:16px 0;text-align:center}
 .admin-overlay p{font-size:13px;color:var(--text-secondary);margin-bottom:16px}
 .pin-input{width:140px;padding:11px;font-size:20px;font-family:monospace;text-align:center;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);letter-spacing:.25em;display:block;margin:0 auto 12px}
-.unlock-btn{display:block;margin:0 auto;padding:10px 28px;font-size:14px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer}
+.unlock-btn{display:block;margin:0 auto;padding:10px 28px;font-size:14px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer}
 .pin-err{font-size:12px;color:var(--text-danger);margin-top:8px;display:none}
 .pin-err.show{display:block}
 .patrol-order-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border-secondary);cursor:grab;user-select:none;touch-action:none}
@@ -424,7 +425,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .meter-form{padding:10px 12px 12px;border-top:0.5px solid var(--border-secondary);background:var(--bg-secondary)}
 .meter-input-row{display:flex;gap:8px;margin-bottom:10px}
 .meter-input-row input{flex:1;padding:9px 10px;font-size:15px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)}
-.meter-save{font-size:12px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);padding:9px 14px;cursor:pointer;white-space:nowrap}
+.meter-save{font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);padding:9px 14px;cursor:pointer;white-space:nowrap}
 .meter-chart-wrap{padding:0 12px 12px}
 .meter-chart-title{font-size:10px;color:var(--text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .meter-bldg-hdr{font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em;padding:8px 12px 4px;border-bottom:0.5px solid var(--border-secondary);background:var(--bg-secondary)}
@@ -474,7 +475,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .home-patrol-sub{color:var(--text-secondary)}
 .light .bp-qr-box{border-color:var(--border-secondary)}
 .fe-bldg-tab{flex:1;padding:7px 4px;font-size:11px;font-family:inherit;font-weight:500;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-secondary);transition:all .15s}
-.fe-bldg-tab.act{background:var(--text-primary);color:#fff;border-color:var(--text-primary);font-weight:600}
+.fe-bldg-tab.act{background:var(--btn-bg);color:var(--btn-color);border-color:var(--text-primary);font-weight:600}
 .fe-zone-block{margin-bottom:8px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-primary)}
 .fe-zone-block.zone-drag-over{border-color:var(--blue);border-width:2px}
 .fe-zone-drag-hdr{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg-secondary);cursor:grab;border-bottom:0.5px solid var(--border-secondary);user-select:none}
@@ -498,7 +499,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .fe-name-cancel-btn{flex-shrink:0;padding:4px 8px;font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-secondary)}
 .po-fe-row{background:rgba(55,138,221,.04);border-radius:var(--radius-md)}
 /* ── DARK MODE ── */
-.light{--bg-primary:#ffffff;--bg-secondary:#f5f5f7;--bg-info:rgba(55,138,221,.08);--bg-success:rgba(29,158,117,.08);--bg-warning:rgba(186,117,23,.08);--bg-danger:rgba(226,75,74,.08);--text-primary:#1c1c1e;--text-secondary:#6e6e73;--text-tertiary:#aeaeb2;--border-primary:rgba(0,0,0,.12);--border-secondary:rgba(0,0,0,.08)}
+.light{--bg-primary:#ffffff;--bg-secondary:#f5f5f7;--bg-info:rgba(55,138,221,.08);--bg-success:rgba(29,158,117,.08);--bg-warning:rgba(186,117,23,.08);--bg-danger:rgba(226,75,74,.08);--text-primary:#1c1c1e;--text-secondary:#6e6e73;--text-tertiary:#aeaeb2;--border-primary:rgba(0,0,0,.12);--border-secondary:rgba(0,0,0,.08);--btn-bg:#1c1c1e;--btn-color:#ffffff}
 .dark input,.dark select,.dark textarea{background:var(--bg-secondary)!important;color:var(--text-primary)!important;border-color:var(--border-primary)!important;color-scheme:dark}
 .light .nav{background:var(--bg-primary);border-bottom-color:var(--border-secondary)}
 .light .nav-row button{color:var(--text-secondary)}
@@ -699,7 +700,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div id="login-error" style="display:none;background:rgba(226,75,74,.1);border:0.5px solid rgba(226,75,74,.4);border-radius:var(--radius-md);padding:10px 14px;font-size:13px;color:var(--text-danger);margin-bottom:16px;text-align:center"></div>
       <input type="email" id="login-email" placeholder="Email" style="width:100%;padding:12px 14px;font-size:14px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);margin-bottom:10px"/>
       <input type="password" id="login-password" placeholder="Password" style="width:100%;padding:12px 14px;font-size:14px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);margin-bottom:16px" onkeydown="if(event.key==='Enter')doLogin()"/>
-      <button onclick="doLogin()" id="login-btn" style="width:100%;padding:13px;border:none;border-radius:var(--radius-md);background:var(--text-primary);color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">Sign in</button>
+      <button onclick="doLogin()" id="login-btn" style="width:100%;padding:13px;border:none;border-radius:var(--radius-md);background:var(--btn-bg);color:var(--btn-color);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">Sign in</button>
       <div id="login-spinner" style="display:none;text-align:center;margin-top:14px;font-size:13px;color:var(--text-secondary)">Signing in…</div>
     </div>
   </div>
@@ -1015,7 +1016,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div id="nm-sub-history" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div class="lbl" style="margin:0">All near miss reports</div>
-        <button onclick="downloadNMReport()" style="font-size:11px;font-family:inherit;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v8M5 8l3 3 3-3"/><path d="M3 13h10"/></svg> Monthly report</button>
+        <button onclick="downloadNMReport()" style="font-size:11px;font-family:inherit;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-sm);padding:5px 11px;cursor:pointer;display:flex;align-items:center;gap:4px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v8M5 8l3 3 3-3"/><path d="M3 13h10"/></svg> Monthly report</button>
       </div>
       <div class="filter-row">
         <select id="nm-hist-month" onchange="renderNMHistory()" style="flex:1;padding:8px;font-size:12px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)"><option value="">All time</option></select>
@@ -1164,7 +1165,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div style="display:flex;align-items:center;gap:10px">
       <span id="qr-select-count" style="font-size:13px;color:var(--text-secondary);flex:1">0 selected</span>
       <button onclick="qrSelectAll()" style="font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);padding:7px 12px;cursor:pointer;color:var(--text-secondary)">Select all</button>
-      <button onclick="printSelectedQR()" id="qr-print-sel-btn" disabled style="font-size:12px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;opacity:.35"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6V2h8v4"/><rect x="1" y="6" width="14" height="7" rx="1"/><path d="M4 10h8M4 13h8"/></svg>Print selected</button>
+      <button onclick="printSelectedQR()" id="qr-print-sel-btn" disabled style="font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;opacity:.35"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6V2h8v4"/><rect x="1" y="6" width="14" height="7" rx="1"/><path d="M4 10h8M4 13h8"/></svg>Print selected</button>
     </div>
   </div>
 </div>
@@ -1181,7 +1182,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="admin-section">
         <div class="admin-section-title">QR codes</div>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">All 24 scannable QR codes for building patrols, boiler rooms, and utility meters.</div>
-        <button onclick="openQRPage()" style="width:100%;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
+        <button onclick="openQRPage()" style="width:100%;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
           View QR codes
         </button>
@@ -1625,7 +1626,7 @@ function openQRPage(){qrSelectMode=false;qrSelected.clear();showScreen('qr');ren
 function closeQRPage(){if(qrSelectMode)toggleQRSelectMode();showScreen('admin');}
 function printQRSheet(codes){codes=codes||ALL_QR_CODES;const win=window.open('','_blank','width=800,height=900');if(!win){alert('Please allow pop-ups to print the QR sheet.');return;}win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Canopy Security — QR Codes</title><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:#fff;padding:14mm}h1{font-size:13px;font-weight:700;color:#111;margin-bottom:2mm}.meta{font-size:9px;color:#666;margin-bottom:6mm}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm}.cell{border:0.5px solid #ddd;border-radius:6px;padding:5mm;text-align:center;page-break-inside:avoid}.qr-wrap{display:inline-block;background:#fff;padding:3px;margin-bottom:3mm}.qr-wrap img,.qr-wrap canvas{display:block}.lbl{font-size:11px;font-weight:700;color:#111;margin-bottom:1mm}.sub{font-size:9px;color:#555}.token{font-size:7px;color:#aaa;margin-top:2mm;font-family:monospace;word-break:break-all}@media print{body{padding:10mm}@page{size:A4;margin:10mm}.no-break{page-break-inside:avoid}}<\/style></head><body><h1>Canopy Campus Security — QR Codes</h1><div class="meta">Printed ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} · ${codes.length} code${codes.length!==1?'s':''} · Post at each location</div><div class="grid">${codes.map((qr,i)=>`<div class="cell no-break"><div class="qr-wrap" id="pqr${i}"></div><div class="lbl">${qr.label}</div><div class="sub">${qr.sublabel}</div><div class="token">${qr.token}</div></div>`).join('')}</div><script>window.onload=function(){var codes=${JSON.stringify(codes)};codes.forEach(function(qr,i){var el=document.getElementById('pqr'+i);if(!el||!window.QRCode)return;try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:120,height:120,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}});setTimeout(function(){window.print();},800);}<\/script></body></html>`);win.document.close();}
 const boilerCP=[{id:'boiler-C1',building:'Canopy 1',token:'canopy-boiler-C1'},{id:'boiler-C3',building:'Canopy 3',token:'canopy-boiler-C3'},{id:'boiler-C5',building:'Canopy 5',token:'canopy-boiler-C5'}].map(c=>({...c,scanned:false,temp:'',alarm:null,afterReset:null,saved:false,checks:[]}));
-function renderBoiler(){const el=document.getElementById('boiler-count');if(el){const totalChecks=boilerCP.reduce((s,c)=>s+c.checks.length,0);el.textContent=totalChecks===0?'0/'+boilerCP.length+' done':totalChecks+' check'+(totalChecks!==1?'s':'')+' logged';}const list=document.getElementById('boiler-list');if(!list)return;list.innerHTML=boilerCP.map((c,i)=>{const checkCount=c.checks.length;const rowHtml=`<div class="checkpoint" style="padding:10px 12px"><div class="cp-dot ${checkCount>0?'done':'pending'}"></div><div style="flex:1"><div class="cp-name">${c.building} – Boiler room</div>${c.scanned&&!c.saved?'<div class="cp-time" style="color:var(--text-info)">QR scanned — enter reading below</div>':checkCount>0?`<div class="cp-time">${checkCount} check${checkCount!==1?'s':''} logged this shift</div>`:'<div class="cp-time">Pending — scan QR to begin</div>'}</div>${c.scanned&&!c.saved?'':`<button class="cp-btn" onclick="scanBoilerQR(${i})">Scan QR</button>`}</div>${checkCount>0&&!(c.scanned&&!c.saved)?`<div style="padding:4px 12px 8px;border-top:0.5px solid var(--border-secondary)">${c.checks.map((ck,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:11px;font-weight:600;color:var(--text-info);min-width:24px">C${ci+1}</span><span style="font-size:12px;color:var(--text-primary);flex:1">${ck.temp}°F · ${ck.alarmSummary}</span><span style="font-size:11px;color:var(--text-secondary)">${ck.time}</span></div>`).join('')}</div>`:''}`;let formHtml='';if(c.scanned&&!c.saved){let alarmGuidance='';if(c.alarm===true){alarmGuidance=`<div class="alarm-guidance"><div class="alarm-step alarm-warn"><div class="alarm-step-hdr">⚠️ Alarm present — action required</div>Reset the boiler using the reset button on the unit. Wait for it to fully restart before checking again.</div></div><div style="margin-top:10px"><div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:6px">After reset — is the alarm still present?</div><div class="boiler-yn-row"><button class="yn-btn yes ${c.afterReset===true?'active':''}" onclick="setBoilerAfterReset(${i},true)">Yes — still alarming</button><button class="yn-btn no ${c.afterReset===false?'active':''}" onclick="setBoilerAfterReset(${i},false)">No — alarm cleared</button></div>${c.afterReset===true?`<div class="alarm-danger alarm-step" style="margin-top:10px"><div class="alarm-step-hdr">🚨 Contact facilities immediately</div>The alarm persists after reset. Do not operate the boiler. Notify facilities management right away.</div><a href="tel:+18014204789" class="facilities-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2h4l1.5 4-2.5 1.5a10 10 0 0 0 3.5 3.5L10 8.5l4 1.5v4a1 1 0 0 1-1 1A14 14 0 0 1 1 3a1 1 0 0 1 1-1z"/></svg>Call Cody Holt — Facilities</a>`:''}</div>`;}const checkNum=checkCount+1;formHtml=`<div class="boiler-form"><div class="boiler-form-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>${c.building} — Check #${checkNum}</div><div class="form-group" style="margin-bottom:10px"><label>Water temperature (°F)</label><input type="number" id="btemp-${i}" placeholder="e.g. 185" value="${c.temp}" oninput="boilerCP[${i}].temp=this.value" style="font-size:16px"></div><div class="form-group" style="margin-bottom:0"><label>Any alarms active?</label><div class="boiler-yn-row"><button class="yn-btn yes ${c.alarm===true?'active':''}" onclick="setBoilerAlarm(${i},true)">Yes</button><button class="yn-btn no ${c.alarm===false?'active':''}" onclick="setBoilerAlarm(${i},false)">No</button></div></div>${alarmGuidance}<button onclick="saveBoiler(${i})" style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer" ${(!c.temp||c.alarm===null||(c.alarm===true&&c.afterReset===null))?'disabled style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:not-allowed;opacity:.35"':''}>Save &amp; log to DAR</button></div>`;}return rowHtml+formHtml;}).join('');}
+function renderBoiler(){const el=document.getElementById('boiler-count');if(el){const totalChecks=boilerCP.reduce((s,c)=>s+c.checks.length,0);el.textContent=totalChecks===0?'0/'+boilerCP.length+' done':totalChecks+' check'+(totalChecks!==1?'s':'')+' logged';}const list=document.getElementById('boiler-list');if(!list)return;list.innerHTML=boilerCP.map((c,i)=>{const checkCount=c.checks.length;const rowHtml=`<div class="checkpoint" style="padding:10px 12px"><div class="cp-dot ${checkCount>0?'done':'pending'}"></div><div style="flex:1"><div class="cp-name">${c.building} – Boiler room</div>${c.scanned&&!c.saved?'<div class="cp-time" style="color:var(--text-info)">QR scanned — enter reading below</div>':checkCount>0?`<div class="cp-time">${checkCount} check${checkCount!==1?'s':''} logged this shift</div>`:'<div class="cp-time">Pending — scan QR to begin</div>'}</div>${c.scanned&&!c.saved?'':`<button class="cp-btn" onclick="scanBoilerQR(${i})">Scan QR</button>`}</div>${checkCount>0&&!(c.scanned&&!c.saved)?`<div style="padding:4px 12px 8px;border-top:0.5px solid var(--border-secondary)">${c.checks.map((ck,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:11px;font-weight:600;color:var(--text-info);min-width:24px">C${ci+1}</span><span style="font-size:12px;color:var(--text-primary);flex:1">${ck.temp}°F · ${ck.alarmSummary}</span><span style="font-size:11px;color:var(--text-secondary)">${ck.time}</span></div>`).join('')}</div>`:''}`;let formHtml='';if(c.scanned&&!c.saved){let alarmGuidance='';if(c.alarm===true){alarmGuidance=`<div class="alarm-guidance"><div class="alarm-step alarm-warn"><div class="alarm-step-hdr">⚠️ Alarm present — action required</div>Reset the boiler using the reset button on the unit. Wait for it to fully restart before checking again.</div></div><div style="margin-top:10px"><div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:6px">After reset — is the alarm still present?</div><div class="boiler-yn-row"><button class="yn-btn yes ${c.afterReset===true?'active':''}" onclick="setBoilerAfterReset(${i},true)">Yes — still alarming</button><button class="yn-btn no ${c.afterReset===false?'active':''}" onclick="setBoilerAfterReset(${i},false)">No — alarm cleared</button></div>${c.afterReset===true?`<div class="alarm-danger alarm-step" style="margin-top:10px"><div class="alarm-step-hdr">🚨 Contact facilities immediately</div>The alarm persists after reset. Do not operate the boiler. Notify facilities management right away.</div><a href="tel:+18014204789" class="facilities-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2h4l1.5 4-2.5 1.5a10 10 0 0 0 3.5 3.5L10 8.5l4 1.5v4a1 1 0 0 1-1 1A14 14 0 0 1 1 3a1 1 0 0 1 1-1z"/></svg>Call Cody Holt — Facilities</a>`:''}</div>`;}const checkNum=checkCount+1;formHtml=`<div class="boiler-form"><div class="boiler-form-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>${c.building} — Check #${checkNum}</div><div class="form-group" style="margin-bottom:10px"><label>Water temperature (°F)</label><input type="number" id="btemp-${i}" placeholder="e.g. 185" value="${c.temp}" oninput="boilerCP[${i}].temp=this.value" style="font-size:16px"></div><div class="form-group" style="margin-bottom:0"><label>Any alarms active?</label><div class="boiler-yn-row"><button class="yn-btn yes ${c.alarm===true?'active':''}" onclick="setBoilerAlarm(${i},true)">Yes</button><button class="yn-btn no ${c.alarm===false?'active':''}" onclick="setBoilerAlarm(${i},false)">No</button></div></div>${alarmGuidance}<button onclick="saveBoiler(${i})" style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer" ${(!c.temp||c.alarm===null||(c.alarm===true&&c.afterReset===null))?'disabled style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:not-allowed;opacity:.35"':''}>Save &amp; log to DAR</button></div>`;}return rowHtml+formHtml;}).join('');}
 function scanBoilerQR(i){
   const b=boilerCP[i];
   openQRScanner({title:'Scan QR — '+b.building+' Boiler',sub:'Point at the '+b.building+' boiler room QR code',token:b.token,wrongMsg:'Wrong QR code. Please scan the '+b.building+' boiler code.',successLabel:b.building+' boiler scanned',successSub:'Enter reading below',onSuccess:()=>{boilerCP[i].scanned=true;renderBoiler();setTimeout(()=>{const list=document.getElementById('boiler-list');if(list)list.children[i]?.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}});
@@ -1735,7 +1736,7 @@ function saveFEOrder(){try{const edits={};Object.keys(FE_DATA).forEach(k=>{edits
 function resetFEOrder(){try{localStorage.removeItem('ext_data_edits');}catch(e){}location.reload();}
 function renderOfficerList(){document.getElementById('officer-list').innerHTML=officers.map((o,i)=>`<div class="officer-row-admin"><div class="av-sm">${initials(o)}</div><div class="o-name">${o}</div><button class="del-btn" onclick="removeOfficer(${i})">Remove</button></div>`).join('');renderPatrolOrderList();if(feDrawerOpen)renderFEReorderBody();}
 let feDrawerOpen=false;
-function renderPatrolOrderList(){const el=document.getElementById('patrol-order-list');if(!el)return;el.innerHTML=patrolOrder.map((id,i)=>{const isFE=id==='fe';const label=patrolMeta[id]?.label||id;const chevron=isFE?`<svg id="fe-drawer-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity:.5;transition:transform .2s;${feDrawerOpen?'transform:rotate(90deg)':''}"><path d="M6 4l4 4-4 4"/></svg>`:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3"><path d="M6 4l4 4-4 4"/></svg>`;const row=`<div class="patrol-order-item${isFE?' po-fe-row':''}" draggable="${!isFE||!feDrawerOpen}" data-id="${id}" data-idx="${i}" ondragstart="poDragStart(event)" ondragover="poDragOver(event)" ondrop="poDrop(event)" ondragend="poDragEnd(event)" ${isFE?`onclick="toggleFEDrawer(event)"`:''}  style="${isFE?'cursor:pointer;':''}"><div class="drag-handle"><span></span><span></span><span></span></div><span class="patrol-order-label" style="${isFE?'font-weight:600;color:var(--text-primary)':''}">${isFE?'🧯 ':' '}${label}</span>${isFE?`<span style="font-size:10px;color:var(--text-secondary);margin-right:4px">Edit</span>`:''}${chevron}</div>`;const drawer=isFE?`<div id="fe-inline-drawer" style="display:${feDrawerOpen?'block':'none'};background:var(--bg-secondary);border-top:0.5px solid var(--border-secondary);border-bottom:0.5px solid var(--border-secondary);padding:12px;margin-bottom:0"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder zones or individual extinguishers. Tap ✏️ to rename a location.</div><div style="display:flex;gap:6px;margin-bottom:10px"><button class="fe-bldg-tab act" data-bldg="C1" onclick="selectFEAdminBldg('C1',this)">C1</button><button class="fe-bldg-tab" data-bldg="C3" onclick="selectFEAdminBldg('C3',this)">C3</button><button class="fe-bldg-tab" data-bldg="C4" onclick="selectFEAdminBldg('C4',this)">C4</button><button class="fe-bldg-tab" data-bldg="C5" onclick="selectFEAdminBldg('C5',this)">C5</button></div><div id="fe-reorder-body"></div><div style="display:flex;gap:8px;margin-top:10px"><button onclick="saveFEOrder()" style="flex:1;padding:9px;font-size:12px;font-family:inherit;font-weight:600;background:var(--text-primary);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer">Save changes</button><button onclick="resetFEOrder()" style="padding:9px 12px;font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary)">Reset all</button></div><div class="toast" id="fe-order-toast" style="margin-top:8px">Changes saved</div></div>`:'';return row+drawer;}).join('');}
+function renderPatrolOrderList(){const el=document.getElementById('patrol-order-list');if(!el)return;el.innerHTML=patrolOrder.map((id,i)=>{const isFE=id==='fe';const label=patrolMeta[id]?.label||id;const chevron=isFE?`<svg id="fe-drawer-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity:.5;transition:transform .2s;${feDrawerOpen?'transform:rotate(90deg)':''}"><path d="M6 4l4 4-4 4"/></svg>`:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3"><path d="M6 4l4 4-4 4"/></svg>`;const row=`<div class="patrol-order-item${isFE?' po-fe-row':''}" draggable="${!isFE||!feDrawerOpen}" data-id="${id}" data-idx="${i}" ondragstart="poDragStart(event)" ondragover="poDragOver(event)" ondrop="poDrop(event)" ondragend="poDragEnd(event)" ${isFE?`onclick="toggleFEDrawer(event)"`:''}  style="${isFE?'cursor:pointer;':''}"><div class="drag-handle"><span></span><span></span><span></span></div><span class="patrol-order-label" style="${isFE?'font-weight:600;color:var(--text-primary)':''}">${isFE?'🧯 ':' '}${label}</span>${isFE?`<span style="font-size:10px;color:var(--text-secondary);margin-right:4px">Edit</span>`:''}${chevron}</div>`;const drawer=isFE?`<div id="fe-inline-drawer" style="display:${feDrawerOpen?'block':'none'};background:var(--bg-secondary);border-top:0.5px solid var(--border-secondary);border-bottom:0.5px solid var(--border-secondary);padding:12px;margin-bottom:0"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder zones or individual extinguishers. Tap ✏️ to rename a location.</div><div style="display:flex;gap:6px;margin-bottom:10px"><button class="fe-bldg-tab act" data-bldg="C1" onclick="selectFEAdminBldg('C1',this)">C1</button><button class="fe-bldg-tab" data-bldg="C3" onclick="selectFEAdminBldg('C3',this)">C3</button><button class="fe-bldg-tab" data-bldg="C4" onclick="selectFEAdminBldg('C4',this)">C4</button><button class="fe-bldg-tab" data-bldg="C5" onclick="selectFEAdminBldg('C5',this)">C5</button></div><div id="fe-reorder-body"></div><div style="display:flex;gap:8px;margin-top:10px"><button onclick="saveFEOrder()" style="flex:1;padding:9px;font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer">Save changes</button><button onclick="resetFEOrder()" style="padding:9px 12px;font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary)">Reset all</button></div><div class="toast" id="fe-order-toast" style="margin-top:8px">Changes saved</div></div>`:'';return row+drawer;}).join('');}
 function toggleFEDrawer(e){if(e.target.closest('.drag-handle'))return;feDrawerOpen=!feDrawerOpen;renderPatrolOrderList();if(feDrawerOpen){feAdminBldg='C1';renderFEReorderBody();setTimeout(()=>{const drawer=document.getElementById('fe-inline-drawer');if(drawer)drawer.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}}
 let poDragging=null;
 function poDragStart(e){poDragging=e.currentTarget;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
@@ -1766,27 +1767,37 @@ const DRIVE_FOLDER='1qo-6YOspwMq9oczeNzkWlmobVGDUxp1Q';
 const SA_EMAIL='canopy-dar-backup@canopy-security.iam.gserviceaccount.com';
 const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCwMiQf2RUQhGLWAtU9f0ld0VroE6FtASHUXhi3YZWJSxiycfkAHKFz+H748PVtlC1vP3mwNcfmL4bM6Wf9rlWW8WI7ty7qMb4jMj78RclhqmHQFwu6uBfkFXekv2zkp9K+A9SxaM5VyDL9wJxT++gqcubhooj0mKAs2Ra4+RqB2gsIGYVZ1Hj+wN/uOIAJFPQd77WWjqI3tU1CEtR8S+kVAeHRo57SEWfa3Ain6h6xWNBwgYeo5G4pefmyUZBuYB2/74hUCDGPmmkNYK7gxCB8O/zINSK80KHzyG8R+AXEPgAT0rRiDpiPPvthBBFQPlm+7IcQDHgMYhS8TVpjz/ytAgMBAAECggEAGAcpI1QN/1ajyTOnCN/sOBMY0T/8FPVr5kjUGLisv9sHNIPpGmQiexeO7pFNpvKSJPMEZqIERMEud5CiUddjF1aLuEEJm351GNpSpJc6bfXiU5JmUxb6ixbdCLviNGcpN33Q6kYJ/Wtz02Rfl+8T1ityjkqwCqCAbMfzb/496H8twnrQdyqULE7QRAESNpQyoIcB7W1fWn0se0X99DAPdWN8BvEvinicI2VF46OGfoJANGiJm2+Iyy6ykoAT/MIzZD4OKM0aaN2bsq5qFq8DLcF8+jsSioOFzLuT8krhALmC1Ryd0GxVUG2mB1Jm1I+/SrP0h/UGkISBfKSBEIo4MQKBgQDZ+Kxe0jyJXtRoyl8y8cGoo/u7afBc/fD47oALP/7HebTBc5mLVq5YQzqLRo1u/B3R9I2IsY1p6LQQWggVxgqjfzSh16uO5S9j6RRPWuBI1b3lPD4bpcN5ojD3NiB/WQ649rQh3VsF+w7Ga2faX97c4GpQk0u0V5LUm6gaGGZsAwKBgQDO76JhyO3PbDPn6o+ajeFVgARUVTKzJVG0+iv6BT9Q4oVrOvHKlWQrjHA5QhSiNMUYMAGmK76f4iXzsuDqOu2Nn13CC5o5KV4Eyi5yZYKNdbPTdW4qB0HacC6cstG9dun45ejnxWAJEP2lmPuOY8qU+XSZrJAS8siMNgOczbSNjwKBgA7Nv8800h22ThDL5clM+A0fDgK9gDCgopQVhqa88u3TSz50PnJjMbYW4swAv6xQ/Sl8RXyKKoON5WTS6IeqCqDuC8IOJr2uvRg5BUMade8cbSg7fjBcgrkpFdBEYdKkVsajIrrGEN+IHInHU6dWKYmwyCeuyU53QCamZ7VWAObHAoGAFpLDZuFRN7g47UqEAbsKYpZFYqGslygyAojrtSlPX9Zl8W2LpKqpM6rtLwHLWGpjOaE6/NJ2x+AWfb/8kvB8q19ADgPP/f5KOEGJ0YbLN/0n8aA0tTb3cwmbvBIxmPZYzYLe5jF8qWCGGsNWZZDzL08K7hyJ1tdPEyRtPnSeBncCgYAQKg9GzlEQKkblB1bX1vECtmQNBtsF77Su4ZR0E9Eg5vcqqBj3MnKQnDb2Xj+SaEmRsENaWebHl4rydTrCIPsfsyq9ZxrKGcR6rMd9Nc/IvFbjiy9C7uFLVBPivSsjxfhgiMzjS/kvb/vdvVJ85AV/qtpw6CK4AViwi5JGA66e8g==\n-----END PRIVATE KEY-----\n';
 
-/* Init — restore active shift immediately (sync), then check Supabase auth in background */
-window.addEventListener('DOMContentLoaded',async()=>{
-  // Step 1: Try to restore an active shift RIGHT NOW before anything async
-  document.getElementById('app').classList.add('dark');
+/* ── STARTUP — runs synchronously after DOM ready ── */
+(function initApp(){
+  // Always apply dark mode first
+  const appEl=document.getElementById('app');
+  if(appEl)appEl.classList.add('dark');
   document.body.style.background='#1a1a1a';
+
+  // Try to restore active shift immediately — no async, no network
   const restored=restoreActiveShift();
-  if(restored){
-    // Full shift restored — Supabase check in background only
+  if(restored)return; // back in the app — done
+
+  // No active shift — check if officer name saved (pre-select on checkin)
+  // showScreen handled by Supabase auth below
+})();
+
+/* ── SUPABASE AUTH — async, only controls login vs checkin screen ── */
+window.addEventListener('DOMContentLoaded',async()=>{
+  // If shift was already restored above, do nothing except background auth
+  if(officer){
     try{
       window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
       await window._supabase.auth.getSession();
-    }catch(e){console.warn('Background Supabase init:',e);}
+    }catch(e){console.warn('Background auth:',e);}
     return;
   }
-  // Step 2: Supabase auth check
+  // No active shift — determine login vs checkin
   try{
     window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
     const {data:{session}}=await window._supabase.auth.getSession();
     if(session){
       showScreen('checkin');
-      // Pre-select last officer if available
       if(_pendingOfficer){
         setTimeout(()=>{
           const sel=document.getElementById('ci-sel');
@@ -1797,7 +1808,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
     }else{showScreen('login');}
   }catch(e){
     console.warn('Supabase init:',e);
-    showScreen('checkin');
+    // Network error — if we have a saved officer go to checkin, else login
+    showScreen(_pendingOfficer?'checkin':'login');
     if(_pendingOfficer){
       setTimeout(()=>{
         const sel=document.getElementById('ci-sel');
