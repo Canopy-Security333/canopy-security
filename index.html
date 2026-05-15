@@ -1373,7 +1373,7 @@ function seedDemoPassDowns(){const n=Date.now();passDowns=[{id:'pd-1',officer:'M
 function seedDemoData(){const n=new Date();const day=(d,h,m)=>{const x=new Date(n);x.setDate(x.getDate()-d);x.setHours(h,m,0,0);return x.toISOString();};darHistory=[{id:'dar-001',officer:'Matt Dalsing',date:day(1,6,2),dateLabel:fmtDate(new Date(day(1,6,2))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Matt Dalsing signed in.',time:day(1,6,2)},{type:'patrol',title:'Building patrol — Canopy 1',detail:'Officer conducted a patrol of Canopy 1. Tenant spaces walked.',time:day(1,6,45)},{type:'checkout',title:'Shift ended',detail:'Steps: 6,240. Duration: 7h 58m.',time:day(1,14,0)}],steps:6240},{id:'dar-002',officer:'Brian Davies',date:day(1,14,5),dateLabel:fmtDate(new Date(day(1,14,5))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Brian Davies signed in.',time:day(1,14,5)},{type:'nearmiss',title:'Near miss submitted – Canopy 3',detail:'Safety. Wet floor near east stairwell.',time:day(1,16,22)},{type:'checkout',title:'Shift ended',detail:'Steps: 8,120. Duration: 8h 0m.',time:day(1,22,5)}],steps:8120}];saveStorage();}
 function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
-function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();}
+function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
@@ -1778,7 +1778,12 @@ const SA_EMAIL='canopy-dar-backup@canopy-security.iam.gserviceaccount.com';
 const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCwMiQf2RUQhGLWAtU9f0ld0VroE6FtASHUXhi3YZWJSxiycfkAHKFz+H748PVtlC1vP3mwNcfmL4bM6Wf9rlWW8WI7ty7qMb4jMj78RclhqmHQFwu6uBfkFXekv2zkp9K+A9SxaM5VyDL9wJxT++gqcubhooj0mKAs2Ra4+RqB2gsIGYVZ1Hj+wN/uOIAJFPQd77WWjqI3tU1CEtR8S+kVAeHRo57SEWfa3Ain6h6xWNBwgYeo5G4pefmyUZBuYB2/74hUCDGPmmkNYK7gxCB8O/zINSK80KHzyG8R+AXEPgAT0rRiDpiPPvthBBFQPlm+7IcQDHgMYhS8TVpjz/ytAgMBAAECggEAGAcpI1QN/1ajyTOnCN/sOBMY0T/8FPVr5kjUGLisv9sHNIPpGmQiexeO7pFNpvKSJPMEZqIERMEud5CiUddjF1aLuEEJm351GNpSpJc6bfXiU5JmUxb6ixbdCLviNGcpN33Q6kYJ/Wtz02Rfl+8T1ityjkqwCqCAbMfzb/496H8twnrQdyqULE7QRAESNpQyoIcB7W1fWn0se0X99DAPdWN8BvEvinicI2VF46OGfoJANGiJm2+Iyy6ykoAT/MIzZD4OKM0aaN2bsq5qFq8DLcF8+jsSioOFzLuT8krhALmC1Ryd0GxVUG2mB1Jm1I+/SrP0h/UGkISBfKSBEIo4MQKBgQDZ+Kxe0jyJXtRoyl8y8cGoo/u7afBc/fD47oALP/7HebTBc5mLVq5YQzqLRo1u/B3R9I2IsY1p6LQQWggVxgqjfzSh16uO5S9j6RRPWuBI1b3lPD4bpcN5ojD3NiB/WQ649rQh3VsF+w7Ga2faX97c4GpQk0u0V5LUm6gaGGZsAwKBgQDO76JhyO3PbDPn6o+ajeFVgARUVTKzJVG0+iv6BT9Q4oVrOvHKlWQrjHA5QhSiNMUYMAGmK76f4iXzsuDqOu2Nn13CC5o5KV4Eyi5yZYKNdbPTdW4qB0HacC6cstG9dun45ejnxWAJEP2lmPuOY8qU+XSZrJAS8siMNgOczbSNjwKBgA7Nv8800h22ThDL5clM+A0fDgK9gDCgopQVhqa88u3TSz50PnJjMbYW4swAv6xQ/Sl8RXyKKoON5WTS6IeqCqDuC8IOJr2uvRg5BUMade8cbSg7fjBcgrkpFdBEYdKkVsajIrrGEN+IHInHU6dWKYmwyCeuyU53QCamZ7VWAObHAoGAFpLDZuFRN7g47UqEAbsKYpZFYqGslygyAojrtSlPX9Zl8W2LpKqpM6rtLwHLWGpjOaE6/NJ2x+AWfb/8kvB8q19ADgPP/f5KOEGJ0YbLN/0n8aA0tTb3cwmbvBIxmPZYzYLe5jF8qWCGGsNWZZDzL08K7hyJ1tdPEyRtPnSeBncCgYAQKg9GzlEQKkblB1bX1vECtmQNBtsF77Su4ZR0E9Eg5vcqqBj3MnKQnDb2Xj+SaEmRsENaWebHl4rydTrCIPsfsyq9ZxrKGcR6rMd9Nc/IvFbjiy9C7uFLVBPivSsjxfhgiMzjS/kvb/vdvVJ85AV/qtpw6CK4AViwi5JGA66e8g==\n-----END PRIVATE KEY-----\n';
 
 /* ── STARTUP ── */
-window.addEventListener('DOMContentLoaded',()=>{
+
+// Track whether an active shift is currently running so async callbacks
+// never navigate away from the main screen after a restore.
+let _shiftRestored=false;
+
+function _initApp(){
   // Apply dark mode immediately
   const appEl=document.getElementById('app');
   if(appEl)appEl.classList.add('dark');
@@ -1787,21 +1792,27 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Try to restore an active shift — fully synchronous, no network needed
   const restored=restoreActiveShift();
   if(restored){
-    // Shift is live — init Supabase silently in background for future writes
+    _shiftRestored=true;
+    // Shift is live — init Supabase silently in background for future writes only.
+    // IMPORTANT: we must never call showScreen() here — the shift is already showing.
     setTimeout(async()=>{
       try{
         window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
         await window._supabase.auth.getSession();
       }catch(e){console.warn('Background auth:',e);}
     },2000);
-    return;
+    return; // ← early return: do NOT fall through to the Supabase auth check below
   }
+
+  _shiftRestored=false;
 
   // No active shift — check Supabase session to decide login vs checkin
   (async()=>{
     try{
       window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
       const {data:{session}}=await window._supabase.auth.getSession();
+      // Double-check: if a shift was restored while we were awaiting, don't navigate
+      if(_shiftRestored)return;
       if(session){
         showScreen('checkin');
         if(_pendingOfficer){
@@ -1816,6 +1827,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       }
     }catch(e){
       console.warn('Supabase init:',e);
+      if(_shiftRestored)return;
       // Offline or error — if saved officer exists go to checkin, else login
       if(_pendingOfficer){
         showScreen('checkin');
@@ -1829,6 +1841,52 @@ window.addEventListener('DOMContentLoaded',()=>{
       }
     }
   })();
+}
+
+window.addEventListener('DOMContentLoaded', _initApp);
+
+// Android pull-to-refresh and tab-switching can trigger pageshow / visibilitychange
+// without a full reload. Re-check and restore the shift if needed.
+window.addEventListener('pageshow', (e)=>{
+  // e.persisted = true means page was restored from bfcache (back/forward cache)
+  if(e.persisted){
+    const raw=localStorage.getItem('active_shift');
+    if(raw && !officer){
+      // Shift data exists but in-memory state was lost — do a full re-init
+      _shiftRestored=false;
+      _initApp();
+    } else if(raw && officer && shiftStart){
+      // State is intact — just make sure we're on the main screen
+      showScreen('main');
+      showPane('home', null);
+    }
+  }
+});
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    const raw=localStorage.getItem('active_shift');
+    if(raw && !officer){
+      // Came back to the tab/app and lost in-memory state — re-init
+      _shiftRestored=false;
+      _initApp();
+    } else if(raw && officer && shiftStart){
+      // Shift is fine — ensure we didn't drift to checkin screen
+      const activeScreen=document.querySelector('.screen.act');
+      if(activeScreen && activeScreen.id==='screen-checkin'){
+        showScreen('main');
+        showPane('home',null);
+      }
+    }
+  } else {
+    // App going to background — flush shift state to localStorage immediately
+    if(officer && shiftStart) saveActiveShift();
+  }
+});
+
+// Final safety net: save shift before ANY page unload (pull-to-refresh, close, navigation)
+window.addEventListener('beforeunload',()=>{
+  if(officer && shiftStart) saveActiveShift();
 });
 
 async function doLogin(){
