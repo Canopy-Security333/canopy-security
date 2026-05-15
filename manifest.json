@@ -8,6 +8,7 @@
   "orientation": "portrait",
   "background_color": "#1a1a1e",
   "theme_color": "#1a1a1e",
+  "overscroll_behavior": "none",
   "icons": [
     {
       "src": "/canopy-security/icon-192.png",

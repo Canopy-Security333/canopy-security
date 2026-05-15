@@ -45,7 +45,8 @@
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
   --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:var(--bg-secondary);color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:var(--bg-secondary);color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overscroll-behavior-y:contain}
+html{overscroll-behavior-y:contain}
 *{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{display:none}
 .screen{display:none}.screen.act{display:block}
 /* ── CHECK-IN ── */
@@ -1438,7 +1439,15 @@ const bpScanned={C1:null,C3:null,C4:null,C5:null};
 function renderBP(){const list=document.getElementById('bp-list');if(!list)return;list.innerHTML=BP_BUILDINGS.map(b=>`<button class="scan-patrol-btn" onclick="openBPScanner('${b.id}')"><div class="scan-patrol-icon" style="background:rgba(55,138,221,.12)"><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="10" y="1" width="5" height="5" rx="1"/><rect x="1" y="10" width="5" height="5" rx="1"/><rect x="4" y="4" width="1.5" height="1.5" fill="var(--blue)" stroke="none"/><rect x="11" y="4" width="1.5" height="1.5" fill="var(--blue)" stroke="none"/><rect x="4" y="11" width="1.5" height="1.5" fill="var(--blue)" stroke="none"/><path d="M10 10h2v2h-2zM12 12h3M12 10h3M10 12v3"/></svg></div><div class="scan-patrol-text"><div class="scan-patrol-title">${b.name}</div><div class="scan-patrol-sub">${bpScanned[b.id]?'Last logged at '+bpScanned[b.id]:'Scan QR code to log patrol'}</div></div></button>`).join('');}
 function logBPScan(id){const bldg=BP_BUILDINGS.find(b=>b.id===id);if(!bldg)return;bpScanned[id]=fmt(new Date());addEntry('patrol','Building patrol \u2014 '+bldg.name,'Officer '+(officer||'\u2014')+' conducted a patrol of '+bldg.name+'. Tenant spaces walked. No issues noted unless Near Miss filed.');stats.patrols++;updateStats();renderBP();showToast('bp-toast','\u2713 '+bldg.name+' patrol logged');}
 
-/* ── GENERIC QR SCANNER ── */
+/* ── DISABLE PULL-TO-REFRESH ON ANDROID ── */
+let _lastY=0;
+document.addEventListener('touchstart',e=>{_lastY=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchmove',e=>{
+  const el=e.target.closest('[data-scrollable]')||e.target.closest('.pane')||e.target.closest('.scroll');
+  const atTop=!el||el.scrollTop<=0;
+  const pullingDown=e.touches[0].clientY>_lastY;
+  if(atTop&&pullingDown)e.preventDefault();
+},{passive:false});
 let qrStream=null,qrAnimFrame=null,qrDone=false,qrConfig=null;
 function openQRScanner(cfg){
   qrConfig=cfg;qrDone=false;
