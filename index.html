@@ -1395,7 +1395,7 @@ function seedDemoPassDowns(){const n=Date.now();passDowns=[{id:'pd-1',officer:'M
 function seedDemoData(){const n=new Date();const day=(d,h,m)=>{const x=new Date(n);x.setDate(x.getDate()-d);x.setHours(h,m,0,0);return x.toISOString();};darHistory=[{id:'dar-001',officer:'Matt Dalsing',date:day(1,6,2),dateLabel:fmtDate(new Date(day(1,6,2))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Matt Dalsing signed in.',time:day(1,6,2)},{type:'patrol',title:'Building patrol — Canopy 1',detail:'Officer conducted a patrol of Canopy 1. Tenant spaces walked.',time:day(1,6,45)},{type:'checkout',title:'Shift ended',detail:'Steps: 6,240. Duration: 7h 58m.',time:day(1,14,0)}],steps:6240},{id:'dar-002',officer:'Brian Davies',date:day(1,14,5),dateLabel:fmtDate(new Date(day(1,14,5))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Brian Davies signed in.',time:day(1,14,5)},{type:'nearmiss',title:'Near miss submitted – Canopy 3',detail:'Safety. Wet floor near east stairwell.',time:day(1,16,22)},{type:'checkout',title:'Shift ended',detail:'Steps: 8,120. Duration: 8h 0m.',time:day(1,22,5)}],steps:8120}];saveStorage();}
 function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
-function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();}
+function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
@@ -1419,6 +1419,8 @@ function finalizeShift(){if(stepTracking)stopStepTracking();const endTime=new Da
   const _bkEl=document.getElementById('eos-backup-status');
   if(_bkEl){_bkEl.textContent='DAR saved locally. Uploading to Drive…';_bkEl.style.color='';}
   uploadDARtoDrive(_shiftRecord);
+  if(window._supabase&&_supabaseUserId){window._supabase.from('active_shifts').delete().eq('supabase_user_id',_supabaseUserId).then(({error})=>{if(error)console.warn('Supabase shift delete error:',error.message);});}
+  _supabaseUserId=null;
   clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();showScreen('eos');}
 function returnToCheckin(){
   renderPassDownsBanner();
@@ -1440,6 +1442,7 @@ function addEntry(type,title,detail){
   darLog.push(entry);
   const el=document.getElementById('stat-entries');if(el)el.textContent=darLog.length;
   saveActiveShift();
+  saveShiftToSupabase();
   if(window._supabase&&officer&&shiftId){
     window._supabase.from('dar_entries').insert({shift_id:shiftId,officer,type,title,detail,created_at:entry.time.toISOString()}).then(({error})=>{if(error)console.warn('Supabase write error:',error.message);});
   }
@@ -1808,6 +1811,7 @@ const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwg
 // Track whether an active shift is currently running so async callbacks
 // never navigate away from the main screen after a restore.
 let _shiftRestored=false;
+let _supabaseUserId=null; // cached Supabase user ID — set on login/restore, cleared on end-shift
 
 function _initApp(){
   // Apply dark mode immediately
@@ -1824,7 +1828,8 @@ function _initApp(){
     setTimeout(async()=>{
       try{
         window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-        await window._supabase.auth.getSession();
+        const{data:{session}}=await window._supabase.auth.getSession();
+        if(session){_supabaseUserId=session.user.id;saveShiftToSupabase();}
       }catch(e){console.warn('Background auth:',e);}
     },2000);
     return; // ← early return: do NOT fall through to the Supabase auth check below
@@ -1840,13 +1845,38 @@ function _initApp(){
       // Double-check: if a shift was restored while we were awaiting, don't navigate
       if(_shiftRestored)return;
       if(session){
-        showScreen('checkin');
-        if(_pendingOfficer){
-          setTimeout(()=>{
-            const sel=document.getElementById('ci-sel');
-            if(sel){sel.value=_pendingOfficer;ciReady();}
-            _pendingOfficer=null;
-          },100);
+        _supabaseUserId=session.user.id;
+        // No local shift found — check Supabase for an active shift row
+        try{
+          const{data:row}=await window._supabase
+            .from('active_shifts').select('*')
+            .eq('supabase_user_id',_supabaseUserId).maybeSingle();
+          if(_shiftRestored)return;
+          if(row&&row.officer_name&&row.shift_start){
+            // Restore shift state from Supabase
+            officer=row.officer_name;
+            shiftId=row.shift_id||('shift-'+Date.now());
+            shiftStart=new Date(row.shift_start);
+            darLog=(row.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
+            stats=row.stats||{patrols:0,nm:0,checks:0};
+            stepCount=0;reachedMilestones=new Set();
+            _applyOfficerToUI(officer);
+            ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
+            const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+            updateStepDisplay();
+            timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
+            saveActiveShift(); // re-hydrate localStorage from Supabase data
+            _shiftRestored=true;
+            showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();
+          }else{
+            showScreen('checkin');
+            if(_pendingOfficer){setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);}
+          }
+        }catch(rowErr){
+          console.warn('Supabase shift restore error:',rowErr.message);
+          if(_shiftRestored)return;
+          showScreen('checkin');
+          if(_pendingOfficer){setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);}
         }
       }else{
         showScreen('login');
@@ -1911,14 +1941,14 @@ document.addEventListener('visibilitychange',()=>{
       }
     }
   } else {
-    // App going to background — flush shift state to localStorage immediately
-    if(officer && shiftStart) saveActiveShift();
+    // App going to background — flush shift state to localStorage and Supabase
+    if(officer&&shiftStart){saveActiveShift();saveShiftToSupabase();}
   }
 });
 
 // Final safety net: save shift before ANY page unload (pull-to-refresh, close, navigation)
 window.addEventListener('beforeunload',()=>{
-  if(officer && shiftStart) saveActiveShift();
+  if(officer&&shiftStart){saveActiveShift();saveShiftToSupabase();}
 });
 
 async function doLogin(){
@@ -2016,6 +2046,27 @@ async function uploadDARtoDrive(record){
     const bkEl=document.getElementById('eos-backup-status');
     if(bkEl){bkEl.textContent='⚠ Drive backup failed — DAR saved locally';bkEl.style.color='var(--text-warning)';}
   }
+}
+
+/* ── Supabase active-shift persistence ── */
+async function saveShiftToSupabase(){
+  if(!window._supabase||!officer||!shiftStart)return;
+  try{
+    if(!_supabaseUserId){
+      const{data:{user}}=await window._supabase.auth.getUser();
+      if(!user)return;
+      _supabaseUserId=user.id;
+    }
+    await window._supabase.from('active_shifts').upsert({
+      supabase_user_id:_supabaseUserId,
+      officer_name:officer,
+      shift_id:shiftId,
+      shift_start:shiftStart.toISOString(),
+      dar_entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),
+      stats,
+      updated_at:new Date().toISOString()
+    },{onConflict:'supabase_user_id'});
+  }catch(e){console.warn('saveShiftToSupabase error:',e.message);}
 }
 
 </script>
