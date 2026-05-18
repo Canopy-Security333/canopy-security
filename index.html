@@ -46,7 +46,8 @@
   --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;
   --btn-bg:#f2f2f7;--btn-color:#1c1c1e;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:#1a1a1a;color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overscroll-behavior-y:none}
+html{overscroll-behavior-y:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;background:#1a1a1a;color:var(--text-primary);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;overscroll-behavior-y:contain}
 *{scrollbar-width:none;-ms-overflow-style:none}*::-webkit-scrollbar{display:none}
 .screen{display:none}.screen.act{display:block}
 /* ── CHECK-IN ── */
@@ -1949,6 +1950,9 @@ document.addEventListener('visibilitychange',()=>{
 // Final safety net: save shift before ANY page unload (pull-to-refresh, close, navigation)
 window.addEventListener('beforeunload',()=>{
   if(officer&&shiftStart){saveActiveShift();saveShiftToSupabase();}
+});
+window.addEventListener('pagehide',()=>{
+  if(officer&&shiftStart)saveActiveShift();
 });
 
 async function doLogin(){
