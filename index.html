@@ -2001,25 +2001,37 @@ async function uploadDARtoDrive(record){
 }
 
 /* ── Supabase active-shift persistence ── */
-async function saveShiftToSupabase(){
-  console.log('saving shift to supabase', officer, shiftStart);
-  if(!window._supabase||!officer||!shiftStart)return;
-  try{
-    if(!_supabaseUserId){
-      const{data:{user}}=await window._supabase.auth.getUser();
-      if(!user)return;
-      _supabaseUserId=user.id;
+async function saveShiftToSupabase() {
+  try {
+    if (!officer || !shiftStart) {
+      alert('saveShiftToSupabase: no officer or shiftStart — skipping');
+      return;
     }
-    await window._supabase.from('active_shifts').upsert({
-      supabase_user_id:_supabaseUserId,
-      officer_name:officer,
-      shift_id:shiftId,
-      shift_start:shiftStart.toISOString(),
-      dar_entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),
-      stats,
-      updated_at:new Date().toISOString()
-    },{onConflict:'supabase_user_id'});
-  }catch(e){console.warn('saveShiftToSupabase error:',e.message);}
+    alert('saveShiftToSupabase: attempting save for ' + officer);
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) {
+      alert('saveShiftToSupabase: no session found — cannot save');
+      return;
+    }
+    alert('saveShiftToSupabase: session found, user id = ' + session.user.id);
+    const { error } = await window._supabase
+      .from('active_shifts')
+      .upsert({
+        user_id: session.user.id,
+        officer_name: officer,
+        shift_start: shiftStart.toISOString(),
+        dar_entries: darEntries || [],
+        stats: stats || {},
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+    if (error) {
+      alert('saveShiftToSupabase ERROR: ' + error.message + ' | code: ' + error.code);
+    } else {
+      alert('saveShiftToSupabase: SUCCESS — shift saved to Supabase');
+    }
+  } catch (e) {
+    alert('saveShiftToSupabase EXCEPTION: ' + e.message);
+  }
 }
 async function loadShiftFromSupabase(){
   try{
