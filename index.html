@@ -1420,7 +1420,7 @@ function finalizeShift(){if(stepTracking)stopStepTracking();const endTime=new Da
   const _bkEl=document.getElementById('eos-backup-status');
   if(_bkEl){_bkEl.textContent='DAR saved locally. Uploading to Drive…';_bkEl.style.color='';}
   uploadDARtoDrive(_shiftRecord);
-  if(window._supabase&&_supabaseUserId){window._supabase.from('active_shifts').delete().eq('supabase_user_id',_supabaseUserId).then(({error})=>{if(error)console.warn('Supabase shift delete error:',error.message);});}
+  clearShiftFromSupabase();
   _supabaseUserId=null;
   clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();showScreen('eos');}
 function returnToCheckin(){
@@ -1814,135 +1814,76 @@ const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwg
 let _shiftRestored=false;
 let _supabaseUserId=null; // cached Supabase user ID — set on login/restore, cleared on end-shift
 
-function _initApp(){
-  // Apply dark mode immediately
+async function _initApp(){
+  // 1. Apply dark mode immediately
   const appEl=document.getElementById('app');
   if(appEl)appEl.classList.add('dark');
   document.body.style.background='#1a1a1a';
 
-  // Try to restore an active shift — fully synchronous, no network needed
-  const restored=restoreActiveShift();
-  if(restored){
+  // 2. Initialize Supabase first — always, before any routing decision
+  try{
+    window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+  }catch(e){console.warn('Supabase init failed:',e);}
+
+  // 3. Check Supabase auth session
+  let session=null;
+  try{
+    const{data}=await window._supabase.auth.getSession();
+    session=data.session;
+  }catch(e){console.warn('Auth check failed:',e);}
+
+  // 4. No session = go to login, full stop
+  if(!session){showScreen('login');return;}
+  _supabaseUserId=session.user.id;
+
+  // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
+  const remoteShift=await loadShiftFromSupabase();
+  if(remoteShift&&remoteShift.officer_name&&remoteShift.shift_start){
+    officer=remoteShift.officer_name;
+    shiftId=remoteShift.shift_id||('shift-'+Date.now());
+    shiftStart=new Date(remoteShift.shift_start);
+    darLog=(remoteShift.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
+    stats=remoteShift.stats||{patrols:0,nm:0,checks:0};
+    stepCount=0;reachedMilestones=new Set();
+    _applyOfficerToUI(officer);
+    ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
+    const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+    updateStepDisplay();
+    clearInterval(timerInt);
+    timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
+    saveActiveShift(); // re-hydrate localStorage cache from Supabase data
     _shiftRestored=true;
-    // Shift is live — init Supabase silently in background for future writes only.
-    // IMPORTANT: we must never call showScreen() here — the shift is already showing.
-    setTimeout(async()=>{
-      try{
-        window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-        const{data:{session}}=await window._supabase.auth.getSession();
-        if(session){_supabaseUserId=session.user.id;saveShiftToSupabase();}
-      }catch(e){console.warn('Background auth:',e);}
-    },2000);
-    return; // ← early return: do NOT fall through to the Supabase auth check below
+    showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();
+    return;
   }
 
-  _shiftRestored=false;
+  // 6. No remote shift — try localStorage as fallback (offline / Supabase unreachable)
+  const localRestored=restoreActiveShift();
+  if(localRestored){
+    _shiftRestored=true;
+    saveShiftToSupabase(); // back up to Supabase now that we have a session
+    return;
+  }
 
-  // No active shift — check Supabase session to decide login vs checkin
-  (async()=>{
-    try{
-      window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-      const {data:{session}}=await window._supabase.auth.getSession();
-      // Double-check: if a shift was restored while we were awaiting, don't navigate
-      if(_shiftRestored)return;
-      if(session){
-        _supabaseUserId=session.user.id;
-        // No local shift found — check Supabase for an active shift row
-        try{
-          const{data:row}=await window._supabase
-            .from('active_shifts').select('*')
-            .eq('supabase_user_id',_supabaseUserId).maybeSingle();
-          if(_shiftRestored)return;
-          if(row&&row.officer_name&&row.shift_start){
-            // Restore shift state from Supabase
-            officer=row.officer_name;
-            shiftId=row.shift_id||('shift-'+Date.now());
-            shiftStart=new Date(row.shift_start);
-            darLog=(row.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
-            stats=row.stats||{patrols:0,nm:0,checks:0};
-            stepCount=0;reachedMilestones=new Set();
-            _applyOfficerToUI(officer);
-            ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
-            const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
-            updateStepDisplay();
-            timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
-            saveActiveShift(); // re-hydrate localStorage from Supabase data
-            _shiftRestored=true;
-            showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();
-          }else{
-            showScreen('checkin');
-            if(_pendingOfficer){setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);}
-          }
-        }catch(rowErr){
-          console.warn('Supabase shift restore error:',rowErr.message);
-          if(_shiftRestored)return;
-          showScreen('checkin');
-          if(_pendingOfficer){setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);}
-        }
-      }else{
-        showScreen('login');
-      }
-    }catch(e){
-      console.warn('Supabase init:',e);
-      if(_shiftRestored)return;
-      // Offline or error — if saved officer exists go to checkin, else login
-      if(_pendingOfficer){
-        showScreen('checkin');
-        setTimeout(()=>{
-          const sel=document.getElementById('ci-sel');
-          if(sel){sel.value=_pendingOfficer;ciReady();}
-          _pendingOfficer=null;
-        },100);
-      }else{
-        showScreen('login');
-      }
-    }
-  })();
+  // 7. No shift anywhere — go to check-in
+  showScreen('checkin');
+  if(_pendingOfficer){
+    setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);
+  }
 }
 
 window.addEventListener('DOMContentLoaded', _initApp);
 
 // Android pull-to-refresh and tab-switching can trigger pageshow / visibilitychange
 // without a full reload. Re-check and restore the shift if needed.
-window.addEventListener('pageshow', (e)=>{
-  const raw=localStorage.getItem('active_shift');
-  if(e.persisted){
-    // Page restored from bfcache (back/forward cache) — JS state may be stale
-    if(raw && !officer){
-      // Shift data exists but in-memory state was lost — do a full re-init
-      _shiftRestored=false;
-      _initApp();
-    } else if(raw && officer && shiftStart){
-      // State is intact — just make sure we're on the main screen
-      showScreen('main');
-      showPane('home', null);
-    }
-  } else {
-    // Normal (non-bfcache) page show — safety net in case DOMContentLoaded
-    // fired but _initApp() didn't finish restoring the shift yet.
-    if(raw && !officer && !_shiftRestored){
-      _initApp();
-    }
+window.addEventListener('pageshow',(e)=>{
+  if(e.persisted&&!officer){
+    _initApp();
   }
 });
 
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'){
-    const raw=localStorage.getItem('active_shift');
-    if(raw && !officer){
-      // Came back to the tab/app and lost in-memory state — re-init
-      _shiftRestored=false;
-      _initApp();
-    } else if(raw && officer && shiftStart){
-      // Shift is fine — ensure we didn't drift to checkin or login screen
-      const activeScreen=document.querySelector('.screen.act');
-      if(activeScreen && (activeScreen.id==='screen-checkin' || activeScreen.id==='screen-login')){
-        showScreen('main');
-        showPane('home',null);
-      }
-    }
-  } else {
-    // App going to background — flush shift state to localStorage and Supabase
+  if(document.visibilityState==='hidden'){
     if(officer&&shiftStart){saveActiveShift();saveShiftToSupabase();}
   }
 });
@@ -1985,18 +1926,24 @@ async function doLogin(){
 /* ── Google Drive upload via Service Account ── */
 async function getServiceAccountToken(){
   const now=Math.floor(Date.now()/1000);
-  const b64u=s=>btoa(s).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  const b64u=s=>btoa(unescape(encodeURIComponent(s))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
   const header=b64u(JSON.stringify({alg:'RS256',typ:'JWT'}));
   const claim=b64u(JSON.stringify({iss:SA_EMAIL,scope:'https://www.googleapis.com/auth/drive.file',aud:'https://oauth2.googleapis.com/token',exp:now+3600,iat:now}));
   const unsigned=header+'.'+claim;
   const keyData=SA_KEY.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g,'').replace(/\s/g,'');
   const binaryKey=Uint8Array.from(atob(keyData),c=>c.charCodeAt(0));
   const cryptoKey=await crypto.subtle.importKey('pkcs8',binaryKey.buffer,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,new TextEncoder().encode(unsigned));
-  const sigB64=btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  const sigBuf=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,new TextEncoder().encode(unsigned));
+  const sigBytes=new Uint8Array(sigBuf);
+  let sigBin='';for(let i=0;i<sigBytes.length;i++)sigBin+=String.fromCharCode(sigBytes[i]);
+  const sigB64=btoa(sigBin).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
   const jwt=unsigned+'.'+sigB64;
   const resp=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+jwt});
   const data=await resp.json();
+  if(!data.access_token){
+    const msg=data.error_description||data.error||'unknown token error';
+    throw new Error('OAuth token failed: '+msg);
+  }
   return data.access_token;
 }
 
@@ -2041,14 +1988,15 @@ async function uploadDARtoDrive(record){
       console.log('DAR saved to Drive:',fname);
       if(bkEl){bkEl.textContent='✓ DAR backed up to Google Drive';bkEl.style.color='#4ea06e';}
     }else{
-      const err=await res.text();
-      console.warn('Drive upload failed:',err);
-      if(bkEl){bkEl.textContent='⚠ Drive backup failed — DAR saved locally';bkEl.style.color='var(--text-warning)';}
+      let errDetail='';
+      try{const j=await res.json();errDetail=j.error?.message||j.error_description||JSON.stringify(j);}catch{errDetail=await res.text().catch(()=>'');}
+      console.warn('Drive upload failed (HTTP '+res.status+'):',errDetail);
+      if(bkEl){bkEl.textContent='⚠ Drive backup failed ('+res.status+'): '+errDetail.slice(0,80);bkEl.style.color='var(--text-warning)';}
     }
   }catch(e){
     console.warn('Drive upload error:',e.message);
     const bkEl=document.getElementById('eos-backup-status');
-    if(bkEl){bkEl.textContent='⚠ Drive backup failed — DAR saved locally';bkEl.style.color='var(--text-warning)';}
+    if(bkEl){bkEl.textContent='⚠ '+e.message.slice(0,100);bkEl.style.color='var(--text-warning)';}
   }
 }
 
@@ -2071,6 +2019,28 @@ async function saveShiftToSupabase(){
       updated_at:new Date().toISOString()
     },{onConflict:'supabase_user_id'});
   }catch(e){console.warn('saveShiftToSupabase error:',e.message);}
+}
+async function loadShiftFromSupabase(){
+  try{
+    if(!window._supabase)return null;
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session)return null;
+    _supabaseUserId=session.user.id;
+    const{data,error}=await window._supabase
+      .from('active_shifts').select('*')
+      .eq('supabase_user_id',session.user.id).maybeSingle();
+    if(error||!data)return null;
+    return data;
+  }catch(e){console.warn('loadShiftFromSupabase failed:',e.message);return null;}
+}
+async function clearShiftFromSupabase(){
+  try{
+    if(!window._supabase)return;
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session)return;
+    await window._supabase.from('active_shifts').delete()
+      .eq('supabase_user_id',session.user.id);
+  }catch(e){console.warn('clearShiftFromSupabase failed:',e.message);}
 }
 
 </script>
