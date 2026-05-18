@@ -1296,6 +1296,9 @@ function loadStorage(){try{const d=localStorage.getItem('dar_history');if(d)darH
 function saveStorage(){try{localStorage.setItem('dar_history',JSON.stringify(darHistory));}catch(e){}try{localStorage.setItem('pass_downs',JSON.stringify(passDowns));}catch(e){}}
 function saveActiveShift(){
   if(!officer||!shiftStart)return;
+  // Always save the officer name first — even if the full payload fails,
+  // this ensures the check-in screen can pre-select the right name.
+  try{localStorage.setItem('current_officer',officer);}catch(e){}
   try{
     const payload={
       officer,
@@ -1308,7 +1311,6 @@ function saveActiveShift(){
       nmReports
     };
     localStorage.setItem('active_shift',JSON.stringify(payload));
-    localStorage.setItem('current_officer',officer);
   }catch(e){console.warn('saveActiveShift error:',e);}
 }
 function clearActiveShift(){
@@ -1358,7 +1360,8 @@ function restoreActiveShift(){
     return false;
   }catch(e){
     console.warn('restoreActiveShift error:',e);
-    clearActiveShift();
+    // Do NOT call clearActiveShift() here — preserve whatever was saved.
+    // Only finalizeShift() (End Shift button) should ever clear this.
     return false;
   }
 }
@@ -1848,9 +1851,9 @@ window.addEventListener('DOMContentLoaded', _initApp);
 // Android pull-to-refresh and tab-switching can trigger pageshow / visibilitychange
 // without a full reload. Re-check and restore the shift if needed.
 window.addEventListener('pageshow', (e)=>{
-  // e.persisted = true means page was restored from bfcache (back/forward cache)
+  const raw=localStorage.getItem('active_shift');
   if(e.persisted){
-    const raw=localStorage.getItem('active_shift');
+    // Page restored from bfcache (back/forward cache) — JS state may be stale
     if(raw && !officer){
       // Shift data exists but in-memory state was lost — do a full re-init
       _shiftRestored=false;
@@ -1859,6 +1862,12 @@ window.addEventListener('pageshow', (e)=>{
       // State is intact — just make sure we're on the main screen
       showScreen('main');
       showPane('home', null);
+    }
+  } else {
+    // Normal (non-bfcache) page show — safety net in case DOMContentLoaded
+    // fired but _initApp() didn't finish restoring the shift yet.
+    if(raw && !officer && !_shiftRestored){
+      _initApp();
     }
   }
 });
@@ -1871,9 +1880,9 @@ document.addEventListener('visibilitychange',()=>{
       _shiftRestored=false;
       _initApp();
     } else if(raw && officer && shiftStart){
-      // Shift is fine — ensure we didn't drift to checkin screen
+      // Shift is fine — ensure we didn't drift to checkin or login screen
       const activeScreen=document.querySelector('.screen.act');
-      if(activeScreen && activeScreen.id==='screen-checkin'){
+      if(activeScreen && (activeScreen.id==='screen-checkin' || activeScreen.id==='screen-login')){
         showScreen('main');
         showPane('home',null);
       }
