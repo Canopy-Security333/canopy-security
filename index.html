@@ -2027,18 +2027,27 @@ async function saveShiftToSupabase() {
     console.warn('saveShiftToSupabase exception:', e.message);
   }
 }
-async function loadShiftFromSupabase(){
-  try{
-    if(!window._supabase)return null;
-    const{data:{session}}=await window._supabase.auth.getSession();
-    if(!session)return null;
-    _supabaseUserId=session.user.id;
-    const{data,error}=await window._supabase
-      .from('active_shifts').select('*')
-      .eq('supabase_user_id',session.user.id).maybeSingle();
-    if(error||!data)return null;
+async function loadShiftFromSupabase() {
+  try {
+    alert('loadShiftFromSupabase: starting');
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) {
+      alert('loadShiftFromSupabase: no session — returning null');
+      return null;
+    }
+    alert('loadShiftFromSupabase: session found — querying active_shifts for user ' + session.user.id);
+    const { data, error } = await window._supabase
+      .from('active_shifts')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    alert('loadShiftFromSupabase: query result — data:' + JSON.stringify(data) + ' error:' + JSON.stringify(error));
+    if (error || !data) return null;
     return data;
-  }catch(e){console.warn('loadShiftFromSupabase failed:',e.message);return null;}
+  } catch (e) {
+    alert('loadShiftFromSupabase EXCEPTION: ' + e.message);
+    return null;
+  }
 }
 async function clearShiftFromSupabase(){
   try{
