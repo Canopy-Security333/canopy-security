@@ -680,6 +680,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
   </div>
 </div>
 
+<div class="modal-backdrop" id="pavilion-modal-backdrop">
+  <div class="modal">
+    <div class="modal-title">Pavilion Patrol</div>
+    <div class="modal-sub">QR scanned successfully. Add any additional notes below.</div>
+    <div style="position:relative">
+      <textarea class="modal-textarea" id="pavilion-notes" placeholder="Additional notes (optional)…" style="padding-right:44px"></textarea>
+      <button id="pavilion-mic-btn" class="mic-btn" onclick="togglePavilionMic()" style="position:absolute;bottom:20px;right:8px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="11" rx="3"/>
+          <path d="M5 10a7 7 0 0 0 14 0M12 19v3M8 22h8"/>
+        </svg>
+      </button>
+    </div>
+    <button class="modal-primary-btn" onclick="submitPavilionPatrol()">Log Patrol</button>
+    <button class="modal-secondary-btn" onclick="closePavilionModal()">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="riser-closed-modal-backdrop">
+  <div class="modal">
+    <div class="modal-title" style="color:var(--text-danger)">🚨 Valve Found CLOSED</div>
+    <div class="modal-sub">A Near Miss report has been submitted. You must follow up with facilities immediately to confirm they are aware of the closed valve.</div>
+    <div style="background:var(--bg-danger);border:0.5px solid rgba(226,75,74,.3);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--text-danger);line-height:1.6">
+      ⚠️ In most cases a closed valve means facilities is performing fire system work and is already aware. However, always verify directly with facilities before leaving the area.
+    </div>
+    <a href="tel:+18014204789" class="facilities-btn" style="margin-bottom:8px;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px;font-size:14px;font-family:inherit;font-weight:600;background:var(--red);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2h4l1.5 4-2.5 1.5a10 10 0 0 0 3.5 3.5L10 8.5l4 1.5v4a1 1 0 0 1-1 1A14 14 0 0 1 1 3a1 1 0 0 1 1-1z"/></svg>
+      Call Cody Holt — Facilities
+    </a>
+    <button class="modal-secondary-btn" onclick="closeRiserClosedModal()">I have notified facilities</button>
+  </div>
+</div>
+
 <!-- QR SCANNER MODAL -->
 <div id="qr-scanner-modal" style="display:none;position:fixed;inset:0;z-index:200;background:#000;max-width:430px;margin:0 auto;flex-direction:column">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(0,0,0,.7);flex-shrink:0">
@@ -874,6 +907,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <span id="bp-count" style="display:none"></span>
     <div id="bp-list" style="margin-bottom:8px"></div>
 
+    <div class="lbl" style="margin-top:16px">Pavilion</div>
+    <button class="scan-patrol-btn" onclick="scanPavilion()" id="pavilion-scan-btn">
+      <div class="scan-patrol-icon" style="background:var(--bg-info)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-info)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M17 21h3M21 17v3"/>
+        </svg>
+      </div>
+      <div class="scan-patrol-text">
+        <div class="scan-patrol-title">Scan Pavilion QR</div>
+        <div class="scan-patrol-sub" id="pavilion-scan-sub">Tap to scan and log patrol</div>
+      </div>
+      <div class="scan-patrol-count" id="pavilion-scan-count"></div>
+    </button>
+
     <div class="lbl" style="display:flex;align-items:center;gap:8px">Boiler room checks <span class="seasonal-badge">Nov – Apr only</span></div>
     <div class="patrol-card" style="margin-bottom:8px">
       <div class="patrol-hdr" onclick="togglePatrol('boiler')">
@@ -885,6 +933,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div id="boiler-list"></div>
       </div>
     </div>
+
+    <div class="lbl" style="margin-top:16px">
+      Fire Risers
+      <span id="riser-count" style="font-size:10px;font-weight:500;color:var(--text-secondary);margin-left:8px;text-transform:none;letter-spacing:0">0/4 checked</span>
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);margin:-4px 0 8px;font-style:italic">Verify main sprinkler valve is OPEN at each building. Check weekly.</div>
+    <div id="riser-list"></div>
+    <div id="riser-toast" class="toast">✓ Fire riser check logged</div>
 
     <div class="lbl">Monthly meter readings</div>
     <div class="patrol-card" style="margin-bottom:8px">
@@ -962,6 +1018,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         </div>
       </div>
     </div>
+    <div class="lbl" style="margin-top:16px">
+      Fire Risers
+      <span id="riser-count" style="font-size:10px;font-weight:500;color:var(--text-secondary);margin-left:8px;text-transform:none;letter-spacing:0">0/4 checked</span>
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);margin:-4px 0 8px;font-style:italic">Verify main sprinkler valve is OPEN at each building. Check weekly.</div>
+    <div id="riser-list"></div>
+    <div id="riser-toast" class="toast">✓ Fire riser check logged</div>
     <div class="meters-section">
       <div class="lbl">Monthly meter readings</div>
       <div class="patrol-card">
@@ -1275,10 +1338,10 @@ function showPane(id,btn){
   p.classList.add('act');
   if(id==='dar'){renderCurrentDAR();renderHistory();populateSearchOfficers();}
   if(id==='home'){renderBP();renderDCPatrol();renderBunkerPatrol();updateHomePatrolCounts();updateHomeTiles();}
-  if(id==='home-bp'){renderBP();renderBoiler();renderMeters();updateFEEntryCard();}
+  if(id==='home-bp'){renderBP();renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='reports'){updateReportsTiles();}
   if(id==='keys'){}
-  if(id==='patrols'){renderBoiler();renderMeters();updateFEEntryCard();}
+  if(id==='patrols'){renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='nearmiss')renderNMList();
   if(id==='passdowns')renderPassDownsPage();
   if(id==='fe-schedule')renderFESchedule();
@@ -1597,7 +1660,12 @@ function logDCPatrol(){openQRScanner({title:'Scan QR — Data Center',sub:'Point
 function renderBunkerPatrol(){const n=bkrPatrol.scans.length;const el=document.getElementById('bunker-count');if(el)el.textContent=n>0?n+' round'+(n!==1?'s':''):'';}
 function _doLogBunker(){const round=bkrPatrol.scans.length+1;const time=fmt(new Date());bkrPatrol.scans.push(time);addEntry('patrol','Bunker patrol — Round '+round,'Officer '+(officer||'—')+' completed bunker patrol round '+round+'.');stats.patrols++;updateStats();renderBunkerPatrol();showToast('bunker-toast','✓ Round '+round+' logged');window.open(PDC_URL,'_blank','noopener');}
 function logBunkerPatrol(){openQRScanner({title:'Scan QR — Bunker',sub:'Point at the Bunker QR code',token:'https://rounds.platinumdatacenters.com',wrongMsg:'Wrong QR code. Please scan the Bunker patrol code.',successLabel:'Bunker patrol logged',successSub:'Round '+(bkrPatrol.scans.length+1)+' — logged at '+fmt(new Date()),onSuccess:_doLogBunker});}
-const ALL_QR_CODES=[{label:'Canopy 1',sublabel:'Building Patrol',token:'canopy-patrol-C1'},{label:'Canopy 3',sublabel:'Building Patrol',token:'canopy-patrol-C3'},{label:'Canopy 4',sublabel:'Building Patrol',token:'canopy-patrol-C4'},{label:'Canopy 5',sublabel:'Building Patrol',token:'canopy-patrol-C5'},{label:'Canopy 1',sublabel:'Boiler Room Check',token:'canopy-boiler-C1'},{label:'Canopy 3',sublabel:'Boiler Room Check',token:'canopy-boiler-C3'},{label:'Canopy 5',sublabel:'Boiler Room Check',token:'canopy-boiler-C5'},{label:'Data Center',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'Bunker',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'UPS / West',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-W'},{label:'UPS / East',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-E'},{label:'PDU 11',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU11'},{label:'PDU 12',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU12'},{label:'AC',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-AC'},{label:'2H AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2HAC'},{label:'3 Lab AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-3LAB'},{label:'AC 2FL So. IDF',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-AC2FL'},{label:'2LEW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LEW'},{label:'2LDW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LDW'},{label:'2LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LCW'},{label:'2LBW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LBW'},{label:'1LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1LCW'},{label:'1 S. IDF PW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIDF'},{label:'1 S. IDF AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIAC'}];
+const ALL_QR_CODES=[{label:'Canopy 1',sublabel:'Building Patrol',token:'canopy-patrol-C1'},{label:'Canopy 3',sublabel:'Building Patrol',token:'canopy-patrol-C3'},{label:'Canopy 4',sublabel:'Building Patrol',token:'canopy-patrol-C4'},{label:'Canopy 5',sublabel:'Building Patrol',token:'canopy-patrol-C5'},{label:'Canopy 1',sublabel:'Boiler Room Check',token:'canopy-boiler-C1'},{label:'Canopy 3',sublabel:'Boiler Room Check',token:'canopy-boiler-C3'},{label:'Canopy 5',sublabel:'Boiler Room Check',token:'canopy-boiler-C5'},{label:'Data Center',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'Bunker',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'UPS / West',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-W'},{label:'UPS / East',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-E'},{label:'PDU 11',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU11'},{label:'PDU 12',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU12'},{label:'AC',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-AC'},{label:'2H AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2HAC'},{label:'3 Lab AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-3LAB'},{label:'AC 2FL So. IDF',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-AC2FL'},{label:'2LEW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LEW'},{label:'2LDW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LDW'},{label:'2LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LCW'},{label:'2LBW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LBW'},{label:'1LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1LCW'},{label:'1 S. IDF PW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIDF'},{label:'1 S. IDF AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIAC'},
+{token:'canopy-pavilion',label:'Pavilion',sublabel:'Pavilion Area Patrol'},
+{token:'canopy-riser-C1',label:'Fire Riser — C1',sublabel:'Canopy 1 Main Sprinkler Valve'},
+{token:'canopy-riser-C3',label:'Fire Riser — C3',sublabel:'Canopy 3 Main Sprinkler Valve'},
+{token:'canopy-riser-C4',label:'Fire Riser — C4',sublabel:'Canopy 4 Main Sprinkler Valve'},
+{token:'canopy-riser-C5',label:'Fire Riser — C5',sublabel:'Canopy 5 Main Sprinkler Valve'}];
 let qrSelectMode=false;
 const qrSelected=new Set();
 function renderAdminQRGrid(){
@@ -1673,6 +1741,19 @@ function setBoilerAlarm(i,val){boilerCP[i].alarm=val;if(!val)boilerCP[i].afterRe
 function setBoilerAfterReset(i,val){boilerCP[i].afterReset=val;renderBoiler();}
 function saveBoiler(i){const c=boilerCP[i];if(!c.temp||c.alarm===null)return;if(c.alarm===true&&c.afterReset===null)return;const checkNum=c.checks.length+1;const time=fmt(new Date());let detail='Temp: '+c.temp+'°F. ';let alarmSummary='No alarms';if(c.alarm===false){detail+='No alarms.';}else if(c.afterReset===false){detail+='Alarm present — reset performed, alarm cleared.';alarmSummary='Alarm — cleared after reset';}else if(c.afterReset===true){detail+='Alarm present — reset performed, alarm STILL ACTIVE. Facilities contacted.';alarmSummary='⚠ Alarm still active';}c.checks.push({time,temp:c.temp,alarmSummary});addEntry('boiler','Boiler check #'+checkNum+' — '+c.building,detail);stats.patrols++;updateStats();c.scanned=false;c.saved=false;c.temp='';c.alarm=null;c.afterReset=null;renderBoiler();showToast('boiler-toast','✓ '+c.building+' check #'+checkNum+' logged');}
 function togglePatrol(id){const body=document.getElementById(id+'-body');const chev=document.getElementById(id+'-chev');if(body)body.classList.toggle('open');if(chev)chev.classList.toggle('open');}
+let pavilionPatrolCount=0;
+let pavilionMicRecognition=null;
+let pavilionMicActive=false;
+function scanPavilion(){openQRScanner({title:'Scan Pavilion QR',sub:'Point at the Pavilion area QR code',token:'canopy-pavilion',wrongMsg:'Wrong QR code. Please scan the Pavilion code.',successLabel:'Pavilion QR scanned',successSub:'Add notes and log patrol',onSuccess:()=>{document.getElementById('pavilion-notes').value='';document.getElementById('pavilion-modal-backdrop').classList.add('open');}});}
+function closePavilionModal(){document.getElementById('pavilion-modal-backdrop').classList.remove('open');if(pavilionMicActive)togglePavilionMic();}
+function submitPavilionPatrol(){const notes=document.getElementById('pavilion-notes').value.trim();const detail='Pavilion area patrol completed.'+(notes?' '+notes:'');addEntry('patrol','Pavilion patrol',detail);pavilionPatrolCount++;stats.patrols++;updateStats();saveActiveShift();saveShiftToSupabase();const countEl=document.getElementById('pavilion-scan-count');if(countEl)countEl.textContent=pavilionPatrolCount+'x';const subEl=document.getElementById('pavilion-scan-sub');if(subEl)subEl.textContent='Last patrol: '+fmt(new Date());closePavilionModal();showToast('patrol-toast','✓ Pavilion patrol logged');}
+function togglePavilionMic(){if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('Speech recognition is not supported in this browser.');return;}if(pavilionMicActive){if(pavilionMicRecognition)pavilionMicRecognition.stop();pavilionMicActive=false;document.getElementById('pavilion-mic-btn').classList.remove('recording');return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;pavilionMicRecognition=new SR();pavilionMicRecognition.continuous=true;pavilionMicRecognition.interimResults=false;pavilionMicRecognition.lang='en-US';pavilionMicRecognition.onresult=e=>{const transcript=Array.from(e.results).map(r=>r[0].transcript).join(' ');const ta=document.getElementById('pavilion-notes');ta.value=(ta.value+' '+transcript).trim();};pavilionMicRecognition.onerror=()=>{pavilionMicActive=false;document.getElementById('pavilion-mic-btn').classList.remove('recording');};pavilionMicRecognition.onend=()=>{pavilionMicActive=false;document.getElementById('pavilion-mic-btn').classList.remove('recording');};pavilionMicRecognition.start();pavilionMicActive=true;document.getElementById('pavilion-mic-btn').classList.add('recording');}
+const riserCP=[{id:'riser-C1',building:'Canopy 1',token:'canopy-riser-C1'},{id:'riser-C3',building:'Canopy 3',token:'canopy-riser-C3'},{id:'riser-C4',building:'Canopy 4',token:'canopy-riser-C4'},{id:'riser-C5',building:'Canopy 5',token:'canopy-riser-C5'}].map(c=>({...c,scanned:false,valveStatus:'open',saved:false}));
+function renderRisers(){const checked=riserCP.filter(r=>r.saved).length;const countEl=document.getElementById('riser-count');if(countEl)countEl.textContent=checked+'/'+riserCP.length+' checked';const list=document.getElementById('riser-list');if(!list)return;list.innerHTML=riserCP.map((r,i)=>{const formHtml=r.scanned&&!r.saved?`<div class="boiler-form"><div class="boiler-form-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 2v4M8 10v4M2 8h4M10 8h4"/></svg>${r.building} — Sprinkler Valve Status</div><div class="form-group" style="margin-bottom:0"><label>Main sprinkler valve is:</label><div class="boiler-yn-row"><button class="yn-btn no ${r.valveStatus==='open'?'active':''}" onclick="setRiserValve(${i},'open')">✓ Open</button><button class="yn-btn yes ${r.valveStatus==='closed'?'active':''}" onclick="setRiserValve(${i},'closed')">✗ Closed</button></div></div><button onclick="saveRiser(${i})" style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer">Save &amp; log to DAR</button></div>`:'';return`<div class="patrol-card" id="rcard-${i}"><div class="patrol-hdr" style="padding:11px 12px;display:flex;align-items:center;justify-content:space-between"><div><div class="patrol-title">${r.building} — Fire Riser</div><div class="patrol-meta">${r.saved?'✓ Valve confirmed open':r.scanned?'QR scanned — select valve status':'Pending — scan QR to begin'}</div></div><div style="display:flex;align-items:center;gap:8px">${r.saved?'<span style="font-size:18px">✅</span>':''}${!r.saved?`<button class="cp-btn" onclick="scanRiser(${i})">Scan QR</button>`:''}</div></div>${formHtml}</div>`;}).join('');}
+function scanRiser(i){const r=riserCP[i];openQRScanner({title:'Scan QR — '+r.building+' Fire Riser',sub:'Point at the '+r.building+' fire riser QR code',token:r.token,wrongMsg:'Wrong QR code. Please scan the '+r.building+' fire riser code.',successLabel:r.building+' fire riser scanned',successSub:'Confirm valve status below',onSuccess:()=>{riserCP[i].scanned=true;riserCP[i].valveStatus='open';renderRisers();}});}
+function setRiserValve(i,val){riserCP[i].valveStatus=val;renderRisers();}
+function saveRiser(i){const r=riserCP[i];const isOpen=r.valveStatus==='open';const detail=r.building+' main sprinkler valve: '+(isOpen?'OPEN — no issues.':'CLOSED — Near Miss filed, facilities notified.');addEntry('patrol','Fire riser check — '+r.building,detail);stats.patrols++;updateStats();riserCP[i].saved=true;riserCP[i].scanned=false;renderRisers();if(!isOpen){const nmReport={id:'nm-'+Date.now(),officer,building:r.building,cats:['safety','facilities'],desc:'Fire sprinkler main valve found CLOSED during weekly riser check. Facilities contacted to verify awareness.',photo:null,time:new Date().toISOString(),status:'open'};nmReports.unshift(nmReport);nmHistory.unshift(nmReport);saveNMHistory();saveNearMissToSupabase(nmReport);stats.nm++;updateStats();document.getElementById('riser-closed-modal-backdrop').classList.add('open');}else{showToast('riser-toast','✓ '+r.building+' fire riser logged');}saveActiveShift();saveShiftToSupabase();}
+function closeRiserClosedModal(){document.getElementById('riser-closed-modal-backdrop').classList.remove('open');showToast('riser-toast','✓ Fire riser check logged — Near Miss filed');}
 const METER_HISTORY_DATES=['5/24/25','6/24/25','7/25/25','8/24/25','9/21/25','10/20/25','11/23/25','12/22/25','1/27/26','2/23/26','3/23/26','4/20/26'];
 const meters=[{id:'C1-UPS-W',building:'Canopy 1',name:'UPS / West',unit:'kWh',token:'canopy-meter-C1-UPS-W',history:[47788,370999,700230,97474,402002,700572,996711,208295,411910,556502,700736,831461]},{id:'C1-UPS-E',building:'Canopy 1',name:'UPS / East',unit:'kWh',token:'canopy-meter-C1-UPS-E',history:[910811,193760,478233,815250,85555,354630,917568,798346,965051,76420,185920,280603]},{id:'C1-PDU11',building:'Canopy 1',name:'PDU 11',unit:'kWh',token:'canopy-meter-C1-PDU11',history:[449260,449304,449304,449326,449344,449363,449388,449408,449431,449449,449467,449485]},{id:'C1-PDU12',building:'Canopy 1',name:'PDU 12',unit:'kWh',token:'canopy-meter-C1-PDU12',history:[1212347,1212348,1212348,1212348,1212348,1212348,1212352,1212355,1212356,1212356,1212356,1212356]},{id:'C1-AC',building:'Canopy 1',name:'AC',unit:'kWh',token:'canopy-meter-C1-AC',history:[1439029,1439029,1439029,1439029,1439029,1439029,1439029,1439029,1439029,1439029,1439029,1439029]},{id:'C3-2HAC',building:'Canopy 3',name:'2H AC',unit:'kWh',token:'canopy-meter-C3-2HAC',history:[0,0,0,0,0,0,0,0,0,0,0,0]},{id:'C3-3LAB',building:'Canopy 3',name:'3 Lab AC',unit:'kWh',token:'canopy-meter-C3-3LAB',history:[13675,13700,13728,13757,13782,13807,13834,13857,13884,13906,13927,13949]},{id:'C3-AC2FL',building:'Canopy 3',name:'AC 2FL So. IDF',unit:'kWh',token:'canopy-meter-C3-AC2FL',history:[60555,60686,60843,61041,61244,61339,61583,61954,62333,62676,62941,63092]},{id:'C3-2LEW',building:'Canopy 3',name:'2LEW',unit:'kWh',token:'canopy-meter-C3-2LEW',history:[12618,13047,13475,14011,14457,14924,15473,15959,16514,19663,17374,17734]},{id:'C3-2LDW',building:'Canopy 3',name:'2LDW',unit:'kWh',token:'canopy-meter-C3-2LDW',history:[1718032,1718032,1718032,1718032,1718032,1718032,1718032,1718032,1718032,1718032,1718032,1718033]},{id:'C3-2LCW',building:'Canopy 3',name:'2LCW',unit:'kWh',token:'canopy-meter-C3-2LCW',history:[8440,8819,9164,9569,9916,10268,10666,11002,11310,11580,11870,12138]},{id:'C3-2LBW',building:'Canopy 3',name:'2LBW',unit:'kWh',token:'canopy-meter-C3-2LBW',history:[11229,11596,11957,12388,12800,13279,13833,14306,14883,15491,16210,17051]},{id:'C3-1LCW',building:'Canopy 3',name:'1LCW',unit:'kWh',token:'canopy-meter-C3-1LCW',history:[119607,119646,119688,119736,119776,119809,119809,119865,119897,119916,119924,119933]},{id:'C3-1SIDF',building:'Canopy 3',name:'1 S. IDF PW',unit:'kWh',token:'canopy-meter-C3-1SIDF',history:[231347,231347,231347,231347,231347,231347,231347,231347,231347,231347,231347,231347]},{id:'C3-1SIAC',building:'Canopy 3',name:'1 S. IDF AC',unit:'kWh',token:'canopy-meter-C3-1SIAC',history:[37274,37274,37320,37427,37470,37525,37586,37660,37790,37867,37916,37963]}].map(m=>({...m,scanned:false,reading:'',saved:false}));
 let scannedMeterIdx=null;
@@ -1689,7 +1770,7 @@ function saveNMHistory(){try{localStorage.setItem('nm_history',JSON.stringify(nm
 const nmReports=[];
 function openNMDetail(id){const r=nmHistory.find(x=>x.id===id)||nmReports.find(x=>x.id===id);if(!r)return;document.getElementById('nm-detail-title').textContent=r.building;document.getElementById('nm-detail-meta').textContent=r.officer+' · '+fmtFull(r.time);document.getElementById('nm-detail-cats').innerHTML=r.cats&&r.cats.length?r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join(''):'<span style="font-size:12px;color:var(--text-secondary)">No category</span>';document.getElementById('nm-detail-desc').textContent=r.desc;const pw=document.getElementById('nm-detail-photo-wrap');const pi=document.getElementById('nm-detail-photo');if(r.photo){pi.src=r.photo;pw.style.display='block';}else{pi.src='';pw.style.display='none';}document.getElementById('nm-detail-backdrop').style.display='block';}
 function closeNMDetail(){document.getElementById('nm-detail-backdrop').style.display='none';document.getElementById('nm-detail-photo').src='';}
-function showNMSub(id,btn){document.getElementById('nm-sub-submit').style.display=id==='submit'?'block':'none';document.getElementById('nm-sub-history').style.display=id==='history'?'block':'none';document.querySelectorAll('#pane-nearmiss .dar-tab').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history'){populateNMHistoryFilters();renderNMHistory();}}
+function showNMSub(id,btn){document.getElementById('nm-sub-submit').style.display=id==='submit'?'block':'none';document.getElementById('nm-sub-history').style.display=id==='history'?'block':'none';document.querySelectorAll('#pane-nearmiss .dar-tab').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history'){populateNMHistoryFilters();renderNMHistory();loadAllNearMissFromSupabase();}}
 function toggleCat(btn,cat,cls){const idx=activeCatsNM.indexOf(cat);if(idx>-1){activeCatsNM.splice(idx,1);btn.className='cat-pill';}else{activeCatsNM.push(cat);btn.className='cat-pill '+cls;}}
 let nmPhotoData=null;
 function openPhotoSheet(){
@@ -1728,7 +1809,119 @@ function removePhoto(){
 function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);addEntry('nearmiss','Near miss submitted – '+building,(activeCatsNM.length?activeCatsNM.join(', ')+'. ':'')+desc);stats.nm++;document.getElementById('nm-building').value='Select building...';document.getElementById('nm-desc').value='';nmPhotoData=null;removePhoto();activeCatsNM=[];document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');updateStats();renderNMList();showToast('nm-toast');}
 function renderNMList(){const camIcon='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';document.getElementById('nm-list').innerHTML=nmReports.slice(0,5).map(r=>`<div class="nm-item" onclick="openNMDetail('${r.id}')" style="cursor:pointer"><div class="nm-top"><div><div class="nm-title-text">${r.building}</div><div class="nm-meta">${r.officer} · ${fmt(r.time)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">${r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join('')}${r.photo?camIcon:''}</div></div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px">${r.desc.length>120?r.desc.slice(0,120)+'…':r.desc}</div></div>`).join('')||'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No reports yet this shift.</div>';}
 function populateNMHistoryFilters(){const sel=document.getElementById('nm-hist-month');const months=[...new Set(nmHistory.map(r=>fmtMonthYear(r.time)))];const cur=sel.value;sel.innerHTML='<option value="">All time</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');if(cur)sel.value=cur;}
-function renderNMHistory(){const mF=document.getElementById('nm-hist-month').value;const cF=document.getElementById('nm-hist-cat').value;let recs=nmHistory.filter(r=>{if(mF&&fmtMonthYear(r.time)!==mF)return false;if(cF&&!r.cats.map(c=>c.toLowerCase()).includes(cF.toLowerCase()))return false;return true;});document.getElementById('nm-hist-count').textContent=recs.length+' report'+(recs.length!==1?'s':'');const camIcon='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';document.getElementById('nm-hist-list').innerHTML=recs.length?recs.map(r=>`<div class="nm-item" onclick="openNMDetail('${r.id}')" style="cursor:pointer"><div class="nm-top"><div><div class="nm-title-text">${r.building}</div><div class="nm-meta">${r.officer} · ${fmtFull(r.time)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">${r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join('')}${r.photo?camIcon:''}</div></div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px">${r.desc.length>120?r.desc.slice(0,120)+'…':r.desc}</div></div>`).join(''):'<div class="no-results">No reports found.</div>';}
+function renderNMHistory() {
+  const mF = document.getElementById('nm-hist-month') ? document.getElementById('nm-hist-month').value : '';
+  const cF = document.getElementById('nm-hist-cat') ? document.getElementById('nm-hist-cat').value : '';
+  let recs = nmHistory.filter(r => {
+    if (mF && fmtMonthYear(r.time) !== mF) return false;
+    if (cF && !r.cats.map(c => c.toLowerCase()).includes(cF.toLowerCase())) return false;
+    return true;
+  });
+  const countEl = document.getElementById('nm-hist-count');
+  if (countEl) countEl.textContent = recs.length + ' report' + (recs.length !== 1 ? 's' : '');
+  if (!recs.length) {
+    document.getElementById('nm-hist-list').innerHTML = '<div class="no-results">No reports found.</div>';
+    return;
+  }
+  const groups = {};
+  recs.forEach(r => {
+    const month = fmtMonthYear(r.time);
+    if (!groups[month]) groups[month] = [];
+    groups[month].push(r);
+  });
+  const currentMonth = fmtMonthYear(new Date().toISOString());
+  const camIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+  let html = '';
+  Object.keys(groups).forEach(month => {
+    const isCurrentMonth = month === currentMonth;
+    const monthId = 'nm-month-' + month.replace(/\s/g, '-');
+    const reports = groups[month];
+    const openCount = reports.filter(r => r.status !== 'resolved').length;
+    const resolvedCount = reports.filter(r => r.status === 'resolved').length;
+    html += `<div style="margin-bottom:10px;border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);overflow:hidden">
+      <div onclick="toggleNMMonth('${monthId}')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--bg-secondary);cursor:pointer">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="${monthId}-chev" style="font-size:10px;color:var(--text-tertiary);transition:transform .2s;display:inline-block;${isCurrentMonth ? 'transform:rotate(90deg)' : ''}">▶</span>
+          <span style="font-size:14px;font-weight:600;color:var(--text-primary)">${month}</span>
+          <span style="font-size:11px;color:var(--text-secondary)">${reports.length} report${reports.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${openCount > 0 ? `<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg-danger);color:var(--text-danger);border:0.5px solid rgba(226,75,74,.3)">${openCount} open</span>` : ''}
+          ${resolvedCount > 0 ? `<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:var(--bg-success);color:var(--text-success);border:0.5px solid rgba(29,158,117,.3)">${resolvedCount} resolved</span>` : ''}
+        </div>
+      </div>
+      <div id="${monthId}" style="display:${isCurrentMonth ? 'block' : 'none'}">
+        ${reports.map(r => {
+          const isResolved = r.status === 'resolved';
+          return `<div style="padding:11px 14px;border-top:0.5px solid var(--border-secondary)">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${r.building}</div>
+                <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${r.officer} · ${fmtFull(r.time)}</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
+                ${r.cats.map(c => `<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join('')}
+                ${r.photo ? camIcon : ''}
+                ${isResolved
+                  ? `<span style="display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:999px;background:var(--bg-success);color:var(--text-success);border:0.5px solid rgba(29,158,117,.3)"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>Resolved</span>`
+                  : `<span style="font-size:11px;padding:3px 8px;border-radius:999px;background:var(--bg-danger);color:var(--text-danger);border:0.5px solid rgba(226,75,74,.3)">Open</span>`
+                }
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;line-height:1.5">${r.desc.length > 120 ? r.desc.slice(0, 120) + '…' : r.desc}</div>
+            ${isResolved && r.resolution_notes ? `<div style="font-size:11px;color:var(--text-success);background:var(--bg-success);border-radius:var(--radius-sm);padding:6px 8px;margin-bottom:6px">✓ ${r.resolution_notes}</div>` : ''}
+            ${isResolved
+              ? `<div style="font-size:11px;color:var(--text-secondary)">Resolved by ${r.resolved_by} · ${r.resolved_at ? fmtFull(r.resolved_at) : ''}</div>`
+              : `<div style="margin-top:8px">
+                  <input type="text" id="nm-resolve-notes-${r.id}" placeholder="Resolution notes (optional)…" style="width:100%;padding:7px 9px;font-size:12px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);margin-bottom:6px">
+                  <button onclick="resolveNearMiss('${r.id}', document.getElementById('nm-resolve-notes-${r.id}').value)" style="width:100%;padding:8px;font-size:12px;font-family:inherit;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer">✓ Mark as Resolved</button>
+                </div>`
+            }
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('nm-hist-list').innerHTML = html;
+}
+function toggleNMMonth(id) {
+  const body = document.getElementById(id);
+  const chev = document.getElementById(id + '-chev');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (chev) chev.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+}
+async function resolveNearMiss(id, notes) {
+  try {
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) return;
+    const { error } = await window._supabase
+      .from('near_miss_reports')
+      .update({
+        status: 'resolved',
+        resolved_by: officer,
+        resolved_at: new Date().toISOString(),
+        resolution_notes: notes || null
+      })
+      .eq('id', id);
+    if (error) {
+      console.warn('resolveNearMiss error:', error.message);
+      return;
+    }
+    const idx = nmHistory.findIndex(r => r.id === id);
+    if (idx > -1) {
+      nmHistory[idx].status = 'resolved';
+      nmHistory[idx].resolved_by = officer;
+      nmHistory[idx].resolved_at = new Date().toISOString();
+      nmHistory[idx].resolution_notes = notes || null;
+    }
+    saveNMHistory();
+    renderNMHistory();
+  } catch (e) {
+    console.warn('resolveNearMiss exception:', e.message);
+  }
+}
 function downloadNMReport(){const mF=document.getElementById('nm-hist-month').value;const monthLabel=mF||fmtMonthYear(new Date());const recs=nmHistory.filter(r=>!mF||fmtMonthYear(r.time)===mF);const safety=recs.filter(r=>r.cats.includes('safety')).length;const security=recs.filter(r=>r.cats.includes('security')).length;const facilities=recs.filter(r=>r.cats.includes('facilities')).length;let txt='NEAR MISS MONTHLY REPORT\n================================\n';txt+=`Period:     ${monthLabel}\nGenerated:  ${fmtFull(new Date())}\nTotal:      ${recs.length} report${recs.length!==1?'s':''}\n--------------------------------\nSafety:     ${safety}\nSecurity:   ${security}\nFacilities: ${facilities}\n================================\n\n`;recs.forEach((r,i)=>{txt+=`#${i+1}  ${fmtFull(r.time)}\n    Officer:   ${r.officer}\n    Location:  ${r.building}\n    Category:  ${r.cats.length?r.cats.join(', '):'None'}\n    Details:   ${r.desc}\n\n`;});txt+='================================\nEnd of report';const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='NearMiss_'+monthLabel.replace(/\s/g,'_')+'.txt';a.click();URL.revokeObjectURL(url);}
 function autoStartSteps(){if(typeof DeviceMotionEvent==='undefined')return;if(typeof DeviceMotionEvent.requestPermission==='function'){setStepUI('inactive','Tap Enable to start step tracking');}else{startStepTracking();}}
 function toggleStepTracking(){if(stepTracking){stopStepTracking();return;}if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')startStepTracking();else setStepUI('denied','Motion access denied');}).catch(()=>setStepUI('denied','Permission error'));}else{startStepTracking();}}
@@ -2091,6 +2284,34 @@ async function loadNearMissFromSupabase() {
     saveNMHistory();
   } catch (e) {
     console.warn('loadNearMissFromSupabase exception:', e.message);
+  }
+}
+async function loadAllNearMissFromSupabase() {
+  try {
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) return;
+    const { data, error } = await window._supabase
+      .from('near_miss_reports')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+    if (error || !data) return;
+    nmHistory = data.map(r => ({
+      id: r.id,
+      officer: r.officer_name,
+      building: r.building,
+      cats: r.categories || [],
+      desc: r.description,
+      photo: r.photo || null,
+      time: new Date(r.submitted_at).toISOString(),
+      status: r.status || 'open',
+      resolved_by: r.resolved_by || null,
+      resolved_at: r.resolved_at || null,
+      resolution_notes: r.resolution_notes || null
+    }));
+    saveNMHistory();
+    renderNMHistory();
+  } catch (e) {
+    console.warn('loadAllNearMissFromSupabase exception:', e.message);
   }
 }
 
