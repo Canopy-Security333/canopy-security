@@ -1833,12 +1833,13 @@ async function _initApp(){
   }catch(e){console.warn('Auth check failed:',e);}
 
   // 4. No session = go to login, full stop
-  if(!session){showScreen('login');return;}
+  if(!session){alert('_initApp: no session — calling showScreen(login)');showScreen('login');alert('_initApp: showScreen(login) called');return;}
   _supabaseUserId=session.user.id;
 
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
   const remoteShift=await loadShiftFromSupabase();
   if(remoteShift&&remoteShift.officer_name&&remoteShift.shift_start){
+    alert('Supabase restore found — officer: ' + remoteShift.officer_name);
     officer=remoteShift.officer_name;
     shiftId=remoteShift.shift_id||('shift-'+Date.now());
     shiftStart=new Date(remoteShift.shift_start);
@@ -1853,7 +1854,9 @@ async function _initApp(){
     timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
     saveActiveShift(); // re-hydrate localStorage cache from Supabase data
     _shiftRestored=true;
+    alert('_initApp: about to showScreen(main) after Supabase restore');
     showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();
+    alert('_initApp: showScreen(main) called after Supabase restore');
     return;
   }
 
@@ -1866,7 +1869,9 @@ async function _initApp(){
   }
 
   // 7. No shift anywhere — go to check-in
+  alert('_initApp: no shift found anywhere — about to showScreen(checkin)');
   showScreen('checkin');
+  alert('_initApp: showScreen(checkin) called');
   if(_pendingOfficer){
     setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);
   }
