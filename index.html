@@ -2002,11 +2002,12 @@ async function uploadDARtoDrive(record){
 
 /* ── Supabase active-shift persistence ── */
 async function saveShiftToSupabase() {
+  alert('saveShiftToSupabase START — officer:' + officer + ' darLog length:' + (darLog ? darLog.length : 'undefined') + ' stats:' + JSON.stringify(stats));
   try {
     if (!officer || !shiftStart) return;
     const { data: { session } } = await window._supabase.auth.getSession();
     if (!session) return;
-    const { error } = await window._supabase
+    const { data, error } = await window._supabase
       .from('active_shifts')
       .upsert({
         user_id: session.user.id,
@@ -2016,7 +2017,7 @@ async function saveShiftToSupabase() {
         stats: stats || {},
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
-    if (error) console.warn('saveShiftToSupabase error:', error.message, error.code);
+    alert('upsert result — data:' + JSON.stringify(data) + ' error:' + JSON.stringify(error));
   } catch (e) {
     console.warn('saveShiftToSupabase exception:', e.message);
   }
