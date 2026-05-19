@@ -1833,13 +1833,12 @@ async function _initApp(){
   }catch(e){console.warn('Auth check failed:',e);}
 
   // 4. No session = go to login, full stop
-  if(!session){alert('_initApp: no session — calling showScreen(login)');showScreen('login');alert('_initApp: showScreen(login) called');return;}
+  if(!session){showScreen('login');return;}
   _supabaseUserId=session.user.id;
 
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
   const remoteShift=await loadShiftFromSupabase();
   if(remoteShift&&remoteShift.officer_name&&remoteShift.shift_start){
-    alert('Supabase restore found — officer: ' + remoteShift.officer_name);
     officer=remoteShift.officer_name;
     shiftId=remoteShift.shift_id||('shift-'+Date.now());
     shiftStart=new Date(remoteShift.shift_start);
@@ -1854,9 +1853,7 @@ async function _initApp(){
     timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
     saveActiveShift(); // re-hydrate localStorage cache from Supabase data
     _shiftRestored=true;
-    alert('_initApp: about to showScreen(main) after Supabase restore');
     showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();
-    alert('_initApp: showScreen(main) called after Supabase restore');
     return;
   }
 
@@ -1869,9 +1866,7 @@ async function _initApp(){
   }
 
   // 7. No shift anywhere — go to check-in
-  alert('_initApp: no shift found anywhere — about to showScreen(checkin)');
   showScreen('checkin');
-  alert('_initApp: showScreen(checkin) called');
   if(_pendingOfficer){
     setTimeout(()=>{const sel=document.getElementById('ci-sel');if(sel){sel.value=_pendingOfficer;ciReady();}_pendingOfficer=null;},100);
   }
@@ -2007,12 +2002,11 @@ async function uploadDARtoDrive(record){
 
 /* ── Supabase active-shift persistence ── */
 async function saveShiftToSupabase() {
-  alert('saveShiftToSupabase START — officer:' + officer + ' darLog length:' + (darLog ? darLog.length : 'undefined') + ' stats:' + JSON.stringify(stats));
   try {
     if (!officer || !shiftStart) return;
     const { data: { session } } = await window._supabase.auth.getSession();
     if (!session) return;
-    const { data, error } = await window._supabase
+    const { error } = await window._supabase
       .from('active_shifts')
       .upsert({
         user_id: session.user.id,
@@ -2022,30 +2016,24 @@ async function saveShiftToSupabase() {
         stats: stats || {},
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
-    alert('upsert result — data:' + JSON.stringify(data) + ' error:' + JSON.stringify(error));
+    if (error) console.warn('saveShiftToSupabase error:', error.message, error.code);
   } catch (e) {
     console.warn('saveShiftToSupabase exception:', e.message);
   }
 }
 async function loadShiftFromSupabase() {
   try {
-    alert('loadShiftFromSupabase: starting');
     const { data: { session } } = await window._supabase.auth.getSession();
-    if (!session) {
-      alert('loadShiftFromSupabase: no session — returning null');
-      return null;
-    }
-    alert('loadShiftFromSupabase: session found — querying active_shifts for user ' + session.user.id);
+    if (!session) return null;
     const { data, error } = await window._supabase
       .from('active_shifts')
       .select('*')
       .eq('user_id', session.user.id)
       .maybeSingle();
-    alert('loadShiftFromSupabase: query result — data:' + JSON.stringify(data) + ' error:' + JSON.stringify(error));
     if (error || !data) return null;
     return data;
   } catch (e) {
-    alert('loadShiftFromSupabase EXCEPTION: ' + e.message);
+    console.warn('loadShiftFromSupabase failed:', e.message);
     return null;
   }
 }
