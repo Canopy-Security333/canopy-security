@@ -838,8 +838,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div class="eos-title">Shift complete</div>
     <div class="eos-sub" id="eos-sub"></div>
     <div class="eos-stats" id="eos-stats"></div>
-    <div id="eos-backup-status" style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">DAR saved locally. Uploading to Drive…</div>
-    <button class="eos-btn" onclick="returnToCheckin()">Return to check-in</button>
+<button class="eos-btn" onclick="returnToCheckin()">Return to check-in</button>
   </div>
 </div>
 
@@ -1556,9 +1555,6 @@ function finalizeShift(){clearShiftFromSupabase();if(stepTracking)stopStepTracki
       nm_count:stats.nm,step_count:stepCount
     }).then(({error})=>{if(error)console.warn('Supabase shift summary error:',error.message);});
   }
-  const _bkEl=document.getElementById('eos-backup-status');
-  if(_bkEl){_bkEl.textContent='DAR saved locally. Uploading to Drive…';_bkEl.style.color='';}
-  uploadDARtoDrive(_shiftRecord);
   clearShiftFromSupabase();
   _supabaseUserId=null;
   clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();showScreen('eos');}
@@ -2068,13 +2064,10 @@ if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js');
 }
 /* ══════════════════════════════════════
-   SUPABASE AUTH + GOOGLE DRIVE BACKUP
+   SUPABASE AUTH
 ══════════════════════════════════════ */
 const SUPABASE_URL='https://chpargloviqxzyjbehel.supabase.co';
 const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNocGFyZ2xvdmlxeHp5amJlaGVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NTI0MjksImV4cCI6MjA5NDQyODQyOX0.TBFL6YFrYjS4Oq4jQNYzyztz8L_gYrOurwqaM1Yjc0k';
-const DRIVE_FOLDER='1qo-6YOspwMq9oczeNzkWlmobVGDUxp1Q';
-const SA_EMAIL='canopy-dar-backup@canopy-security.iam.gserviceaccount.com';
-const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCwMiQf2RUQhGLWAtU9f0ld0VroE6FtASHUXhi3YZWJSxiycfkAHKFz+H748PVtlC1vP3mwNcfmL4bM6Wf9rlWW8WI7ty7qMb4jMj78RclhqmHQFwu6uBfkFXekv2zkp9K+A9SxaM5VyDL9wJxT++gqcubhooj0mKAs2Ra4+RqB2gsIGYVZ1Hj+wN/uOIAJFPQd77WWjqI3tU1CEtR8S+kVAeHRo57SEWfa3Ain6h6xWNBwgYeo5G4pefmyUZBuYB2/74hUCDGPmmkNYK7gxCB8O/zINSK80KHzyG8R+AXEPgAT0rRiDpiPPvthBBFQPlm+7IcQDHgMYhS8TVpjz/ytAgMBAAECggEAGAcpI1QN/1ajyTOnCN/sOBMY0T/8FPVr5kjUGLisv9sHNIPpGmQiexeO7pFNpvKSJPMEZqIERMEud5CiUddjF1aLuEEJm351GNpSpJc6bfXiU5JmUxb6ixbdCLviNGcpN33Q6kYJ/Wtz02Rfl+8T1ityjkqwCqCAbMfzb/496H8twnrQdyqULE7QRAESNpQyoIcB7W1fWn0se0X99DAPdWN8BvEvinicI2VF46OGfoJANGiJm2+Iyy6ykoAT/MIzZD4OKM0aaN2bsq5qFq8DLcF8+jsSioOFzLuT8krhALmC1Ryd0GxVUG2mB1Jm1I+/SrP0h/UGkISBfKSBEIo4MQKBgQDZ+Kxe0jyJXtRoyl8y8cGoo/u7afBc/fD47oALP/7HebTBc5mLVq5YQzqLRo1u/B3R9I2IsY1p6LQQWggVxgqjfzSh16uO5S9j6RRPWuBI1b3lPD4bpcN5ojD3NiB/WQ649rQh3VsF+w7Ga2faX97c4GpQk0u0V5LUm6gaGGZsAwKBgQDO76JhyO3PbDPn6o+ajeFVgARUVTKzJVG0+iv6BT9Q4oVrOvHKlWQrjHA5QhSiNMUYMAGmK76f4iXzsuDqOu2Nn13CC5o5KV4Eyi5yZYKNdbPTdW4qB0HacC6cstG9dun45ejnxWAJEP2lmPuOY8qU+XSZrJAS8siMNgOczbSNjwKBgA7Nv8800h22ThDL5clM+A0fDgK9gDCgopQVhqa88u3TSz50PnJjMbYW4swAv6xQ/Sl8RXyKKoON5WTS6IeqCqDuC8IOJr2uvRg5BUMade8cbSg7fjBcgrkpFdBEYdKkVsajIrrGEN+IHInHU6dWKYmwyCeuyU53QCamZ7VWAObHAoGAFpLDZuFRN7g47UqEAbsKYpZFYqGslygyAojrtSlPX9Zl8W2LpKqpM6rtLwHLWGpjOaE6/NJ2x+AWfb/8kvB8q19ADgPP/f5KOEGJ0YbLN/0n8aA0tTb3cwmbvBIxmPZYzYLe5jF8qWCGGsNWZZDzL08K7hyJ1tdPEyRtPnSeBncCgYAQKg9GzlEQKkblB1bX1vECtmQNBtsF77Su4ZR0E9Eg5vcqqBj3MnKQnDb2Xj+SaEmRsENaWebHl4rydTrCIPsfsyq9ZxrKGcR6rMd9Nc/IvFbjiy9C7uFLVBPivSsjxfhgiMzjS/kvb/vdvVJ85AV/qtpw6CK4AViwi5JGA66e8g==\n-----END PRIVATE KEY-----\n';
 
 /* ── STARTUP ── */
 
@@ -2205,82 +2198,6 @@ async function doLogin(){
   }
 }
 
-/* ── Google Drive upload via Service Account ── */
-async function getServiceAccountToken(){
-  const now=Math.floor(Date.now()/1000);
-  const b64u=s=>btoa(unescape(encodeURIComponent(s))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const header=b64u(JSON.stringify({alg:'RS256',typ:'JWT'}));
-  const claim=b64u(JSON.stringify({iss:SA_EMAIL,scope:'https://www.googleapis.com/auth/drive.file',aud:'https://oauth2.googleapis.com/token',exp:now+3600,iat:now}));
-  const unsigned=header+'.'+claim;
-  const keyData=SA_KEY.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----/g,'').replace(/\s/g,'');
-  const binaryKey=Uint8Array.from(atob(keyData),c=>c.charCodeAt(0));
-  const cryptoKey=await crypto.subtle.importKey('pkcs8',binaryKey.buffer,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
-  const sigBuf=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',cryptoKey,new TextEncoder().encode(unsigned));
-  const sigBytes=new Uint8Array(sigBuf);
-  let sigBin='';for(let i=0;i<sigBytes.length;i++)sigBin+=String.fromCharCode(sigBytes[i]);
-  const sigB64=btoa(sigBin).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const jwt=unsigned+'.'+sigB64;
-  const resp=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+jwt});
-  const data=await resp.json();
-  if(!data.access_token){
-    const msg=data.error_description||data.error||'unknown token error';
-    throw new Error('OAuth token failed: '+msg);
-  }
-  return data.access_token;
-}
-
-async function uploadDARtoDrive(record){
-  try{
-    const token=await getServiceAccountToken();
-    const date=new Date(record.date);
-    const dateStr=date.toISOString().slice(0,10);
-    const timeStr=date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','');
-    const fname='DAR_'+record.officer.replace(/\s+/g,'_')+'_'+dateStr+'_'+timeStr+'.txt';
-    const lines=[
-      'CANOPY CAMPUS SECURITY',
-      'DAILY ACTIVITY REPORT',
-      '='.repeat(50),
-      'Officer : '+record.officer,
-      'Date    : '+fmtDate(date),
-      'Start   : '+fmt(date),
-      'Entries : '+record.entries.length,
-      'Steps   : '+record.steps.toLocaleString(),
-      '',
-      '─'.repeat(50),
-      'LOG',
-      '─'.repeat(50)
-    ];
-    record.entries.forEach(e=>{
-      const t=new Date(e.time).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-      lines.push('');
-      lines.push('['+t+'] '+e.title.toUpperCase());
-      lines.push(e.detail);
-    });
-    lines.push('','='.repeat(50),'END OF REPORT');
-    const body=lines.join('\n');
-    const meta=JSON.stringify({name:fname,parents:[DRIVE_FOLDER]});
-    const form=new FormData();
-    form.append('metadata',new Blob([meta],{type:'application/json'}));
-    form.append('file',new Blob([body],{type:'text/plain'}));
-    const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
-      method:'POST',headers:{Authorization:'Bearer '+token},body:form
-    });
-    const bkEl=document.getElementById('eos-backup-status');
-    if(res.ok){
-      console.log('DAR saved to Drive:',fname);
-      if(bkEl){bkEl.textContent='✓ DAR backed up to Google Drive';bkEl.style.color='#4ea06e';}
-    }else{
-      let errDetail='';
-      try{const j=await res.json();errDetail=j.error?.message||j.error_description||JSON.stringify(j);}catch{errDetail=await res.text().catch(()=>'');}
-      console.warn('Drive upload failed (HTTP '+res.status+'):',errDetail);
-      if(bkEl){bkEl.textContent='⚠ Drive backup failed ('+res.status+'): '+errDetail.slice(0,80);bkEl.style.color='var(--text-warning)';}
-    }
-  }catch(e){
-    console.warn('Drive upload error:',e.message);
-    const bkEl=document.getElementById('eos-backup-status');
-    if(bkEl){bkEl.textContent='⚠ '+e.message.slice(0,100);bkEl.style.color='var(--text-warning)';}
-  }
-}
 
 /* ── Supabase active-shift persistence ── */
 async function saveShiftToSupabase() {
