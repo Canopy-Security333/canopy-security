@@ -2043,7 +2043,7 @@ function feExtDragOver(e,zi,ei){if(feExtDragState.fromZi===null)return;e.prevent
 function feExtDrop(e,toZi,toEi){e.preventDefault();e.stopPropagation();document.querySelectorAll('.fe-ext-drag-item').forEach(el=>el.classList.remove('ext-drag-over'));const{fromZi,fromEi}=feExtDragState;if(fromZi===null)return;if(fromZi===toZi&&fromEi===toEi)return;const bld=FE_DATA[feAdminBldg];const srcZone=bld.zones[fromZi];const dstZone=bld.zones[toZi];const[movedExt]=srcZone.items.splice(fromEi,1);const insertAt=(fromZi===toZi&&fromEi<toEi)?toEi-1:toEi;dstZone.items.splice(insertAt,0,movedExt);feExtDragState.fromZi=null;feExtDragState.fromEi=null;renderFEReorderBody();}
 function saveFEOrder(){try{const edits={};Object.keys(FE_DATA).forEach(k=>{edits[k]={zones:FE_DATA[k].zones};});localStorage.setItem('ext_data_edits',JSON.stringify(edits));}catch(e){}showToast('fe-order-toast','✓ Order saved');}
 function resetFEOrder(){try{localStorage.removeItem('ext_data_edits');}catch(e){}location.reload();}
-function renderOfficerList(){document.getElementById('officer-list').innerHTML=officers.map((o,i)=>`<div class="officer-row-admin"><div class="av-sm">${initials(o)}</div><div class="o-name">${o}</div><button class="del-btn" onclick="removeOfficer(${i})">Remove</button></div>`).join('');renderPatrolOrderList();if(feDrawerOpen)renderFEReorderBody();}
+function renderOfficerList(){document.getElementById('officer-list').innerHTML=officers.map(o=>`<div class="officer-row-admin"><div class="av-sm">${initials(o)}</div><div class="o-name">${o}</div><button class="del-btn" onclick="removeOfficer(${JSON.stringify(o)})">Remove</button></div>`).join('');renderPatrolOrderList();if(feDrawerOpen)renderFEReorderBody();}
 let feDrawerOpen=false;
 function renderPatrolOrderList(){const el=document.getElementById('patrol-order-list');if(!el)return;el.innerHTML=patrolOrder.map((id,i)=>{const isFE=id==='fe';const label=patrolMeta[id]?.label||id;const chevron=isFE?`<svg id="fe-drawer-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity:.5;transition:transform .2s;${feDrawerOpen?'transform:rotate(90deg)':''}"><path d="M6 4l4 4-4 4"/></svg>`:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3"><path d="M6 4l4 4-4 4"/></svg>`;const row=`<div class="patrol-order-item${isFE?' po-fe-row':''}" draggable="${!isFE||!feDrawerOpen}" data-id="${id}" data-idx="${i}" ondragstart="poDragStart(event)" ondragover="poDragOver(event)" ondrop="poDrop(event)" ondragend="poDragEnd(event)" ${isFE?`onclick="toggleFEDrawer(event)"`:''}  style="${isFE?'cursor:pointer;':''}"><div class="drag-handle"><span></span><span></span><span></span></div><span class="patrol-order-label" style="${isFE?'font-weight:600;color:var(--text-primary)':''}">${isFE?'🧯 ':' '}${label}</span>${isFE?`<span style="font-size:10px;color:var(--text-secondary);margin-right:4px">Edit</span>`:''}${chevron}</div>`;const drawer=isFE?`<div id="fe-inline-drawer" style="display:${feDrawerOpen?'block':'none'};background:var(--bg-secondary);border-top:0.5px solid var(--border-secondary);border-bottom:0.5px solid var(--border-secondary);padding:12px;margin-bottom:0"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder zones or individual extinguishers. Tap ✏️ to rename a location.</div><div style="display:flex;gap:6px;margin-bottom:10px"><button class="fe-bldg-tab act" data-bldg="C1" onclick="selectFEAdminBldg('C1',this)">C1</button><button class="fe-bldg-tab" data-bldg="C3" onclick="selectFEAdminBldg('C3',this)">C3</button><button class="fe-bldg-tab" data-bldg="C4" onclick="selectFEAdminBldg('C4',this)">C4</button><button class="fe-bldg-tab" data-bldg="C5" onclick="selectFEAdminBldg('C5',this)">C5</button></div><div id="fe-reorder-body"></div><div style="display:flex;gap:8px;margin-top:10px"><button onclick="saveFEOrder()" style="flex:1;padding:9px;font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer">Save changes</button><button onclick="resetFEOrder()" style="padding:9px 12px;font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary)">Reset all</button></div><div class="toast" id="fe-order-toast" style="margin-top:8px">Changes saved</div></div>`:'';return row+drawer;}).join('');}
 function toggleFEDrawer(e){if(e.target.closest('.drag-handle'))return;feDrawerOpen=!feDrawerOpen;renderPatrolOrderList();if(feDrawerOpen){feAdminBldg='C1';renderFEReorderBody();setTimeout(()=>{const drawer=document.getElementById('fe-inline-drawer');if(drawer)drawer.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}}
@@ -2053,8 +2053,8 @@ function poDragOver(e){e.preventDefault();document.querySelectorAll('.patrol-ord
 function poDrop(e){e.preventDefault();const toIdx=parseInt(e.currentTarget.dataset.idx);const fromIdx=parseInt(poDragging.dataset.idx);if(toIdx===fromIdx)return;const moved=patrolOrder.splice(fromIdx,1)[0];patrolOrder.splice(toIdx,0,moved);renderPatrolOrderList();applyPatrolOrder();}
 function poDragEnd(){document.querySelectorAll('.patrol-order-item').forEach(el=>{el.classList.remove('dragging');el.classList.remove('drag-over');});poDragging=null;}
 function applyPatrolOrder(){const pane=document.getElementById('pane-patrols');if(!pane)return;const sectionMap={boiler:'.boiler-section',['meters-patrol']:'.meters-section',fe:'.fe-section'};patrolOrder.forEach((id,i)=>{const sel=sectionMap[id];if(!sel)return;const el=pane.querySelector(sel);if(el)pane.appendChild(el);});}
-function addOfficer(){const inp=document.getElementById('new-officer-name');const v=inp.value.trim();if(!v)return;officers.push(v);inp.value='';renderOfficerList();populateSelect();showToast('admin-toast');}
-function removeOfficer(i){officers.splice(i,1);renderOfficerList();populateSelect();showToast('admin-toast');}
+async function addOfficer(){const inp=document.getElementById('new-officer-name');const v=inp.value.trim();if(!v)return;if(window._supabase){try{await window._supabase.from('officers').insert({name:v});}catch(e){console.warn('addOfficer Supabase error:',e);}}officers.push(v);officers.sort((a,b)=>a.localeCompare(b));inp.value='';renderOfficerList();populateSelect();showToast('admin-toast');}
+async function removeOfficer(name){if(window._supabase){try{await window._supabase.from('officers').delete().eq('name',name);}catch(e){console.warn('removeOfficer Supabase error:',e);}}const i=officers.indexOf(name);if(i>-1)officers.splice(i,1);renderOfficerList();populateSelect();showToast('admin-toast');}
 function changePin(){const v=document.getElementById('new-pin').value.trim();if(v.length===4&&/^\d{4}$/.test(v)){adminPin=v;document.getElementById('new-pin').value='';showToast('admin-toast');}}
 function toggleBoiler(){const btn=document.getElementById('boiler-toggle');btn.textContent=btn.textContent==='Active'?'Inactive':'Active';}
 function clearPinErr(){document.getElementById('pin-err').classList.remove('show');}
@@ -2078,6 +2078,16 @@ const SA_KEY='-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwg
 
 /* ── STARTUP ── */
 
+async function loadOfficersFromSupabase(){
+  if(!window._supabase)return;
+  try{
+    const{data,error}=await window._supabase.from('officers').select('name').order('name');
+    if(error||!data||!data.length)return;
+    const names=data.map(r=>r.name).filter(Boolean);
+    if(names.length){officers=names;populateSelect();}
+  }catch(e){/* keep hardcoded fallback */}
+}
+
 // Track whether an active shift is currently running so async callbacks
 // never navigate away from the main screen after a restore.
 let _shiftRestored=false;
@@ -2093,6 +2103,9 @@ async function _initApp(){
   try{
     window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
   }catch(e){console.warn('Supabase init failed:',e);}
+
+  // 2b. Load officer roster from Supabase (falls back to hardcoded if unreachable)
+  await loadOfficersFromSupabase();
 
   // 3. Check Supabase auth session
   let session=null;
