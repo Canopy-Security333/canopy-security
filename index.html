@@ -619,6 +619,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .bottom-nav{background:var(--bg-primary);border-color:var(--border-secondary)}
 .light .end-shift-btn{border-color:rgba(226,75,74,.3);background:rgba(226,75,74,.08)}
 @keyframes scanline{0%,100%{top:10%}50%{top:90%}}
+/* ── KEYS SYSTEM ── */
+.t-key{background:rgba(186,117,23,.08);color:var(--text-warning)}
+.dot-key{background:var(--orange)}
+.keys-sel-bar{position:sticky;top:0;z-index:40;background:var(--bg-secondary);border:0.5px solid var(--border-primary);border-radius:var(--radius-lg);padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 2px 16px rgba(0,0,0,.22)}
+.keys-sel-count{font-size:13px;font-weight:600;color:var(--text-primary)}
+.keys-sel-btn{padding:9px 16px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.keys-cat-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden}
+.keys-cat-hdr{padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.keys-cat-hdr:active{background:var(--bg-secondary)}
+.keys-cat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.keys-cat-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.keys-cat-meta{font-size:11px;color:var(--text-secondary)}
+.keys-cat-chev{font-size:10px;color:var(--text-tertiary);transition:transform .2s;display:inline-block;flex-shrink:0}
+.keys-cat-chev.open{transform:rotate(90deg)}
+.keys-cat-body{border-top:0.5px solid var(--border-secondary);padding:10px 12px 12px;display:none;flex-wrap:wrap;gap:8px}
+.keys-cat-body.open{display:flex}
+.key-chip{font-size:12px;font-family:inherit;font-weight:500;padding:7px 12px;border-radius:999px;border:0.5px solid var(--border-primary);background:none;cursor:pointer;color:var(--text-primary);transition:all .15s;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
+.key-chip.selected{background:rgba(55,138,221,.15);border-color:rgba(55,138,221,.45);color:var(--text-info);font-weight:600}
+.key-chip.checked-out{background:rgba(186,117,23,.12);border-color:rgba(186,117,23,.4);color:var(--text-warning)}
+.keys-tabs{display:flex;gap:0;margin-bottom:12px;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);overflow:hidden;flex-shrink:0}
+.keys-tab{flex:1;padding:8px 4px;font-size:12px;font-family:inherit;font-weight:500;background:none;border:none;cursor:pointer;color:var(--text-secondary);transition:background .1s}
+.keys-tab:not(:last-child){border-right:0.5px solid var(--border-primary)}
+.keys-tab.act{background:var(--btn-bg);color:var(--btn-color);font-weight:600}
+.keys-sub{display:none}.keys-sub.act{display:block}
+.keys-batch-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
+.keys-batch-person{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.keys-batch-company{font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+.keys-batch-keys-list{margin-bottom:10px}
+.keys-key-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border-secondary)}
+.keys-key-row:last-child{border-bottom:none}
+.keys-out-label{font-size:13px;color:var(--text-primary);flex:1}
+.keys-out-cat{font-size:10px;color:var(--text-secondary)}
+.keys-return-btn{font-size:11px;font-family:inherit;font-weight:500;padding:5px 10px;border-radius:var(--radius-sm);background:none;border:0.5px solid var(--border-primary);cursor:pointer;color:var(--text-secondary);white-space:nowrap;flex-shrink:0}
+.keys-batch-meta{font-size:11px;color:var(--text-secondary);margin-bottom:8px}
+.keys-return-all-btn{width:100%;padding:9px;font-size:13px;font-family:inherit;font-weight:600;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-primary);text-align:center;margin-top:4px}
+.keys-log-row{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border-secondary);align-items:flex-start}
+.keys-log-row:last-child{border-bottom:none}
+.keys-log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-key-out{background:var(--orange)}
+.dot-key-in{background:var(--green)}
+.keys-empty{text-align:center;padding:28px 20px;font-size:13px;color:var(--text-secondary)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -993,21 +1034,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     </div>
   </div>
 
-  <!-- KEYS PANE -->
-  <div id="pane-keys" class="pane" style="display:none">
-    <div class="lbl" style="margin-top:0">Keys</div>
-    <div style="background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:32px 20px;text-align:center;margin-bottom:12px">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-      <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">Key sign-out log</div>
-      <div style="font-size:12px;color:var(--text-secondary)">Coming soon — key tracking will be added here.</div>
-    </div>
-    <div class="bottom-nav">
-      <button class="home-pill" onclick="showPane('home',null)">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
-        Home
-      </button>
-    </div>
-  </div>
+  <!-- KEYS PANE — rendered by renderKeysPane() -->
+  <div id="pane-keys" class="pane" style="display:none"></div>
 
   <!-- PATROLS PANE -->
   <div id="pane-patrols" class="pane" style="display:none">
@@ -1284,6 +1312,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 </div>
 </div>
 
+<!-- KEY CHECKOUT SHEET -->
+<div class="modal-backdrop" id="key-checkout-sheet">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin-bottom:0">Check out keys</div>
+      <button onclick="closeKeyCheckoutSheet()" style="width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:16px;flex-shrink:0">&#x2715;</button>
+    </div>
+    <div id="key-checkout-summary"></div>
+    <div class="form-group"><label>Person's name <span style="color:var(--text-danger)">*</span></label><input type="text" id="key-person-input" placeholder="Full name..." oninput="updateKeyCheckoutBtn()"></div>
+    <div class="form-group"><label>Company / Tenant</label><input type="text" id="key-company-input" placeholder="Company or tenant name..."></div>
+    <div class="form-group"><label>Phone number</label><input type="tel" id="key-phone-input" placeholder="e.g. (801) 555-0100"></div>
+    <div class="form-group"><label>Notes</label><textarea id="key-notes-input" placeholder="Optional notes..." style="height:60px"></textarea></div>
+    <button class="modal-primary-btn" id="key-checkout-confirm-btn" onclick="confirmKeyCheckout()" disabled>Check out keys</button>
+    <button class="modal-secondary-btn" onclick="closeKeyCheckoutSheet()">Cancel</button>
+  </div>
+</div>
+
+<!-- KEY RETURN SHEET -->
+<div class="modal-backdrop" id="key-return-sheet">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin-bottom:0">Return key</div>
+      <button onclick="closeKeyReturnSheet()" style="width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:16px;flex-shrink:0">&#x2715;</button>
+    </div>
+    <div id="key-return-info"></div>
+    <div id="key-return-batch-list"></div>
+    <div class="form-group"><label>Return notes (optional)</label><textarea id="key-return-notes" placeholder="e.g. Returned &#8212; no issues noted" style="height:60px"></textarea></div>
+    <button class="modal-primary-btn" id="key-return-confirm-btn" onclick="confirmKeyReturn()">Confirm return</button>
+    <button class="modal-secondary-btn" onclick="closeKeyReturnSheet()">Cancel</button>
+  </div>
+</div>
+
 <script>
 const FE_DATA={C1:{name:'Canopy 1',count:35,color:'rt-c1',zones:[{zone:'First Floor',items:[{id:'EXT-C1-001',location:'Security Office',type:'ABC'},{id:'EXT-C1-002',location:'Colo Customer Entrance',type:'H'},{id:'EXT-C1-003',location:'Data Center Cage 102',type:'H'},{id:'EXT-C1-004',location:'Data Center by Wiring Closet',type:'H'},{id:'EXT-C1-005',location:'Data Center South West Exit',type:'H'},{id:'EXT-C1-006',location:'West Stairwell Exit',type:'ABC'},{id:'EXT-C1-007',location:'South West Bamboo Suite',type:'ABC'},{id:'EXT-C1-008',location:'Bamboo HR Video Studio',type:'ABC'},{id:'EXT-C1-009',location:'Main Lobby Drinking Fountain',type:'ABC'},{id:'EXT-C1-010',location:'Elevated Grounds Café',type:'ABC'},{id:'EXT-C1-011',location:'North Stairwell Exit',type:'ABC'}]},{zone:'Garage & Bunker',items:[{id:'EXT-C1-012',location:'North Stairwell Door',type:'ABC'},{id:'EXT-C1-013',location:'North Tool Room',type:'ABC'},{id:'EXT-C1-014',location:'Elevator Equipment Room',type:'ABC'},{id:'EXT-C1-015',location:'Garage Elevator Electrical Room',type:'ABC'},{id:'EXT-C1-016',location:'Staging Area',type:'ABC'},{id:'EXT-C1-017',location:'West Stairwell Door',type:'ABC'},{id:'EXT-C1-018',location:'Main Hall by Battery Entry',type:'H'},{id:'EXT-C1-019',location:'Main Hall by UPS Entry',type:'H'},{id:'EXT-C1-020',location:'UPS Room SE by Generator',type:'ABC'},{id:'EXT-C1-021',location:'Main Hall Cage Area',type:'H'}]},{zone:'Second Floor',items:[{id:'EXT-C1-022',location:'West Stairwell Exit',type:'ABC'},{id:'EXT-C1-023',location:'South East Pillar',type:'ABC'},{id:'EXT-C1-024',location:'Wire Closet',type:'ABC'},{id:'EXT-C1-025',location:'2nd Floor Lobby Hallway',type:'ABC'},{id:'EXT-C1-026',location:'Bamboo HR S/E Suite Pillar',type:'ABC'},{id:'EXT-C1-027',location:'North Stairwell Exit',type:'ABC'}]},{zone:'Third Floor',items:[{id:'EXT-C1-028',location:'North Stairwell Exit',type:'ABC'},{id:'EXT-C1-029',location:'North Wall by Recording Room',type:'ABC'},{id:'EXT-C1-030',location:'Bamboo HR North Hall Entrance',type:'ABC'},{id:'EXT-C1-031',location:'Wiring Closet',type:'ABC'},{id:'EXT-C1-032',location:'South East Pillar',type:'ABC'},{id:'EXT-C1-033',location:'West Stairwell Exit',type:'ABC'},{id:'EXT-C1-034',location:'West Stairwell',type:'ABC'},{id:'EXT-C1-035',location:'Top of Stairs — Roof Access',type:'ABC'}]}]},C3:{name:'Canopy 3',count:35,color:'rt-c3',zones:[{zone:'First Floor South',items:[{id:'EXT-C3-001',location:'Staging Area',type:'ABC'},{id:'EXT-C3-002',location:'South East Stairwell Exit',type:'ABC'},{id:'EXT-C3-003',location:'ON Semi Break Room',type:'ABC'},{id:'EXT-C3-004',location:'ON Semi Suite Hallway',type:'ABC'},{id:'EXT-C3-005',location:'Elevator Equipment Room',type:'ABC'},{id:'EXT-C3-006',location:'Electrical Room',type:'ABC'},{id:'EXT-C3-007',location:'ON Semi Server Room',type:'H'},{id:'EXT-C3-008',location:'NexTrust South Suite',type:'ABC'},{id:'EXT-C3-009',location:'Elevator Lobby',type:'ABC'}]},{zone:'First Floor North',items:[{id:'EXT-C3-010',location:'North East Suite Exit',type:'ABC'},{id:'EXT-C3-011',location:'Suite Server Room',type:'H'},{id:'EXT-C3-012',location:'D-Mark Room',type:'H'},{id:'EXT-C3-013',location:'West Emergency Exit (Ramp Door)',type:'ABC'},{id:'EXT-C3-014',location:'North West Stairwell Exit',type:'ABC'}]},{zone:'Second Floor North',items:[{id:'EXT-C3-015',location:'North West Stairwell Exit',type:'ABC'},{id:'EXT-C3-016',location:'North East Suite Hallway',type:'ABC'},{id:'EXT-C3-017',location:'IT Storage Room',type:'H'}]},{zone:'Second Floor South',items:[{id:'EXT-C3-018',location:'Elevator Lobby',type:'ABC'},{id:'EXT-C3-019',location:'West Wall Suite',type:'ABC'},{id:'EXT-C3-020',location:'Central North Wall',type:'ABC'},{id:'EXT-C3-021',location:'IT Server Room',type:'H'},{id:'EXT-C3-022',location:'South Suite',type:'ABC'},{id:'EXT-C3-023',location:'South East Stairwell Exit',type:'ABC'}]},{zone:'Third Floor South',items:[{id:'EXT-C3-024',location:'South East Stairwell Exit',type:'ABC'},{id:'EXT-C3-025',location:'South West Suite Hallway',type:'ABC'},{id:'EXT-C3-026',location:'Video Room',type:'ABC'},{id:'EXT-C3-027',location:'Server Room',type:'H'},{id:'EXT-C3-028',location:'South Central Hallway',type:'ABC'},{id:'EXT-C3-029',location:'Electrical Room (Behind Storage)',type:'ABC'},{id:'EXT-C3-030',location:'South Suite Entrance (East Wall)',type:'ABC'},{id:'EXT-C3-031',location:'Elevator Lobby',type:'ABC'}]},{zone:'Penthouse',items:[{id:'EXT-C3-032',location:'Penthouse',type:'ABC'}]},{zone:'Third Floor North',items:[{id:'EXT-C3-033',location:'North Server Room',type:'H'},{id:'EXT-C3-034',location:'North Hallway by Server Room',type:'ABC'},{id:'EXT-C3-035',location:'North West Stairwell Exit',type:'ABC'}]}]},C4:{name:'Canopy 4',count:12,color:'rt-c4',zones:[{zone:'First Floor',items:[{id:'EXT-C4-001',location:'Main Lobby by Bathrooms',type:'ABC'},{id:'EXT-C4-002',location:'North West Exit',type:'ABC'},{id:'EXT-C4-003',location:'North East Exit',type:'ABC'},{id:'EXT-C4-004',location:'East Wall Center',type:'ABC'},{id:'EXT-C4-005',location:'South East Exit',type:'ABC'},{id:'EXT-C4-006',location:'South East Training Room',type:'ABC'},{id:'EXT-C4-007',location:'South West Exit',type:'ABC'}]},{zone:'Second Floor',items:[{id:'EXT-C4-008',location:'2nd Floor Lobby by Bathrooms',type:'ABC'},{id:'EXT-C4-009',location:'North West Office',type:'ABC'},{id:'EXT-C4-010',location:'North East Office',type:'ABC'},{id:'EXT-C4-011',location:'South East Breakroom',type:'ABC'},{id:'EXT-C4-012',location:'South West Office',type:'ABC'}]}]},C5:{name:'Canopy 5',count:25,color:'rt-c5',zones:[{zone:'First Floor South',items:[{id:'EXT-C5-001',location:'Staging Area',type:'ABC'},{id:'EXT-C5-002',location:'Bamboo North 150 East Door',type:'ABC'},{id:'EXT-C5-003',location:'South East Stairwell Exit (Showers)',type:'ABC'},{id:'EXT-C5-004',location:'South Electrical Room',type:'ABC'},{id:'EXT-C5-005',location:'South West Bamboo Suite',type:'ABC'},{id:'EXT-C5-006',location:'Elevator Equipment Room',type:'ABC'},{id:'EXT-C5-007',location:'Elevator Lobby',type:'ABC'}]},{zone:'First Floor North',items:[{id:'EXT-C5-008',location:'Main Electrical Room',type:'ABC'},{id:'EXT-C5-009',location:'North West Stairwell',type:'ABC'}]},{zone:'Second Floor North',items:[{id:'EXT-C5-010',location:'North West Stairwell Exit',type:'ABC'},{id:'EXT-C5-011',location:'North Electrical Room',type:'ABC'},{id:'EXT-C5-012',location:'Entrata Training Room Entrance',type:'ABC'}]},{zone:'Second Floor South',items:[{id:'EXT-C5-013',location:'Elevator Lobby',type:'ABC'},{id:'EXT-C5-014',location:'Central Hallway South Wall',type:'ABC'},{id:'EXT-C5-015',location:'South Electrical Room',type:'ABC'},{id:'EXT-C5-016',location:'South East Stairwell Exit',type:'ABC'}]},{zone:'Third Floor South',items:[{id:'EXT-C5-017',location:'South East Stairwell Exit',type:'ABC'},{id:'EXT-C5-018',location:'South Electrical Room',type:'ABC'},{id:'EXT-C5-019',location:'Central Hallway North Wall',type:'ABC'},{id:'EXT-C5-020',location:'Penthouse Stairs — Roof Access',type:'ABC'},{id:'EXT-C5-021',location:'Penthouse East Wall',type:'ABC'},{id:'EXT-C5-022',location:'Elevator Lobby',type:'ABC'}]},{zone:'Third Floor North',items:[{id:'EXT-C5-023',location:'Veracity Suite North Wall',type:'ABC'},{id:'EXT-C5-024',location:'North Electrical Room',type:'ABC'},{id:'EXT-C5-025',location:'North West Stairwell Exit',type:'ABC'}]}]}};
 try{const saved=localStorage.getItem('ext_data_edits');if(saved){const edits=JSON.parse(saved);Object.keys(edits).forEach(k=>{if(FE_DATA[k])FE_DATA[k].zones=edits[k].zones;});}}catch(e){}
@@ -1337,7 +1397,7 @@ function showPane(id,btn){
   if(id==='home'){renderBP();renderDCPatrol();renderBunkerPatrol();updateHomePatrolCounts();updateHomeTiles();}
   if(id==='home-bp'){renderBP();renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='reports'){updateReportsTiles();}
-  if(id==='keys'){}
+  if(id==='keys'){renderKeysPane();}
   if(id==='patrols'){renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='nearmiss')renderNMList();
   if(id==='passdowns')renderPassDownsPage();
@@ -1462,7 +1522,26 @@ function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
 function closeAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.remove('open');}
 function submitAddPassDown(){const text=document.getElementById('add-pd-textarea').value.trim();if(!text)return;passDowns.unshift({id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()});saveStorage();closeAddPassDownSheet();renderPassDownsPage();showToast('pd-page-toast','✓ Pass down saved');}
-function openPassDownModal(){document.getElementById('pd-modal').classList.add('open');document.getElementById('pd-textarea').value='';document.getElementById('pd-submit-btn').disabled=true;}
+function openPassDownModal(){
+  loadKeyState();
+  const textarea=document.getElementById('pd-textarea');
+  const outEntries=Object.values(keyCheckedOut);
+  let prefix='';
+  if(outEntries.length){
+    const byPerson={};
+    outEntries.forEach(e=>{if(!byPerson[e.person])byPerson[e.person]=[];byPerson[e.person].push(e);});
+    prefix='🔑 KEYS STILL OUT:\n';
+    Object.entries(byPerson).forEach(([person,entries])=>{
+      const keys=entries.map(e=>e.keyLabel).join(', ');
+      const s=entries[0];
+      prefix+=`- ${keys} — out to ${person}${s.company?' ('+s.company+')':''}${s.phone?', '+s.phone:''}. Issued ${fmt(s.time)} by ${s.issuedBy}.\n`;
+    });
+    prefix+='\n';
+  }
+  textarea.value=prefix;
+  document.getElementById('pd-submit-btn').disabled=!textarea.value.trim();
+  document.getElementById('pd-modal').classList.add('open');
+}
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
 function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;passDowns.unshift({id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()});saveStorage();closePassDownModal();finalizeShift();}
 function skipPassDown(){closePassDownModal();finalizeShift();}
@@ -2310,6 +2389,358 @@ async function loadAllNearMissFromSupabase() {
   } catch (e) {
     console.warn('loadAllNearMissFromSupabase exception:', e.message);
   }
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  KEYS SYSTEM
+// ═══════════════════════════════════════════════════════
+TC.key={dot:'dot-key',tag:'t-key',label:'Key sign-out'};
+
+const KEY_CATS=[
+  {id:'bunker',label:'Bunker Keys',bgColor:'rgba(186,117,23,.1)',
+   icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>`,
+   keys:['Full Access – PM.1','Full Access – PM.4','Full Access – PM.6','Limited – P1.1','Limited – P1.2','Limited – P1.3','Cage 1 – B42.1','Cage 1 – B42.2','Cage 2 – B35.1','Cage 3 – B29.1','Cage 4 – B43.1','Cage 5 – B25.4','Cage 6 – C28.4']},
+  {id:'janitorial',label:'Janitorial Keys',bgColor:'rgba(29,158,117,.1)',
+   icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><circle cx="16" cy="12" r="2"/><path d="M3 9h18"/></svg>`,
+   keys:['DP','JS','1','2','3','4','5','6','7','8','9','10','11','12','13','14','18','19','20','21','22']},
+  {id:'roof',label:'Roof Keys',bgColor:'rgba(55,138,221,.1)',
+   icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7"/><path d="M3 9v12h18V9"/><path d="M9 22V12h6v10"/></svg>`,
+   keys:['Canopy 1 – H7.5','Canopy 3 – H7.3','Canopy 4 – H1.35','Canopy 5 – H7.4']},
+  {id:'maintenance',label:'Maintenance Keys',bgColor:'rgba(226,75,74,.1)',
+   icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+   keys:['Electrical 1 – H1.24','Electrical 2 – H1.34','Trash Compactor']},
+  {id:'elevator',label:'Elevator Keys',bgColor:'rgba(29,158,117,.08)',
+   icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9 8l3-3 3 3M9 16l3 3 3-3"/></svg>`,
+   keys:['Canopy 1 – Cab key','Canopy 3 – Cab key','Canopy 4 – Cab key','Canopy 5 – Cab key']},
+  {id:'datacenter',label:'Data Center Keys',bgColor:'rgba(55,138,221,.12)',
+   icon:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M11 8h.01M15 8h.01"/></svg>`,
+   keys:['Platinum Temporary Key','SW Data Center Double Doors','HVAC Keys','Hughes Satellite Keys']}
+];
+
+let keyLog=[];
+let keyCheckedOut={};
+let keySelection=new Set();
+let keyCatOpen={};
+let keysActiveTab='keys';
+let _keyReturnChecked=new Set();
+
+function loadKeyState(){
+  try{const d=localStorage.getItem('key_log');if(d)keyLog=JSON.parse(d);}catch(e){keyLog=[];}
+  try{const d=localStorage.getItem('key_checked_out');if(d)keyCheckedOut=JSON.parse(d);}catch(e){keyCheckedOut={};}
+}
+function saveKeyState(){
+  try{localStorage.setItem('key_log',JSON.stringify(keyLog));}catch(e){}
+  try{localStorage.setItem('key_checked_out',JSON.stringify(keyCheckedOut));}catch(e){}
+}
+function _keyId(catId,idx){return catId+'_'+idx;}
+function _keyInfo(keyId){
+  const under=keyId.lastIndexOf('_');
+  if(under<0)return null;
+  const catId=keyId.slice(0,under);
+  const idx=parseInt(keyId.slice(under+1));
+  const cat=KEY_CATS.find(c=>c.id===catId);
+  if(!cat||isNaN(idx)||idx<0||idx>=cat.keys.length)return null;
+  return{cat,key:cat.keys[idx],keyId,catId,idx};
+}
+function _esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderKeysPane(){
+  loadKeyState();
+  const pane=document.getElementById('pane-keys');
+  if(!pane)return;
+  const selN=keySelection.size;
+  const outN=Object.keys(keyCheckedOut).length;
+  let h='';
+
+  // Sticky selection bar
+  if(selN>0){
+    h+=`<div class="keys-sel-bar">
+      <span class="keys-sel-count">${selN} key${selN!==1?'s':''} selected</span>
+      <div style="display:flex;gap:8px">
+        <button onclick="keysClearSel()" style="font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);padding:8px 12px;cursor:pointer;color:var(--text-secondary)">Clear</button>
+        <button class="keys-sel-btn" onclick="openKeyCheckoutSheet()">Check out ${selN} key${selN!==1?'s':''}</button>
+      </div>
+    </div>`;
+  }
+
+  h+=`<div class="toast" id="keys-toast" style="margin-bottom:8px"></div>`;
+  h+=`<div class="lbl" style="margin-top:0">Keys</div>`;
+  h+=`<div class="keys-tabs">
+    <button class="keys-tab${keysActiveTab==='keys'?' act':''}" onclick="keysTab('keys',this)">Key board</button>
+    <button class="keys-tab${keysActiveTab==='out'?' act':''}" onclick="keysTab('out',this)">Out${outN?' ('+outN+')':''}</button>
+    <button class="keys-tab${keysActiveTab==='log'?' act':''}" onclick="keysTab('log',this)">Full log</button>
+  </div>`;
+  h+=`<div id="keys-sub-keys" class="keys-sub${keysActiveTab==='keys'?' act':''}">`;
+  h+=_buildKeyCats();
+  h+=`</div>`;
+  h+=`<div id="keys-sub-out" class="keys-sub${keysActiveTab==='out'?' act':''}">`;
+  h+=_buildKeysOut();
+  h+=`</div>`;
+  h+=`<div id="keys-sub-log" class="keys-sub${keysActiveTab==='log'?' act':''}">`;
+  h+=_buildKeysLog();
+  h+=`</div>`;
+  h+=`<div class="bottom-nav">
+    <button class="home-pill" onclick="showPane('home',null)">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+      Home
+    </button>
+  </div>`;
+  pane.innerHTML=h;
+}
+
+function _buildKeyCats(){
+  return KEY_CATS.map(cat=>{
+    const open=!!keyCatOpen[cat.id];
+    const outInCat=cat.keys.filter((_,i)=>!!keyCheckedOut[_keyId(cat.id,i)]).length;
+    const selInCat=cat.keys.filter((_,i)=>keySelection.has(_keyId(cat.id,i))).length;
+    const metaParts=[];
+    if(outInCat)metaParts.push(outInCat+' out');
+    if(selInCat)metaParts.push(selInCat+' selected');
+    const meta=metaParts.join(' · ')||cat.keys.length+' keys';
+    const chips=cat.keys.map((k,i)=>{
+      const kid=_keyId(cat.id,i);
+      const isOut=!!keyCheckedOut[kid];
+      const isSel=keySelection.has(kid);
+      const checkSvg=`<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>`;
+      const clockSvg=`<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>`;
+      if(isOut){
+        const e=keyCheckedOut[kid];
+        return`<button class="key-chip checked-out" onclick="openKeyReturnSheet('${kid}',null)" title="Out to ${_esc(e.person)}">${clockSvg}${_esc(k)}</button>`;
+      }
+      return`<button class="key-chip${isSel?' selected':''}" onclick="keysToggleSel('${kid}')">${isSel?checkSvg:''}${_esc(k)}</button>`;
+    }).join('');
+    return`<div class="keys-cat-card">
+      <div class="keys-cat-hdr" onclick="keysToggleCat('${cat.id}')">
+        <div class="keys-cat-icon" style="background:${cat.bgColor}">${cat.icon}</div>
+        <div style="flex:1"><div class="keys-cat-title">${cat.label}</div><div class="keys-cat-meta">${meta}</div></div>
+        <span class="keys-cat-chev${open?' open':''}">&#x203a;</span>
+      </div>
+      <div class="keys-cat-body${open?' open':''}">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function _buildKeysOut(){
+  const outEntries=Object.values(keyCheckedOut);
+  if(!outEntries.length)return'<div class="keys-empty">No keys are currently checked out.</div>';
+  const batches={};
+  outEntries.forEach(e=>{
+    const bid=e.batchId||e.id;
+    if(!batches[bid])batches[bid]={bid,person:e.person,company:e.company,phone:e.phone,issuedBy:e.issuedBy,time:e.time,keys:[]};
+    batches[bid].keys.push(e);
+  });
+  return Object.values(batches).map(b=>{
+    const keyRows=b.keys.map(e=>`<div class="keys-key-row">
+      <div style="flex:1"><div class="keys-out-label">${_esc(e.keyLabel)}</div><div class="keys-out-cat">${_esc(e.catLabel)}</div></div>
+      <button class="keys-return-btn" onclick="openKeyReturnSheet('${e.keyId}',null)">Return</button>
+    </div>`).join('');
+    const contact=[b.company,b.phone].filter(Boolean).join(' · ');
+    return`<div class="keys-batch-card">
+      <div class="keys-batch-person">${_esc(b.person)}</div>
+      ${contact?`<div class="keys-batch-company">${_esc(contact)}</div>`:''}
+      <div class="keys-batch-keys-list">${keyRows}</div>
+      <div class="keys-batch-meta">Issued ${fmt(b.time)} by ${_esc(b.issuedBy)}</div>
+      ${b.keys.length>1?`<button class="keys-return-all-btn" onclick="openKeyReturnSheet(null,'${b.bid}')">Return all keys from this batch</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function _buildKeysLog(){
+  if(!keyLog.length)return'<div class="keys-empty">No key activity logged yet.</div>';
+  const seenBatches=new Set();
+  const rows=[];
+  [...keyLog].reverse().forEach(e=>{
+    if(e.type==='out'){
+      const bid=e.batchId||e.id;
+      if(seenBatches.has(bid))return;
+      seenBatches.add(bid);
+      const batchKeys=keyLog.filter(x=>(x.batchId||x.id)===bid&&x.type==='out').map(x=>x.keyLabel);
+      rows.push({...e,_dk:batchKeys});
+    }else{
+      rows.push({...e,_dk:[e.keyLabel]});
+    }
+  });
+  return`<div class="card" style="padding:8px 12px">${rows.map(e=>{
+    const isOut=e.type==='out';
+    const keyStr=e._dk.join(', ');
+    const timeStr=fmt(isOut?e.time:(e.returnTime||e.time));
+    return`<div class="keys-log-row">
+      <div class="keys-log-dot ${isOut?'dot-key-out':'dot-key-in'}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary)">${isOut?'Checked out':'Returned'}: ${_esc(keyStr)}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${isOut
+          ?`To ${_esc(e.person)}${e.company?' ('+_esc(e.company)+')':''} · by ${_esc(e.issuedBy)}`
+          :`By ${_esc(e.person)}${e.returnedBy?' · logged by '+_esc(e.returnedBy):''}`}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);flex-shrink:0;margin-left:8px">${timeStr}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function keysTab(tab,btn){
+  keysActiveTab=tab;
+  document.querySelectorAll('.keys-tab').forEach(b=>b.classList.remove('act'));
+  if(btn)btn.classList.add('act');
+  document.querySelectorAll('.keys-sub').forEach(s=>{s.style.display='none';s.classList.remove('act');});
+  const sub=document.getElementById('keys-sub-'+tab);
+  if(sub){sub.style.display='block';sub.classList.add('act');}
+}
+
+function keysToggleCat(catId){
+  keyCatOpen[catId]=!keyCatOpen[catId];
+  const sub=document.getElementById('keys-sub-keys');
+  if(sub)sub.innerHTML=_buildKeyCats();
+}
+
+function keysToggleSel(keyId){
+  if(keyCheckedOut[keyId]){openKeyReturnSheet(keyId,null);return;}
+  if(keySelection.has(keyId))keySelection.delete(keyId);
+  else keySelection.add(keyId);
+  renderKeysPane();
+}
+
+function keysClearSel(){
+  keySelection.clear();
+  renderKeysPane();
+}
+
+// ── CHECKOUT SHEET ──
+function openKeyCheckoutSheet(){
+  if(!keySelection.size)return;
+  const lines=[...keySelection].map(kid=>{
+    const info=_keyInfo(kid);
+    return info?`<div style="font-size:12px;color:var(--text-primary);padding:2px 0">• ${_esc(info.cat.label)}: ${_esc(info.key)}</div>`:'';
+  }).join('');
+  document.getElementById('key-checkout-summary').innerHTML=
+    `<div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">${keySelection.size} key${keySelection.size!==1?'s':''} to check out</div>
+      ${lines}
+    </div>`;
+  document.getElementById('key-person-input').value='';
+  document.getElementById('key-company-input').value='';
+  document.getElementById('key-phone-input').value='';
+  document.getElementById('key-notes-input').value='';
+  const btn=document.getElementById('key-checkout-confirm-btn');
+  btn.disabled=true;
+  btn.textContent='Check out '+keySelection.size+' key'+(keySelection.size!==1?'s':'');
+  document.getElementById('key-checkout-sheet').classList.add('open');
+}
+
+function closeKeyCheckoutSheet(){
+  document.getElementById('key-checkout-sheet').classList.remove('open');
+}
+
+function updateKeyCheckoutBtn(){
+  const v=document.getElementById('key-person-input').value.trim();
+  const btn=document.getElementById('key-checkout-confirm-btn');
+  if(btn)btn.disabled=!v;
+}
+
+function confirmKeyCheckout(){
+  const person=document.getElementById('key-person-input').value.trim();
+  if(!person)return;
+  const company=document.getElementById('key-company-input').value.trim();
+  const phone=document.getElementById('key-phone-input').value.trim();
+  const notes=document.getElementById('key-notes-input').value.trim();
+  const batchId='batch_'+Date.now();
+  const time=new Date().toISOString();
+  const issuedBy=officer||'—';
+  const keyLabels=[];
+  [...keySelection].forEach(keyId=>{
+    const info=_keyInfo(keyId);
+    if(!info)return;
+    const entry={id:'klog_out_'+Date.now()+'_'+keyId,batchId,keyId,keyLabel:info.key,catLabel:info.cat.label,type:'out',person,company,phone,notes,issuedBy,time};
+    keyLog.push(entry);
+    keyCheckedOut[keyId]=entry;
+    keyLabels.push(info.key);
+  });
+  saveKeyState();
+  const darDetail=`Keys issued to ${person}${company?' ('+company+')':''}${phone?', '+phone:''}.${notes?' '+notes:''} Keys: ${keyLabels.join(', ')}.`;
+  addEntry('key','Key checkout — '+(keyLabels.length===1?keyLabels[0]:keyLabels.length+' keys'),darDetail);
+  keySelection.clear();
+  closeKeyCheckoutSheet();
+  keysActiveTab='out';
+  renderKeysPane();
+  showToast('keys-toast','✓ '+keyLabels.length+' key'+(keyLabels.length!==1?'s':'')+' checked out to '+person);
+}
+
+// ── RETURN SHEET ──
+function openKeyReturnSheet(keyId,batchId){
+  let entry=keyId?keyCheckedOut[keyId]:null;
+  if(!entry&&batchId){entry=Object.values(keyCheckedOut).find(e=>(e.batchId||e.id)===batchId);}
+  if(!entry)return;
+  const effectiveBatch=entry.batchId||entry.id;
+  const batchEntries=Object.values(keyCheckedOut).filter(e=>(e.batchId||e.id)===effectiveBatch);
+  const isBatch=batchEntries.length>1;
+  if(keyId&&isBatch){
+    _keyReturnChecked=new Set([keyId]);
+  }else{
+    _keyReturnChecked=new Set(batchEntries.map(e=>e.keyId));
+  }
+  const contact=[entry.company,entry.phone].filter(Boolean).join(' · ');
+  document.getElementById('key-return-info').innerHTML=
+    `<div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:3px">${_esc(entry.person)}</div>
+      ${contact?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">${_esc(contact)}</div>`:''}
+      <div style="font-size:11px;color:var(--text-tertiary)">Issued ${fmt(entry.time)} by ${_esc(entry.issuedBy)}</div>
+    </div>`;
+  const batchEl=document.getElementById('key-return-batch-list');
+  if(isBatch){
+    batchEl.style.display='block';
+    batchEl.innerHTML=
+      `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Select keys to return</div>`+
+      batchEntries.map(e=>`<label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border-secondary);cursor:pointer">
+        <input type="checkbox" value="${e.keyId}" ${_keyReturnChecked.has(e.keyId)?'checked':''} onchange="keysReturnToggle('${e.keyId}',this.checked)" style="width:17px;height:17px;accent-color:var(--green);flex-shrink:0">
+        <div style="flex:1"><div style="font-size:13px;color:var(--text-primary)">${_esc(e.keyLabel)}</div><div style="font-size:11px;color:var(--text-secondary)">${_esc(e.catLabel)}</div></div>
+      </label>`).join('')+
+      '<div style="margin-bottom:12px"></div>';
+  }else{
+    batchEl.style.display='none';
+    batchEl.innerHTML='';
+  }
+  document.getElementById('key-return-notes').value='';
+  const retBtn=document.getElementById('key-return-confirm-btn');
+  retBtn.disabled=false;
+  retBtn.textContent='Confirm return';
+  document.getElementById('key-return-sheet').classList.add('open');
+}
+
+function keysReturnToggle(keyId,checked){
+  if(checked)_keyReturnChecked.add(keyId);
+  else _keyReturnChecked.delete(keyId);
+  const btn=document.getElementById('key-return-confirm-btn');
+  if(btn){btn.disabled=_keyReturnChecked.size===0;btn.textContent=_keyReturnChecked.size===0?'Select at least one key':'Confirm return';}
+}
+
+function closeKeyReturnSheet(){
+  document.getElementById('key-return-sheet').classList.remove('open');
+  _keyReturnChecked=new Set();
+}
+
+function confirmKeyReturn(){
+  if(!_keyReturnChecked.size)return;
+  const returnNotes=document.getElementById('key-return-notes').value.trim();
+  const returnTime=new Date().toISOString();
+  const returnedBy=officer||'—';
+  const returned=[];
+  let samplePerson='—';
+  _keyReturnChecked.forEach(keyId=>{
+    const entry=keyCheckedOut[keyId];
+    if(!entry)return;
+    if(samplePerson==='—')samplePerson=entry.person;
+    keyLog.push({...entry,id:'klog_in_'+Date.now()+'_'+keyId,type:'in',returnTime,returnNotes,returnedBy});
+    delete keyCheckedOut[keyId];
+    returned.push(entry.keyLabel);
+  });
+  saveKeyState();
+  if(returned.length){
+    const darDetail=`${returned.join(', ')} returned by ${samplePerson}.${returnNotes?' '+returnNotes:''}`;
+    addEntry('key','Key return — '+(returned.length===1?returned[0]:returned.length+' keys'),darDetail);
+  }
+  closeKeyReturnSheet();
+  renderKeysPane();
+  showToast('keys-toast','✓ '+returned.length+' key'+(returned.length!==1?'s':'')+' returned');
 }
 
 </script>
