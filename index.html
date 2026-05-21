@@ -2345,13 +2345,30 @@ function _setupRealtimeListeners(){
     .channel('app-sync-'+_supabaseUserId)
 
     /* ── active_shifts ──────────────────────────────────────
-       Sync DAR log + stats when another device updates our row */
+       • UPDATE — sync DAR log + stats from another device
+       • DELETE — shift ended elsewhere; transition to check-in */
     .on('postgres_changes',{event:'*',schema:'public',table:'active_shifts'},async(payload)=>{
       try{
         const rec=payload.new||payload.old;
         // Ignore rows belonging to other users
         if(!rec||rec.user_id!==_supabaseUserId)return;
-        if(payload.eventType==='DELETE')return; // handled by finalizeShift locally
+
+        if(payload.eventType==='DELETE'){
+          // Q2: shift was ended on another device — bring this device to check-in
+          if(!officer||!shiftStart)return; // already cleared locally
+          // Q3: confirm it's the exact shift we're tracking
+          const oldRec=payload.old;
+          if(oldRec?.shift_id&&shiftId&&oldRec.shift_id!==shiftId)return;
+          // Mirror the state teardown from finalizeShift() without re-calling Supabase
+          clearInterval(timerInt);timerInt=null;
+          clearActiveShift();
+          officer=null;shiftStart=null;shiftId=null;darLog=[];
+          stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();
+          _shiftRestored=false;
+          showScreen('checkin');
+          return;
+        }
+
         const d=payload.new;
         if(!d||!officer||!shiftStart)return; // no active shift on this device yet
         // Skip if nothing changed (avoids re-rendering our own writes)
