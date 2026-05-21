@@ -2371,13 +2371,28 @@ function _setupRealtimeListeners(){
     })
 
     /* ── dar_entries ────────────────────────────────────────
-       Individual DAR entry inserts (if written to separate table) */
+       Individual DAR entry inserts written by addEntry().
+       Two guards are applied before adding to darLog:
+       1. shift_id filter  — ignore entries from other officers' shifts
+       2. content+timestamp dedup — suppress the Realtime bounce-back of
+          our own writes (local entries have no Supabase id, so id-equality
+          never matches; content+time within 3 s is the reliable signal) */
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'dar_entries'},(payload)=>{
       try{
         const e=payload.new;
         if(!e||!officer||!shiftStart)return;
-        if(darLog.some(x=>x.id===e.id))return; // deduplicate
-        darLog.push({id:e.id,type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||e.time||Date.now())});
+        // Q3 fix: only handle entries that belong to the current shift
+        if(e.shift_id&&shiftId&&e.shift_id!==shiftId)return;
+        // Q2 fix: dedup by content + timestamp proximity (≤3 s)
+        // This correctly identifies self-writes where local entries have no id
+        const eMs=new Date(e.created_at||e.time||0).getTime();
+        const alreadyHave=darLog.some(x=>{
+          const xMs=(x.time instanceof Date?x.time:new Date(x.time)).getTime();
+          return x.type===e.type&&x.title===e.title&&x.detail===e.detail&&Math.abs(xMs-eMs)<3000;
+        });
+        if(alreadyHave)return;
+        // Entry is genuinely from another device — add it
+        darLog.push({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||e.time||Date.now())});
         darLog.sort((a,b)=>new Date(a.time)-new Date(b.time));
         const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
         updateHomeTiles();
