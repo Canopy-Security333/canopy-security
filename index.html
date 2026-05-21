@@ -2111,6 +2111,9 @@ async function _initApp(){
   if(!session){showScreen('login');return;}
   _supabaseUserId=session.user.id;
 
+  // 5b. Start Realtime listeners now that we have a confirmed user
+  _setupRealtimeListeners();
+
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
   const remoteShift=await loadShiftFromSupabase();
   if(remoteShift&&remoteShift.officer_name&&remoteShift.shift_start){
@@ -2319,6 +2322,126 @@ async function loadAllNearMissFromSupabase() {
   } catch (e) {
     console.warn('loadAllNearMissFromSupabase exception:', e.message);
   }
+}
+
+
+/* ══════════════════════════════════════
+   SUPABASE REALTIME LISTENERS
+══════════════════════════════════════ */
+
+function _setupRealtimeListeners(){
+  if(!window._supabase||!_supabaseUserId)return;
+
+  // Tear down any previous channel (e.g. after _initApp re-runs on pageshow)
+  if(window._realtimeChannel){
+    try{window._supabase.removeChannel(window._realtimeChannel);}catch(e){}
+    window._realtimeChannel=null;
+  }
+
+  // Returns true if pane-<id> is currently the visible pane
+  const paneVisible=id=>{const el=document.getElementById('pane-'+id);return el&&el.style.display!=='none';};
+
+  window._realtimeChannel=window._supabase
+    .channel('app-sync-'+_supabaseUserId)
+
+    /* ── active_shifts ──────────────────────────────────────
+       Sync DAR log + stats when another device updates our row */
+    .on('postgres_changes',{event:'*',schema:'public',table:'active_shifts'},async(payload)=>{
+      try{
+        const rec=payload.new||payload.old;
+        // Ignore rows belonging to other users
+        if(!rec||rec.user_id!==_supabaseUserId)return;
+        if(payload.eventType==='DELETE')return; // handled by finalizeShift locally
+        const d=payload.new;
+        if(!d||!officer||!shiftStart)return; // no active shift on this device yet
+        // Skip if nothing changed (avoids re-rendering our own writes)
+        const incoming=d.dar_entries||[];
+        const inStats=d.stats||{};
+        if(incoming.length===darLog.length&&
+           inStats.patrols===stats.patrols&&
+           inStats.nm===stats.nm&&
+           inStats.checks===stats.checks)return;
+        darLog=incoming.map(e=>({...e,time:new Date(e.time)}));
+        stats=inStats;
+        ['patrols','nm','checks'].forEach(k=>{const el=document.getElementById('stat-'+k);if(el)el.textContent=stats[k]||0;});
+        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+        updateHomeTiles();
+        if(paneVisible('dar')){renderCurrentDAR();}
+      }catch(e){/* keep existing local state on any error */}
+    })
+
+    /* ── dar_entries ────────────────────────────────────────
+       Individual DAR entry inserts (if written to separate table) */
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'dar_entries'},(payload)=>{
+      try{
+        const e=payload.new;
+        if(!e||!officer||!shiftStart)return;
+        if(darLog.some(x=>x.id===e.id))return; // deduplicate
+        darLog.push({id:e.id,type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||e.time||Date.now())});
+        darLog.sort((a,b)=>new Date(a.time)-new Date(b.time));
+        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+        updateHomeTiles();
+        if(paneVisible('dar')){renderCurrentDAR();}
+      }catch(e){}
+    })
+
+    /* ── key_checked_out_current ────────────────────────────
+       Key checkout / return syncs instantly to all devices */
+    .on('postgres_changes',{event:'*',schema:'public',table:'key_checked_out_current'},(payload)=>{
+      try{
+        if(payload.eventType==='INSERT'||payload.eventType==='UPDATE'){
+          const r=payload.new;
+          if(!r?.key_id)return;
+          // Deduplicate: if data is identical skip re-render
+          const existing=keyCheckedOut[r.key_id];
+          if(existing&&existing.person===r.person&&String(existing.time)===String(new Date(r.checked_out_at)))return;
+          keyCheckedOut[r.key_id]={keyId:r.key_id,keyLabel:r.key_label||r.key_id,catId:r.cat_id||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
+        }else if(payload.eventType==='DELETE'){
+          const r=payload.old;
+          if(!r?.key_id||!keyCheckedOut[r.key_id])return; // already gone locally
+          delete keyCheckedOut[r.key_id];
+        }
+        saveKeyState();
+        if(paneVisible('keys')){renderKeysPane();}
+      }catch(e){}
+    })
+
+    /* ── pass_downs ─────────────────────────────────────────
+       New pass down notes appear on all devices immediately */
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'pass_downs'},(payload)=>{
+      try{
+        const r=payload.new;
+        if(!r)return;
+        const pid=String(r.id||r.pass_down_id||'');
+        if(passDowns.some(p=>String(p.id)===pid))return; // deduplicate
+        passDowns.unshift({id:pid,officer:r.officer_name||r.officer||'',text:r.text||r.content||'',time:r.created_at||r.time||new Date().toISOString()});
+        saveStorage();
+        renderPassDownsBanner();
+        updateHomeTiles();
+        if(paneVisible('passdowns')){renderPassDownsPage();}
+      }catch(e){}
+    })
+
+    /* ── near_miss_reports ──────────────────────────────────
+       Near miss submissions sync to all connected devices */
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'near_miss_reports'},(payload)=>{
+      try{
+        const r=payload.new;
+        if(!r)return;
+        if(nmHistory.some(x=>x.id===r.id))return; // deduplicate
+        nmHistory.unshift({id:r.id,officer:r.officer_name||'',building:r.building||'',cats:r.categories||[],desc:r.description||'',photo:r.photo||null,time:new Date(r.submitted_at||Date.now()).toISOString()});
+        saveNMHistory();
+        if(paneVisible('nearmiss')){renderNMHistory();}
+      }catch(e){}
+    })
+
+    .subscribe((status)=>{
+      if(status==='SUBSCRIBED'){
+        console.log('[Realtime] Live sync active');
+      }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+        console.warn('[Realtime] '+status+' — running on local state');
+      }
+    });
 }
 
 
