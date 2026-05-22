@@ -666,6 +666,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+<div id="sw-update-banner" onclick="window.location.reload()" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:99999;background:#1c1c1e;border:1px solid rgba(55,138,221,.55);color:#fff;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:13px;font-weight:500;padding:10px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.5);cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent">App updated — tap to reload</div>
 <div id="app" class="dark">
 
 <!-- PASS DOWN MODAL -->
@@ -2120,6 +2121,12 @@ loadStorage();loadNMHistory();populateSelect();renderPassDownsBanner();loadNearM
 <script>
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('/service-worker.js');
+  navigator.serviceWorker.addEventListener('message',e=>{
+    if(e.data&&e.data.type==='APP_UPDATED'){
+      const b=document.getElementById('sw-update-banner');
+      if(b)b.style.display='block';
+    }
+  });
 }
 /* ══════════════════════════════════════
    SUPABASE AUTH
