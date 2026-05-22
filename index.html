@@ -1696,7 +1696,14 @@ function startQRLoop(){
 function handleQRCode(raw){
   if(qrDone||!qrConfig)return;
   const fullToken='https://canopysecurity.app/scan?code='+qrConfig.token;
-  if(raw!==fullToken&&raw!==qrConfig.token){
+  // For tokens that are themselves full URLs (e.g. PDC rounds), the physical QR
+  // sticker may encode a trailing slash or additional path — accept those variants.
+  // Require the char after the base URL to be /, ?, #, or end-of-string so a
+  // lookalike domain (rounds.platinumdatacenters.com.evil.com) can't spoof it.
+  const tokenIsUrl=qrConfig.token.startsWith('https://');
+  const afterBase=raw.length>qrConfig.token.length?raw[qrConfig.token.length]:'';
+  const urlTokenMatch=tokenIsUrl&&(raw===qrConfig.token||(['/',':','?','#'].includes(afterBase)&&raw.startsWith(qrConfig.token)));
+  if(raw!==fullToken&&raw!==qrConfig.token&&!urlTokenMatch){
     const errEl=document.getElementById('qr-scanner-error');
     errEl.textContent=qrConfig.wrongMsg||'Wrong QR code. Please try again.';
     errEl.style.display='block';
