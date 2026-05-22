@@ -660,18 +660,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .dot-key-out{background:var(--orange)}
 .dot-key-in{background:var(--green)}
 .keys-empty{text-align:center;padding:28px 20px;font-size:13px;color:var(--text-secondary)}
-#qr-print-overlay{display:none}
-@media print{
-  #app{display:none!important}
-  #qr-print-overlay{display:block!important}
-  @page{size:letter;margin:0.4in}
-  .prt-page{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
-  .prt-break{break-before:page;page-break-before:always}
-  .prt-cell{page-break-inside:avoid;break-inside:avoid;box-sizing:border-box;padding:4mm;text-align:center}
-  .prt-cell canvas,.prt-cell img{display:block!important;width:1.75in!important;height:1.75in!important;margin:0 auto}
-  .prt-lbl{font-size:10pt;font-weight:600;color:#111;margin-top:2mm;line-height:1.3}
-  .prt-sub{font-size:8pt;color:#555;margin-top:1mm;line-height:1.3}
-}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1518,14 +1507,14 @@ function restoreActiveShift(){
 }
 function _applyOfficerToUI(n){
   const av=document.getElementById('hdr-av');
-  if(av){av.textContent=n==='Admin'?'★':initials(n);av.style.background=n==='Admin'?'rgba(186,117,23,.15)':'';av.style.color=n==='Admin'?'var(--text-warning)':'';}
-  const nm=document.getElementById('hdr-name');if(nm)nm.textContent=n==='Admin'?'Admin (test mode)':n;
+  if(av){av.textContent=initials(n);av.style.background='';av.style.color='';}
+  const nm=document.getElementById('hdr-name');if(nm)nm.textContent=n;
   const nod=document.getElementById('nm-officer-display');if(nod)nod.value=n;
 }
 function prunePassDowns(){passDowns=passDowns.filter(p=>Date.now()-new Date(p.time)<SEVEN_DAYS);}
 function seedDemoPassDowns(){const n=Date.now();passDowns=[{id:'pd-1',officer:'Matt Dalsing',text:'North parking lot light out on east side — work order submitted, ticket #4821.',time:new Date(n-26*3600000).toISOString()},{id:'pd-2',officer:'Brian Davies',text:'Badge reader at Canopy 3 side entrance is intermittent. IT notified.',time:new Date(n-10*3600000).toISOString()}];saveStorage();}
 function seedDemoData(){const n=new Date();const day=(d,h,m)=>{const x=new Date(n);x.setDate(x.getDate()-d);x.setHours(h,m,0,0);return x.toISOString();};darHistory=[{id:'dar-001',officer:'Matt Dalsing',date:day(1,6,2),dateLabel:fmtDate(new Date(day(1,6,2))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Matt Dalsing signed in.',time:day(1,6,2)},{type:'patrol',title:'Building patrol — Canopy 1',detail:'Officer conducted a patrol of Canopy 1. Tenant spaces walked.',time:day(1,6,45)},{type:'checkout',title:'Shift ended',detail:'Steps: 6,240. Duration: 7h 58m.',time:day(1,14,0)}],steps:6240},{id:'dar-002',officer:'Brian Davies',date:day(1,14,5),dateLabel:fmtDate(new Date(day(1,14,5))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Brian Davies signed in.',time:day(1,14,5)},{type:'nearmiss',title:'Near miss submitted – Canopy 3',detail:'Safety. Wet floor near east stairwell.',time:day(1,16,22)},{type:'checkout',title:'Shift ended',detail:'Steps: 8,120. Duration: 8h 0m.',time:day(1,22,5)}],steps:8120}];saveStorage();}
-function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
+function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
 function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();saveActiveShift();saveShiftToSupabase();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
@@ -1823,31 +1812,54 @@ function openQRPage(){qrSelectMode=false;qrSelected.clear();showScreen('qr');ren
 function closeQRPage(){if(qrSelectMode)toggleQRSelectMode();showScreen('admin');}
 function printQRSheet(codes){
   codes=codes||ALL_QR_CODES;
-  const existing=document.getElementById('qr-print-overlay');
-  if(existing)existing.remove();
+  const win=window.open('','_blank','width=820,height=960');
+  if(!win){alert('Please allow pop-ups to print the QR sheet.');return;}
+
+  // Split into pages of exactly 12 (3 cols × 4 rows)
   const pages=[];
   for(let i=0;i<codes.length;i+=12)pages.push(codes.slice(i,i+12));
-  const overlay=document.createElement('div');
-  overlay.id='qr-print-overlay';
-  overlay.innerHTML=pages.map((pg,pi)=>{
+
+  const pagesHtml=pages.map((pg,pi)=>{
     const cells=pg.map((qr,ci)=>{
       const idx=pi*12+ci;
-      return`<div class="prt-cell"><div id="prtqr${idx}"></div><div class="prt-lbl">${qr.label}</div><div class="prt-sub">${qr.sublabel}</div></div>`;
+      return`<div class="cell"><div class="qr-wrap" id="pqr${idx}"></div><div class="lbl">${qr.label}</div><div class="sub">${qr.sublabel}</div></div>`;
     }).join('');
-    return`<div class="prt-page${pi>0?' prt-break':''}">${cells}</div>`;
-  }).join('');
-  document.body.appendChild(overlay);
-  setTimeout(()=>{
-    codes.forEach((qr,i)=>{
-      const el=document.getElementById('prtqr'+i);
-      if(!el||!window.QRCode)return;
-      try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:200,height:200,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
-    });
-    setTimeout(()=>{
-      window.print();
-      window.addEventListener('afterprint',()=>overlay.remove(),{once:true});
-    },800);
-  },60);
+    return`<div class="page${pi>0?' page-break':''}">\n<div class="grid">${cells}</div>\n</div>`;
+  }).join('\n');
+
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Canopy Security — QR Codes</title><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:#fff}
+@page{size:letter;margin:0.4in}
+/* Each .page fills exactly one US Letter sheet (10.2in tall at 0.4in margins) */
+.page{width:100%;height:10.2in;display:flex;flex-direction:column}
+.page-break{break-before:page;page-break-before:always}
+/* 3-col x 4-row grid that fills the full page height */
+.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:5mm}
+/* Each cell centers its QR + labels vertically and horizontally */
+.cell{border:0.5px solid #ccc;border-radius:5px;padding:2mm;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;break-inside:avoid;page-break-inside:avoid}
+/* QR image locked to exactly 1.75 in regardless of canvas pixel size */
+.qr-wrap{display:inline-flex;background:#fff;margin-bottom:2.5mm;line-height:0}
+.qr-wrap canvas,.qr-wrap img{display:block !important;width:1.75in !important;height:1.75in !important}
+/* Labels — minimum 10pt per spec */
+.lbl{font-size:11pt;font-weight:700;color:#111;line-height:1.25;margin-bottom:1mm}
+.sub{font-size:9pt;color:#444;line-height:1.25}
+@media print{
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{height:10.2in}
+}
+<\/style></head><body>${pagesHtml}<script>
+window.onload=function(){
+  var codes=${JSON.stringify(codes)};
+  codes.forEach(function(qr,i){
+    var el=document.getElementById('pqr'+i);
+    if(!el||!window.QRCode)return;
+    try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:200,height:200,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+  });
+  setTimeout(function(){window.print();},1000);
+};
+<\/script></body></html>`);
+  win.document.close();
 }
 const boilerCP=[{id:'boiler-C1',building:'Canopy 1',token:'canopy-boiler-C1'},{id:'boiler-C3',building:'Canopy 3',token:'canopy-boiler-C3'},{id:'boiler-C5',building:'Canopy 5',token:'canopy-boiler-C5'}].map(c=>({...c,scanned:false,temp:'',alarm:null,afterReset:null,saved:false,checks:[]}));
 function renderBoiler(){const el=document.getElementById('boiler-count');if(el){const totalChecks=boilerCP.reduce((s,c)=>s+c.checks.length,0);el.textContent=totalChecks===0?'0/'+boilerCP.length+' done':totalChecks+' check'+(totalChecks!==1?'s':'')+' logged';}const list=document.getElementById('boiler-list');if(!list)return;list.innerHTML=boilerCP.map((c,i)=>{const checkCount=c.checks.length;const rowHtml=`<div class="checkpoint" style="padding:10px 12px"><div class="cp-dot ${checkCount>0?'done':'pending'}"></div><div style="flex:1"><div class="cp-name">${c.building} – Boiler room</div>${c.scanned&&!c.saved?'<div class="cp-time" style="color:var(--text-info)">QR scanned — enter reading below</div>':checkCount>0?`<div class="cp-time">${checkCount} check${checkCount!==1?'s':''} logged this shift</div>`:'<div class="cp-time">Pending — scan QR to begin</div>'}</div>${c.scanned&&!c.saved?'':`<button class="cp-btn" onclick="scanBoilerQR(${i})">Scan QR</button>`}</div>${checkCount>0&&!(c.scanned&&!c.saved)?`<div style="padding:4px 12px 8px;border-top:0.5px solid var(--border-secondary)">${c.checks.map((ck,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:11px;font-weight:600;color:var(--text-info);min-width:24px">C${ci+1}</span><span style="font-size:12px;color:var(--text-primary);flex:1">${ck.temp}°F · ${ck.alarmSummary}</span><span style="font-size:11px;color:var(--text-secondary)">${ck.time}</span></div>`).join('')}</div>`:''}`;let formHtml='';if(c.scanned&&!c.saved){let alarmGuidance='';if(c.alarm===true){alarmGuidance=`<div class="alarm-guidance"><div class="alarm-step alarm-warn"><div class="alarm-step-hdr">⚠️ Alarm present — action required</div>Reset the boiler using the reset button on the unit. Wait for it to fully restart before checking again.</div></div><div style="margin-top:10px"><div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:6px">After reset — is the alarm still present?</div><div class="boiler-yn-row"><button class="yn-btn yes ${c.afterReset===true?'active':''}" onclick="setBoilerAfterReset(${i},true)">Yes — still alarming</button><button class="yn-btn no ${c.afterReset===false?'active':''}" onclick="setBoilerAfterReset(${i},false)">No — alarm cleared</button></div>${c.afterReset===true?`<div class="alarm-danger alarm-step" style="margin-top:10px"><div class="alarm-step-hdr">🚨 Contact facilities immediately</div>The alarm persists after reset. Do not operate the boiler. Notify facilities management right away.</div><a href="tel:+18014204789" class="facilities-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2h4l1.5 4-2.5 1.5a10 10 0 0 0 3.5 3.5L10 8.5l4 1.5v4a1 1 0 0 1-1 1A14 14 0 0 1 1 3a1 1 0 0 1 1-1z"/></svg>Call Cody Holt — Facilities</a>`:''}</div>`;}const checkNum=checkCount+1;formHtml=`<div class="boiler-form"><div class="boiler-form-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>${c.building} — Check #${checkNum}</div><div class="form-group" style="margin-bottom:10px"><label>Water temperature (°F)</label><input type="number" id="btemp-${i}" placeholder="e.g. 185" value="${c.temp}" oninput="boilerCP[${i}].temp=this.value" style="font-size:16px"></div><div class="form-group" style="margin-bottom:0"><label>Any alarms active?</label><div class="boiler-yn-row"><button class="yn-btn yes ${c.alarm===true?'active':''}" onclick="setBoilerAlarm(${i},true)">Yes</button><button class="yn-btn no ${c.alarm===false?'active':''}" onclick="setBoilerAlarm(${i},false)">No</button></div></div>${alarmGuidance}<button onclick="saveBoiler(${i})" style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer" ${(!c.temp||c.alarm===null||(c.alarm===true&&c.afterReset===null))?'disabled style="width:100%;margin-top:12px;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:not-allowed;opacity:.35"':''}>Save &amp; log to DAR</button></div>`;}return rowHtml+formHtml;}).join('');}
@@ -2133,6 +2145,13 @@ let _shiftRestored=false;
 let _supabaseUserId=null; // cached Supabase user ID — set on login/restore, cleared on end-shift
 
 async function _initApp(){
+  // Remove any stale test-mode shift saved under the Admin bypass account
+  try{
+    const _raw=localStorage.getItem('active_shift');
+    if(_raw&&JSON.parse(_raw).officer==='Admin')localStorage.removeItem('active_shift');
+    if(localStorage.getItem('current_officer')==='Admin')localStorage.removeItem('current_officer');
+  }catch(e){}
+
   // 1. Apply dark mode immediately
   const appEl=document.getElementById('app');
   if(appEl)appEl.classList.add('dark');
