@@ -709,6 +709,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div id="nm-detail-photo-wrap" style="display:none">
       <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Photo</div>
       <img id="nm-detail-photo" style="width:100%;border-radius:12px;display:block" />
+      <div id="nm-detail-photo-placeholder" style="display:none;padding:20px;text-align:center;border:0.5px dashed var(--border-primary);border-radius:12px;font-size:13px;color:var(--text-secondary)">📷 Image taken on another device</div>
     </div>
   </div>
 </div>
@@ -1546,8 +1547,8 @@ function openPassDownModal(){
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
 function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;passDowns.unshift({id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()});saveStorage();closePassDownModal();finalizeShift();}
 function skipPassDown(){closePassDownModal();finalizeShift();}
-function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
-function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
+function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
+function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
 function finalizeShift(){clearShiftFromSupabase();if(stepTracking)stopStepTracking();const endTime=new Date();const dur=Math.floor((endTime-shiftStart)/60000);const h=Math.floor(dur/60),m=dur%60;const durStr=(h>0?h+'h ':'')+m+'m';addEntry('checkout','Shift ended','Officer '+officer+' signed out. Steps: '+stepCount.toLocaleString()+'. Duration: '+durStr+'.');clearInterval(timerInt);const record={id:'dar-'+Date.now(),officer,date:shiftStart.toISOString(),dateLabel:fmtDate(shiftStart),entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),steps:stepCount};darHistory.unshift(record);saveStorage();document.getElementById('eos-sub').textContent='Good work, '+officer.split(' ')[0]+'!';document.getElementById('eos-stats').innerHTML=`<div class="eos-stat-row"><span class="eos-stat-label">Officer</span><span class="eos-stat-val">${officer}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-in</span><span class="eos-stat-val">${fmt(shiftStart)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-out</span><span class="eos-stat-val">${fmt(endTime)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Duration</span><span class="eos-stat-val">${durStr}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Steps</span><span class="eos-stat-val">${stepCount.toLocaleString()}</span></div><div class="eos-stat-row"><span class="eos-stat-label">DAR entries</span><span class="eos-stat-val">${darLog.length}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Near miss reports</span><span class="eos-stat-val">${stats.nm}</span></div>`;const _shiftRecord=record;
   if(window._supabase){
     window._supabase.from('shift_summaries').upsert({
@@ -1698,6 +1699,7 @@ function startQRLoop(){
 function handleQRCode(raw){
   if(qrDone||!qrConfig)return;
   const fullToken='https://canopysecurity.app/scan?code='+qrConfig.token;
+  console.log('[QR SCAN] raw:',raw,'| expected fullToken:',fullToken,'| token:',qrConfig.token);
   // For tokens that are themselves full URLs (e.g. PDC rounds), the physical QR
   // sticker may encode a trailing slash or additional path — accept those variants.
   // Require the char after the base URL to be /, ?, #, or end-of-string so a
@@ -1737,11 +1739,11 @@ const dcPatrol={scans:[]};
 const bkrPatrol={scans:[]};
 function renderDCPatrol(){const n=dcPatrol.scans.length;const el=document.getElementById('datacenter-count');if(el)el.textContent=n>0?n+' round'+(n!==1?'s':''):'';}
 function _doLogDC(){addEntry('check','Data Center Patrol','Officer conducted a patrol of the Data Center area and completed Platinum Data Centers rounds check.');window.open(PDC_URL,'_blank','noopener');}
-function logDCPatrol(){openQRScanner({title:'Scan QR — Data Center',sub:'Point at the Data Center QR code',token:PDC_URL,wrongMsg:'Wrong QR code. Please scan the Data Center patrol code.',successLabel:'Data Center Patrol logged',successSub:'Platinum Data Centers rounds check complete',onSuccess:_doLogDC});}
+function logDCPatrol(){openQRScanner({title:'Scan QR — Data Center',sub:'Point at the Data Center QR code',token:'canopy-datacenter',wrongMsg:'Wrong QR code. Please scan the Data Center patrol code.',successLabel:'Data Center Patrol logged',successSub:'Platinum Data Centers rounds check complete',onSuccess:_doLogDC});}
 function renderBunkerPatrol(){const n=bkrPatrol.scans.length;const el=document.getElementById('bunker-count');if(el)el.textContent=n>0?n+' round'+(n!==1?'s':''):'';}
 function _doLogBunker(){addEntry('check','Bunker Patrol','Officer conducted a patrol of the Bunker area and completed Platinum Data Centers rounds check.');window.open(PDC_URL,'_blank','noopener');}
-function logBunkerPatrol(){openQRScanner({title:'Scan QR — Bunker',sub:'Point at the Bunker QR code',token:PDC_URL,wrongMsg:'Wrong QR code. Please scan the Bunker patrol code.',successLabel:'Bunker Patrol logged',successSub:'Platinum Data Centers rounds check complete',onSuccess:_doLogBunker});}
-const ALL_QR_CODES=[{label:'Canopy 1',sublabel:'Building Patrol',token:'canopy-patrol-C1'},{label:'Canopy 3',sublabel:'Building Patrol',token:'canopy-patrol-C3'},{label:'Canopy 4',sublabel:'Building Patrol',token:'canopy-patrol-C4'},{label:'Canopy 5',sublabel:'Building Patrol',token:'canopy-patrol-C5'},{label:'Canopy 1',sublabel:'Boiler Room Check',token:'canopy-boiler-C1'},{label:'Canopy 3',sublabel:'Boiler Room Check',token:'canopy-boiler-C3'},{label:'Canopy 5',sublabel:'Boiler Room Check',token:'canopy-boiler-C5'},{label:'Data Center',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'Bunker',sublabel:'Platinum Data Centers · Rounds',token:'https://rounds.platinumdatacenters.com'},{label:'UPS / West',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-W'},{label:'UPS / East',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-E'},{label:'PDU 11',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU11'},{label:'PDU 12',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU12'},{label:'AC',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-AC'},{label:'2H AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2HAC'},{label:'3 Lab AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-3LAB'},{label:'AC 2FL So. IDF',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-AC2FL'},{label:'2LEW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LEW'},{label:'2LDW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LDW'},{label:'2LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LCW'},{label:'2LBW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LBW'},{label:'1LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1LCW'},{label:'1 S. IDF PW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIDF'},{label:'1 S. IDF AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIAC'},
+function logBunkerPatrol(){openQRScanner({title:'Scan QR — Bunker',sub:'Point at the Bunker QR code',token:'canopy-bunker',wrongMsg:'Wrong QR code. Please scan the Bunker patrol code.',successLabel:'Bunker Patrol logged',successSub:'Platinum Data Centers rounds check complete',onSuccess:_doLogBunker});}
+const ALL_QR_CODES=[{label:'Canopy 1',sublabel:'Building Patrol',token:'canopy-patrol-C1'},{label:'Canopy 3',sublabel:'Building Patrol',token:'canopy-patrol-C3'},{label:'Canopy 4',sublabel:'Building Patrol',token:'canopy-patrol-C4'},{label:'Canopy 5',sublabel:'Building Patrol',token:'canopy-patrol-C5'},{label:'Canopy 1',sublabel:'Boiler Room Check',token:'canopy-boiler-C1'},{label:'Canopy 3',sublabel:'Boiler Room Check',token:'canopy-boiler-C3'},{label:'Canopy 5',sublabel:'Boiler Room Check',token:'canopy-boiler-C5'},{label:'Data Center',sublabel:'Platinum Data Centers · Rounds',token:'canopy-datacenter'},{label:'Bunker',sublabel:'Platinum Data Centers · Rounds',token:'canopy-bunker'},{label:'UPS / West',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-W'},{label:'UPS / East',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-UPS-E'},{label:'PDU 11',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU11'},{label:'PDU 12',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-PDU12'},{label:'AC',sublabel:'Canopy 1 · Meter',token:'canopy-meter-C1-AC'},{label:'2H AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2HAC'},{label:'3 Lab AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-3LAB'},{label:'AC 2FL So. IDF',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-AC2FL'},{label:'2LEW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LEW'},{label:'2LDW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LDW'},{label:'2LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LCW'},{label:'2LBW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-2LBW'},{label:'1LCW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1LCW'},{label:'1 S. IDF PW',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIDF'},{label:'1 S. IDF AC',sublabel:'Canopy 3 · Meter',token:'canopy-meter-C3-1SIAC'},
 {token:'canopy-pavilion',label:'Pavilion',sublabel:'Pavilion Area Patrol'},
 {token:'canopy-riser-C1',label:'Fire Riser — C1',sublabel:'Canopy 1 Main Sprinkler Valve'},
 {token:'canopy-riser-C3',label:'Fire Riser — C3',sublabel:'Canopy 3 Main Sprinkler Valve'},
@@ -1899,7 +1901,8 @@ let nmHistory=[];
 function loadNMHistory(){try{const d=localStorage.getItem('nm_history');if(d)nmHistory=JSON.parse(d);}catch(e){nmHistory=[];}}
 function saveNMHistory(){try{localStorage.setItem('nm_history',JSON.stringify(nmHistory));}catch(e){}}
 const nmReports=[];
-function openNMDetail(id){const r=nmHistory.find(x=>x.id===id)||nmReports.find(x=>x.id===id);if(!r)return;document.getElementById('nm-detail-title').textContent=r.building;document.getElementById('nm-detail-meta').textContent=r.officer+' · '+fmtFull(r.time);document.getElementById('nm-detail-cats').innerHTML=r.cats&&r.cats.length?r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join(''):'<span style="font-size:12px;color:var(--text-secondary)">No category</span>';document.getElementById('nm-detail-desc').textContent=r.desc;const pw=document.getElementById('nm-detail-photo-wrap');const pi=document.getElementById('nm-detail-photo');if(r.photo){pi.src=r.photo;pw.style.display='block';}else{pi.src='';pw.style.display='none';}document.getElementById('nm-detail-backdrop').style.display='block';}
+function openNMDetail(id){const r=nmHistory.find(x=>x.id===id)||nmReports.find(x=>x.id===id);if(!r)return;document.getElementById('nm-detail-title').textContent=r.building;document.getElementById('nm-detail-meta').textContent=r.officer+' · '+fmtFull(r.time);document.getElementById('nm-detail-cats').innerHTML=r.cats&&r.cats.length?r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join(''):'<span style="font-size:12px;color:var(--text-secondary)">No category</span>';document.getElementById('nm-detail-desc').textContent=r.desc;const pw=document.getElementById('nm-detail-photo-wrap');const pi=document.getElementById('nm-detail-photo');const ph=document.getElementById('nm-detail-photo-placeholder');// Try localStorage first (keyed by report ID), then fall back to r.photo if it's real image data
+const localPhoto=localStorage.getItem('nm_photo_'+id);const photoSrc=localPhoto||(r.photo&&r.photo!=='local_only'?r.photo:null);if(photoSrc){pi.src=photoSrc;pi.style.display='block';ph.style.display='none';pw.style.display='block';}else if(r.photo==='local_only'){pi.src='';pi.style.display='none';ph.style.display='block';pw.style.display='block';}else{pi.src='';pw.style.display='none';}document.getElementById('nm-detail-backdrop').style.display='block';}
 function closeNMDetail(){document.getElementById('nm-detail-backdrop').style.display='none';document.getElementById('nm-detail-photo').src='';}
 function showNMSub(id,btn){document.getElementById('nm-sub-submit').style.display=id==='submit'?'block':'none';document.getElementById('nm-sub-history').style.display=id==='history'?'block':'none';document.querySelectorAll('#pane-nearmiss .dar-tab').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history'){populateNMHistoryFilters();renderNMHistory();loadAllNearMissFromSupabase();}}
 function toggleCat(btn,cat,cls){const idx=activeCatsNM.indexOf(cat);if(idx>-1){activeCatsNM.splice(idx,1);btn.className='cat-pill';}else{activeCatsNM.push(cat);btn.className='cat-pill '+cls;}}
@@ -1937,7 +1940,7 @@ function removePhoto(){
   document.getElementById('photo-preview').style.display='none';
   document.getElementById('photo-area').style.display='block';
 }
-function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);addEntry('nearmiss','Near miss submitted – '+building,(activeCatsNM.length?activeCatsNM.join(', ')+'. ':'')+desc);stats.nm++;document.getElementById('nm-building').value='Select building...';document.getElementById('nm-desc').value='';nmPhotoData=null;removePhoto();activeCatsNM=[];document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');updateStats();renderNMList();showToast('nm-toast');}
+function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};if(nmPhotoData){try{localStorage.setItem('nm_photo_'+report.id,nmPhotoData);}catch(e){}}nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);addEntry('nearmiss','Near miss submitted – '+building,(activeCatsNM.length?activeCatsNM.join(', ')+'. ':'')+desc);stats.nm++;document.getElementById('nm-building').value='Select building...';document.getElementById('nm-desc').value='';nmPhotoData=null;removePhoto();activeCatsNM=[];document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');updateStats();renderNMList();showToast('nm-toast');autoCreateNearMissPassDown(report);}
 function renderNMList(){const camIcon='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';document.getElementById('nm-list').innerHTML=nmReports.slice(0,5).map(r=>`<div class="nm-item" onclick="openNMDetail('${r.id}')" style="cursor:pointer"><div class="nm-top"><div><div class="nm-title-text">${r.building}</div><div class="nm-meta">${r.officer} · ${fmt(r.time)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">${r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join('')}${r.photo?camIcon:''}</div></div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px">${r.desc.length>120?r.desc.slice(0,120)+'…':r.desc}</div></div>`).join('')||'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No reports yet this shift.</div>';}
 function populateNMHistoryFilters(){const sel=document.getElementById('nm-hist-month');const months=[...new Set(nmHistory.map(r=>fmtMonthYear(r.time)))];const cur=sel.value;sel.innerHTML='<option value="">All time</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');if(cur)sel.value=cur;}
 function renderNMHistory() {
@@ -1984,7 +1987,7 @@ function renderNMHistory() {
       <div id="${monthId}" style="display:${isCurrentMonth ? 'block' : 'none'}">
         ${reports.map(r => {
           const isResolved = r.status === 'resolved';
-          return `<div style="padding:11px 14px;border-top:0.5px solid var(--border-secondary)">
+          return `<div onclick="openNMDetail('${r.id}')" style="padding:11px 14px;border-top:0.5px solid var(--border-secondary);cursor:pointer">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
               <div>
                 <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${r.building}</div>
@@ -2003,7 +2006,7 @@ function renderNMHistory() {
             ${isResolved && r.resolution_notes ? `<div style="font-size:11px;color:var(--text-success);background:var(--bg-success);border-radius:var(--radius-sm);padding:6px 8px;margin-bottom:6px">✓ ${r.resolution_notes}</div>` : ''}
             ${isResolved
               ? `<div style="font-size:11px;color:var(--text-secondary)">Resolved by ${r.resolved_by} · ${r.resolved_at ? fmtFull(r.resolved_at) : ''}</div>`
-              : `<div style="margin-top:8px">
+              : `<div style="margin-top:8px" onclick="event.stopPropagation()">
                   <input type="text" id="nm-resolve-notes-${r.id}" placeholder="Resolution notes (optional)…" style="width:100%;padding:7px 9px;font-size:12px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);margin-bottom:6px">
                   <button onclick="resolveNearMiss('${r.id}', document.getElementById('nm-resolve-notes-${r.id}').value)" style="width:100%;padding:8px;font-size:12px;font-family:inherit;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer">✓ Mark as Resolved</button>
                 </div>`
@@ -2332,7 +2335,7 @@ async function saveNearMissToSupabase(report) {
         building: report.building,
         categories: report.cats || [],
         description: report.desc,
-        photo: report.photo || null,
+        photo: report.photo ? 'local_only' : null,
         submitted_at: new Date(report.time).toISOString()
       });
     if (error) {
@@ -2343,6 +2346,31 @@ async function saveNearMissToSupabase(report) {
   } catch (e) {
     console.warn('saveNearMissToSupabase exception:', e.message);
   }
+}
+async function autoCreateNearMissPassDown(report) {
+  const nmTypeStr=(report.cats||[]).length?report.cats.map(c=>c.charAt(0).toUpperCase()+c.slice(1)).join(', '):'Unspecified';
+  const nmSummary=report.desc.length>150?report.desc.slice(0,150)+'…':report.desc;
+  const pdText='🚨 Near Miss Report submitted by '+report.officer+' at '+fmt(new Date(report.time))+'. Location: '+report.building+'. Incident type: '+nmTypeStr+'. Summary: '+nmSummary+'. See Near Miss Reports → History for full details.';
+  let pdId='pd-nm-'+Date.now();
+  // Save to Supabase and get back the real UUID so realtime dedup works correctly
+  try {
+    if(window._supabase){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const{data,error}=await window._supabase
+          .from('pass_downs')
+          .insert({user_id:session.user.id,officer_name:report.officer,text:pdText,created_at:report.time})
+          .select('id')
+          .single();
+        if(!error&&data)pdId=String(data.id);
+      }
+    }
+  }catch(e){console.warn('autoCreateNearMissPassDown error:',e.message);}
+  const autoPD={id:pdId,officer:report.officer,text:pdText,time:report.time,auto_nm:true};
+  passDowns.unshift(autoPD);
+  saveStorage();
+  renderPassDownsBanner();
+  if(paneVisible('passdowns'))renderPassDownsPage();
 }
 async function loadNearMissFromSupabase() {
   try {
@@ -2360,7 +2388,11 @@ async function loadNearMissFromSupabase() {
       cats: r.categories || [],
       desc: r.description,
       photo: r.photo || null,
-      time: new Date(r.submitted_at).toISOString()
+      time: new Date(r.submitted_at).toISOString(),
+      status: r.status || 'open',
+      resolved_by: r.resolved_by || null,
+      resolved_at: r.resolved_at || null,
+      resolution_notes: r.resolution_notes || null
     }));
     saveNMHistory();
   } catch (e) {
@@ -2518,7 +2550,8 @@ function _setupRealtimeListeners(){
         if(!r)return;
         const pid=String(r.id||r.pass_down_id||'');
         if(passDowns.some(p=>String(p.id)===pid))return; // deduplicate
-        passDowns.unshift({id:pid,officer:r.officer_name||r.officer||'',text:r.text||r.content||'',time:r.created_at||r.time||new Date().toISOString()});
+        const pdText=r.text||r.content||'';
+        passDowns.unshift({id:pid,officer:r.officer_name||r.officer||'',text:pdText,time:r.created_at||r.time||new Date().toISOString(),auto_nm:pdText.startsWith('🚨')});
         saveStorage();
         renderPassDownsBanner();
         updateHomeTiles();
