@@ -1834,15 +1834,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-se
 .page{width:100%;height:10.2in;display:flex;flex-direction:column}
 .page-break{break-before:page;page-break-before:always}
 /* 3-col x 4-row grid that fills the full page height */
-.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:5mm}
+.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:3mm}
 /* Each cell centers its QR + labels vertically and horizontally */
-.cell{border:0.5px solid #ccc;border-radius:5px;padding:2mm;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;break-inside:avoid;page-break-inside:avoid}
+.cell{border:0.5px solid #ccc;border-radius:5px;padding:2mm;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;break-inside:avoid;page-break-inside:avoid;overflow:hidden}
 /* QR image locked to exactly 1.75 in regardless of canvas pixel size */
-.qr-wrap{display:inline-flex;background:#fff;margin-bottom:2.5mm;line-height:0}
+.qr-wrap{display:inline-flex;background:#fff;margin-bottom:2mm;line-height:0}
 .qr-wrap canvas,.qr-wrap img{display:block !important;width:1.75in !important;height:1.75in !important}
-/* Labels — minimum 10pt per spec */
-.lbl{font-size:11pt;font-weight:700;color:#111;line-height:1.25;margin-bottom:1mm}
-.sub{font-size:9pt;color:#444;line-height:1.25}
+/* Labels */
+.lbl{font-size:10pt;font-weight:700;color:#111;line-height:1.2;margin-bottom:0.5mm}
+.sub{font-size:8pt;color:#444;line-height:1.2}
 @media print{
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page{height:10.2in}
