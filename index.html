@@ -1326,6 +1326,186 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:13px;color:var(--text-primary)">Boiler patrol season</span><button id="boiler-toggle" onclick="toggleBoiler()" style="font-size:11px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;background:none;color:var(--text-secondary)">Active</button></div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0"><span style="font-size:13px;color:var(--text-primary)">Daily step goal</span><select id="step-goal-select" onchange="updateStepGoal()" style="font-size:12px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);padding:4px 8px;background:var(--bg-primary);color:var(--text-primary)"><option value="5000">5,000</option><option value="7500">7,500</option><option value="10000" selected>10,000</option><option value="12500">12,500</option><option value="15000">15,000</option></select></div>
       </div>
+<div class="admin-section" id="reports-section">
+  <div class="admin-section-title">Monthly reports</div>
+  <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6">
+    Five reports are emailed to <strong style="color:var(--text-primary)">matt@canopyus.com</strong> automatically on the 1st of each month. Use the button below to send last month's reports immediately.
+  </div>
+
+  <!-- Report list -->
+  <div id="report-list" style="margin-bottom:14px">
+    <div class="report-row"><span class="report-dot"></span><span class="report-name">Daily Activity Reports</span></div>
+    <div class="report-row"><span class="report-dot"></span><span class="report-name">Near Miss Reports</span></div>
+    <div class="report-row"><span class="report-dot"></span><span class="report-name">Meter Readings</span></div>
+    <div class="report-row"><span class="report-dot"></span><span class="report-name">Pass Down Messages</span></div>
+    <div class="report-row"><span class="report-dot"></span><span class="report-name">Key Checkout History</span></div>
+  </div>
+
+  <!-- Send button -->
+  <button
+    id="send-reports-btn"
+    onclick="sendMonthlyReports()"
+    style="width:100%;padding:12px;font-size:14px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 3l12 5-12 5V9.5l8-1.5-8-1.5V3z"/>
+    </svg>
+    <span id="send-reports-label">Send reports now</span>
+  </button>
+
+  <!-- Status message -->
+  <div id="report-status" style="display:none;margin-top:10px;padding:10px 12px;border-radius:var(--radius-md);font-size:12px;line-height:1.6"></div>
+</div>
+
+
+<!-- ================================================================
+  STYLES — paste inside your existing <style> block,
+  OR just leave them here in a <style> tag right after this comment.
+  ================================================================ -->
+<style>
+.report-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 0.5px solid var(--border-secondary);
+}
+.report-row:last-child { border-bottom: none; }
+.report-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+.report-name { flex: 1; }
+
+#send-reports-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#send-reports-btn.sending {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 0.5px solid var(--border-primary);
+}
+.report-status-ok {
+  background: var(--bg-success);
+  border: 0.5px solid rgba(29,158,117,.3);
+  color: var(--text-success);
+}
+.report-status-err {
+  background: var(--bg-danger);
+  border: 0.5px solid rgba(226,75,74,.3);
+  color: var(--text-danger);
+}
+.report-status-partial {
+  background: var(--bg-warning);
+  border: 0.5px solid rgba(186,117,23,.3);
+  color: var(--text-warning);
+}
+</style>
+
+
+<!-- ================================================================
+  JAVASCRIPT — paste inside your existing <script> block,
+  anywhere near the bottom before the closing </script> tag.
+  ================================================================ -->
+<script>
+// ── Monthly Report Sender ────────────────────────────────────────
+// Calls the Supabase Edge Function directly from the admin panel.
+// The function uses the service role key server-side, so only the
+// anon key is needed here (same key already used by the app).
+
+const REPORTS_FUNCTION_URL =
+  'https://chpargloviqxzyjbehel.supabase.co/functions/v1/send-monthly-reports';
+
+async function sendMonthlyReports() {
+  const btn       = document.getElementById('send-reports-btn');
+  const label     = document.getElementById('send-reports-label');
+  const statusEl  = document.getElementById('report-status');
+
+  // ── guard: get auth token ──────────────────────────────────────
+  if (!window._supabase) {
+    _showReportStatus('error', 'Not connected to Supabase. Please reload the app.');
+    return;
+  }
+
+  const { data: { session } } = await window._supabase.auth.getSession();
+  if (!session) {
+    _showReportStatus('error', 'You must be signed in to send reports.');
+    return;
+  }
+
+  // ── loading state ──────────────────────────────────────────────
+  btn.disabled = true;
+  btn.classList.add('sending');
+  label.textContent = 'Sending reports…';
+  statusEl.style.display = 'none';
+  statusEl.className = '';
+
+  try {
+    const res = await fetch(REPORTS_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: '{}',
+    });
+
+    const json = await res.json().catch(() => null);
+
+    if (res.ok || res.status === 207) {
+      // Parse per-report results
+      const results   = json?.results ?? {};
+      const period    = json?.period  ?? 'last month';
+      const entries   = Object.entries(results);
+      const allOk     = entries.every(([, r]) => (r as any).ok);
+      const anyOk     = entries.some(([,  r]) => (r as any).ok);
+
+      if (allOk) {
+        const totalRows = entries.reduce((s, [, r]) => s + ((r as any).rows ?? 0), 0);
+        _showReportStatus(
+          'ok',
+          `✓ All 5 reports sent for ${period}. Total records: ${totalRows}.`
+        );
+        label.textContent = 'Send reports now';
+      } else if (anyOk) {
+        const failed = entries.filter(([, r]) => !(r as any).ok).map(([id]) => id);
+        _showReportStatus(
+          'partial',
+          `⚠ ${5 - failed.length}/5 reports sent for ${period}. Failed: ${failed.join(', ')}. Check function logs.`
+        );
+        label.textContent = 'Send reports now';
+      } else {
+        _showReportStatus('error', `All reports failed to send. Check Supabase Edge Function logs.`);
+        label.textContent = 'Retry';
+      }
+    } else {
+      const msg = json?.error ?? `HTTP ${res.status}`;
+      _showReportStatus('error', `Error: ${msg}`);
+      label.textContent = 'Retry';
+    }
+  } catch (err) {
+    _showReportStatus('error', `Network error: ${(err as Error).message}`);
+    label.textContent = 'Retry';
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('sending');
+  }
+}
+
+function _showReportStatus(type, msg) {
+  const el = document.getElementById('report-status');
+  el.textContent = msg;
+  el.className = type === 'ok'      ? 'report-status-ok'
+               : type === 'partial' ? 'report-status-partial'
+               :                      'report-status-err';
+  el.style.display = 'block';
+}
+</script>
       <button class="back-btn" onclick="lockAdmin()">Lock &amp; return</button>
     </div>
   </div>
