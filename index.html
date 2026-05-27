@@ -1329,181 +1329,194 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 <div class="admin-section" id="reports-section">
   <div class="admin-section-title">Monthly reports</div>
   <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6">
-    Five reports are emailed to <strong style="color:var(--text-primary)">matt@canopyus.com</strong> automatically on the 1st of each month. Use the button below to send last month's reports immediately.
+    Select reports to email to <strong style="color:var(--text-primary)">matt@canopyus.com</strong>. All 5 are sent automatically on the 1st of each month.
   </div>
 
-  <!-- Report list -->
+  <!-- Checkboxes -->
   <div id="report-list" style="margin-bottom:14px">
-    <div class="report-row"><span class="report-dot"></span><span class="report-name">Daily Activity Reports</span></div>
-    <div class="report-row"><span class="report-dot"></span><span class="report-name">Near Miss Reports</span></div>
-    <div class="report-row"><span class="report-dot"></span><span class="report-name">Meter Readings</span></div>
-    <div class="report-row"><span class="report-dot"></span><span class="report-name">Pass Down Messages</span></div>
-    <div class="report-row"><span class="report-dot"></span><span class="report-name">Key Checkout History</span></div>
+    <label class="report-row">
+      <input type="checkbox" class="report-checkbox" value="dar" checked
+        style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+      <span class="report-name">Daily Activity Reports</span>
+    </label>
+    <label class="report-row">
+      <input type="checkbox" class="report-checkbox" value="near-miss" checked
+        style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+      <span class="report-name">Near Miss Reports</span>
+    </label>
+    <label class="report-row">
+      <input type="checkbox" class="report-checkbox" value="meters" checked
+        style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+      <span class="report-name">Meter Readings</span>
+    </label>
+    <label class="report-row">
+      <input type="checkbox" class="report-checkbox" value="pass-downs" checked
+        style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+      <span class="report-name">Pass Down Messages</span>
+    </label>
+    <label class="report-row">
+      <input type="checkbox" class="report-checkbox" value="key-checkouts" checked
+        style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
+      <span class="report-name">Key Checkout History</span>
+    </label>
+  </div>
+
+  <!-- Select all / none -->
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button onclick="reportSelectAll(true)"
+      style="flex:1;padding:7px;font-size:11px;font-family:inherit;font-weight:600;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-secondary)">
+      Select all
+    </button>
+    <button onclick="reportSelectAll(false)"
+      style="flex:1;padding:7px;font-size:11px;font-family:inherit;font-weight:600;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);cursor:pointer;color:var(--text-secondary)">
+      Clear all
+    </button>
   </div>
 
   <!-- Send button -->
-  <button
-    id="send-reports-btn"
-    onclick="sendMonthlyReports()"
+  <button id="send-reports-btn" onclick="sendMonthlyReports()"
     style="width:100%;padding:12px;font-size:14px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M2 3l12 5-12 5V9.5l8-1.5-8-1.5V3z"/>
     </svg>
-    <span id="send-reports-label">Send reports now</span>
+    <span id="send-reports-label">Send selected reports</span>
   </button>
 
-  <!-- Status message -->
+  <!-- Status -->
   <div id="report-status" style="display:none;margin-top:10px;padding:10px 12px;border-radius:var(--radius-md);font-size:12px;line-height:1.6"></div>
 </div>
 
-
-<!-- ================================================================
-  STYLES — paste inside your existing <style> block,
-  OR just leave them here in a <style> tag right after this comment.
-  ================================================================ -->
 <style>
 .report-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 0;
+  gap: 10px;
+  padding: 8px 0;
   font-size: 13px;
   color: var(--text-primary);
   border-bottom: 0.5px solid var(--border-secondary);
+  cursor: pointer;
 }
 .report-row:last-child { border-bottom: none; }
-.report-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-}
 .report-name { flex: 1; }
-
-#send-reports-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-#send-reports-btn.sending {
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 0.5px solid var(--border-primary);
-}
-.report-status-ok {
-  background: var(--bg-success);
-  border: 0.5px solid rgba(29,158,117,.3);
-  color: var(--text-success);
-}
-.report-status-err {
-  background: var(--bg-danger);
-  border: 0.5px solid rgba(226,75,74,.3);
-  color: var(--text-danger);
-}
-.report-status-partial {
-  background: var(--bg-warning);
-  border: 0.5px solid rgba(186,117,23,.3);
-  color: var(--text-warning);
-}
+#send-reports-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.report-status-ok      { background:var(--bg-success); border:0.5px solid rgba(29,158,117,.3); color:var(--text-success); }
+.report-status-err     { background:var(--bg-danger);  border:0.5px solid rgba(226,75,74,.3);  color:var(--text-danger);  }
+.report-status-partial { background:var(--bg-warning); border:0.5px solid rgba(186,117,23,.3); color:var(--text-warning); }
 </style>
 
-
-<!-- ================================================================
-  JAVASCRIPT — paste inside your existing <script> block,
-  anywhere near the bottom before the closing </script> tag.
-  ================================================================ -->
 <script>
-// ── Monthly Report Sender ────────────────────────────────────────
-// Calls the Supabase Edge Function directly from the admin panel.
-// The function uses the service role key server-side, so only the
-// anon key is needed here (same key already used by the app).
+var REPORTS_FUNCTION_URL = 'https://chpargloviqxzyjbehel.supabase.co/functions/v1/send-monthly-reports';
 
-const REPORTS_FUNCTION_URL =
-  'https://chpargloviqxzyjbehel.supabase.co/functions/v1/send-monthly-reports';
-
-async function sendMonthlyReports() {
-  const btn       = document.getElementById('send-reports-btn');
-  const label     = document.getElementById('send-reports-label');
-  const statusEl  = document.getElementById('report-status');
-
-  // ── guard: get auth token ──────────────────────────────────────
-  if (!window._supabase) {
-    _showReportStatus('error', 'Not connected to Supabase. Please reload the app.');
-    return;
-  }
-
-  const { data: { session } } = await window._supabase.auth.getSession();
-  if (!session) {
-    _showReportStatus('error', 'You must be signed in to send reports.');
-    return;
-  }
-
-  // ── loading state ──────────────────────────────────────────────
-  btn.disabled = true;
-  btn.classList.add('sending');
-  label.textContent = 'Sending reports…';
-  statusEl.style.display = 'none';
-  statusEl.className = '';
-
-  try {
-    const res = await fetch(REPORTS_FUNCTION_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: '{}',
-    });
-
-    const json = await res.json().catch(() => null);
-
-    if (res.ok || res.status === 207) {
-      // Parse per-report results
-      const results   = json?.results ?? {};
-      const period    = json?.period  ?? 'last month';
-      const entries   = Object.entries(results);
-      const allOk     = entries.every(([, r]) => (r as any).ok);
-      const anyOk     = entries.some(([,  r]) => (r as any).ok);
-
-      if (allOk) {
-        const totalRows = entries.reduce((s, [, r]) => s + ((r as any).rows ?? 0), 0);
-        _showReportStatus(
-          'ok',
-          `✓ All 5 reports sent for ${period}. Total records: ${totalRows}.`
-        );
-        label.textContent = 'Send reports now';
-      } else if (anyOk) {
-        const failed = entries.filter(([, r]) => !(r as any).ok).map(([id]) => id);
-        _showReportStatus(
-          'partial',
-          `⚠ ${5 - failed.length}/5 reports sent for ${period}. Failed: ${failed.join(', ')}. Check function logs.`
-        );
-        label.textContent = 'Send reports now';
-      } else {
-        _showReportStatus('error', `All reports failed to send. Check Supabase Edge Function logs.`);
-        label.textContent = 'Retry';
-      }
-    } else {
-      const msg = json?.error ?? `HTTP ${res.status}`;
-      _showReportStatus('error', `Error: ${msg}`);
-      label.textContent = 'Retry';
-    }
-  } catch (err) {
-    _showReportStatus('error', `Network error: ${(err as Error).message}`);
-    label.textContent = 'Retry';
-  } finally {
-    btn.disabled = false;
-    btn.classList.remove('sending');
-  }
+function reportSelectAll(val) {
+  var boxes = document.querySelectorAll('.report-checkbox');
+  for (var i = 0; i < boxes.length; i++) { boxes[i].checked = val; }
 }
 
-function _showReportStatus(type, msg) {
-  const el = document.getElementById('report-status');
+function showReportStatus(type, msg) {
+  var el = document.getElementById('report-status');
   el.textContent = msg;
-  el.className = type === 'ok'      ? 'report-status-ok'
-               : type === 'partial' ? 'report-status-partial'
-               :                      'report-status-err';
+  el.className = type === 'ok' ? 'report-status-ok' : type === 'partial' ? 'report-status-partial' : 'report-status-err';
   el.style.display = 'block';
+}
+
+function sendMonthlyReports() {
+  // Get selected reports
+  var boxes = document.querySelectorAll('.report-checkbox:checked');
+  var selected = [];
+  for (var i = 0; i < boxes.length; i++) { selected.push(boxes[i].value); }
+
+  if (selected.length === 0) {
+    showReportStatus('error', 'Please select at least one report.');
+    return;
+  }
+
+  var btn   = document.getElementById('send-reports-btn');
+  var label = document.getElementById('send-reports-label');
+  var statusEl = document.getElementById('report-status');
+
+  // Immediate visual feedback
+  btn.disabled = true;
+  btn.style.background = 'var(--bg-secondary)';
+  btn.style.color = 'var(--text-secondary)';
+  btn.style.border = '0.5px solid var(--border-primary)';
+  label.textContent = 'Sending ' + selected.length + ' report' + (selected.length !== 1 ? 's' : '') + '…';
+  statusEl.style.display = 'none';
+
+  // Get auth token
+  if (!window._supabase) {
+    showReportStatus('error', 'Not connected to Supabase. Please reload the app.');
+    btn.disabled = false;
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.border = '';
+    label.textContent = 'Send selected reports';
+    return;
+  }
+
+  window._supabase.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+
+    if (!session) {
+      showReportStatus('error', 'You must be signed in to send reports.');
+      btn.disabled = false;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.border = '';
+      label.textContent = 'Send selected reports';
+      return;
+    }
+
+    fetch(REPORTS_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({ reports: selected })
+    })
+    .then(function(res) {
+      return res.json().then(function(json) {
+        return { status: res.status, json: json };
+      });
+    })
+    .then(function(r) {
+      var status = r.status;
+      var json   = r.json;
+
+      if (status === 200 || status === 207) {
+        var results = json.results || {};
+        var period  = json.period  || 'last month';
+        var keys    = Object.keys(results);
+        var allOk   = keys.every(function(k) { return results[k].ok; });
+        var anyOk   = keys.some(function(k)  { return results[k].ok; });
+
+        if (allOk) {
+          var total = keys.reduce(function(s, k) { return s + (results[k].rows || 0); }, 0);
+          showReportStatus('ok', '✓ ' + keys.length + ' report' + (keys.length !== 1 ? 's' : '') + ' sent for ' + period + '. Total records: ' + total + '.');
+        } else if (anyOk) {
+          var failed = keys.filter(function(k) { return !results[k].ok; });
+          showReportStatus('partial', '⚠ ' + (keys.length - failed.length) + '/' + keys.length + ' reports sent. Failed: ' + failed.join(', ') + '.');
+        } else {
+          showReportStatus('error', 'Reports failed to send. Check Supabase Edge Function logs.');
+        }
+      } else {
+        showReportStatus('error', 'Error ' + status + ': ' + (json.error || 'Unknown error'));
+      }
+
+      label.textContent = 'Send selected reports';
+    })
+    .catch(function(err) {
+      showReportStatus('error', 'Network error: ' + err.message);
+      label.textContent = 'Send selected reports';
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.border = '';
+    });
+  });
 }
 </script>
       <button class="back-btn" onclick="lockAdmin()">Lock &amp; return</button>
