@@ -998,6 +998,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="patrol-body" id="meters-patrol-body">
         <div class="toast" id="meter-toast" style="margin:8px 12px 4px;border-radius:8px">Reading logged to DAR</div>
         <div id="meter-list-patrol"></div>
+        <div class="cl-footer">
+          <button id="meter-preview-btn" onclick="requestMeterPreview()" style="width:100%;padding:13px;font-size:14px;font-family:inherit;font-weight:600;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3l12 5-12 5V9.5l8-1.5-8-1.5V3z"/></svg>
+            <span id="meter-preview-label">Email meter readings report to security team</span>
+          </button>
+          <div id="meter-preview-status" style="display:none;margin-top:8px;padding:10px 12px;border-radius:var(--radius-md);font-size:13px;font-weight:500;text-align:center"></div>
+        </div>
       </div>
     </div>
 
@@ -1059,9 +1066,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="patrol-body" id="meters-patrol-body">
           <div class="toast" id="meter-toast" style="margin:8px 12px 4px;border-radius:8px">Reading logged to DAR</div>
           <div id="meter-list-patrol"></div>
+          <div class="cl-footer">
+            <button onclick="requestMeterPreview()" style="width:100%;padding:13px;font-size:14px;font-family:inherit;font-weight:600;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3l12 5-12 5V9.5l8-1.5-8-1.5V3z"/></svg>
+              Email meter readings report to security team
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="fe-section">
       <div class="lbl">Fire extinguisher inspection</div>
       <div class="fe-entry-card" onclick="openFESchedule()">
@@ -1556,6 +1570,73 @@ function sendMonthlyReports() {
   var el = document.getElementById('period-label');
   if (el) el.textContent = 'Period: ' + _getMonthLabel('prev');
 })();
+
+// ── Meter Readings on-demand preview (officer button) ──────────────────────
+var REPORTS_FUNCTION_URL_METERS = 'https://chpargloviqxzyjbehel.supabase.co/functions/v1/send-monthly-reports';
+
+function requestMeterPreview() {
+  var btn      = document.getElementById('meter-preview-btn');
+  var label    = document.getElementById('meter-preview-label');
+  var statusEl = document.getElementById('meter-preview-status');
+
+  if (!window._supabase) {
+    _showMeterPreviewStatus('error', 'Not connected. Please reload the app.');
+    return;
+  }
+
+  btn.disabled = true;
+  label.textContent = 'Sending…';
+  statusEl.style.display = 'none';
+
+  window._supabase.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+    if (!session) {
+      _showMeterPreviewStatus('error', 'You must be signed in.');
+      btn.disabled = false;
+      label.textContent = 'Email meter readings report';
+      return;
+    }
+
+    fetch(REPORTS_FUNCTION_URL_METERS, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token,
+      },
+      body: JSON.stringify({ reportType: 'meter-preview', period: 'current' }),
+    })
+    .then(function(res) { return res.json().then(function(json) { return { status: res.status, json: json }; }); })
+    .then(function(r) {
+      if (r.status === 200 && r.json.ok) {
+        _showMeterPreviewStatus('ok', '✓ Report sent to security@canopyus.com (' + (r.json.rows || 0) + ' records)');
+      } else {
+        _showMeterPreviewStatus('error', 'Error: ' + (r.json.error || 'Unknown error'));
+      }
+    })
+    .catch(function(err) {
+      _showMeterPreviewStatus('error', 'Network error: ' + err.message);
+    })
+    .finally(function() {
+      btn.disabled = false;
+      label.textContent = 'Email meter readings report';
+    });
+  });
+}
+
+function _showMeterPreviewStatus(type, msg) {
+  var el = document.getElementById('meter-preview-status');
+  el.textContent = msg;
+  el.style.display = 'block';
+  if (type === 'ok') {
+    el.style.background = 'var(--bg-success)';
+    el.style.border     = '0.5px solid rgba(29,158,117,.3)';
+    el.style.color      = 'var(--text-success)';
+  } else {
+    el.style.background = 'var(--bg-danger)';
+    el.style.border     = '0.5px solid rgba(226,75,74,.3)';
+    el.style.color      = 'var(--text-danger)';
+  }
+}
 </script>
       <button class="back-btn" onclick="lockAdmin()">Lock &amp; return</button>
     </div>
