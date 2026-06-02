@@ -1693,6 +1693,9 @@ function feGetChecked(bldgId){return Object.keys(feCheckState).filter(k=>k.start
 const TC={checkin:{dot:'dot-checkin',tag:'t-checkin',label:'Check-in'},patrol:{dot:'dot-patrol',tag:'t-patrol',label:'Patrol'},boiler:{dot:'dot-boiler',tag:'t-boiler',label:'Boiler check'},meter:{dot:'dot-meter',tag:'t-meter',label:'Meter reading'},nearmiss:{dot:'dot-nearmiss',tag:'t-nearmiss',label:'Near miss'},note:{dot:'dot-note',tag:'t-note',label:'Note'},steps:{dot:'dot-steps',tag:'t-steps',label:'Milestone'},fireext:{dot:'dot-fireext',tag:'t-fireext',label:'Fire ext. inspection'},checkout:{dot:'dot-checkout',tag:'t-checkout',label:'Sign-out'}};
 let officers=['Brian Davies','Chase Montrose','Jameson Richards','Matt Dalsing','Randy Lazenby','Tyler Schlegelmilch'];
 let patrolOrder=['boiler','meters-patrol','fe'];
+try { const saved = localStorage.getItem('patrol_order'); if (saved) patrolOrder = JSON.parse(saved); } catch(e) {}
+let boilerActive = true;
+try { const b = localStorage.getItem('boiler_active'); if (b !== null) boilerActive = b === 'true'; } catch(e) {}
 const patrolMeta={boiler:{label:'Boiler room checks'},['meters-patrol']:{label:'Utility meters'},fe:{label:'Fire extinguisher inspection'}};
 let adminPin='1234',officer=null,shiftStart=null,shiftId=null,timerInt=null,prevScreen='checkin',_pendingOfficer=null;
 let darLog=[],activeCatsNM=[];
@@ -2563,13 +2566,13 @@ function toggleFEDrawer(e){if(e.target.closest('.drag-handle'))return;feDrawerOp
 let poDragging=null;
 function poDragStart(e){poDragging=e.currentTarget;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
 function poDragOver(e){e.preventDefault();document.querySelectorAll('.patrol-order-item').forEach(el=>el.classList.remove('drag-over'));if(e.currentTarget!==poDragging)e.currentTarget.classList.add('drag-over');}
-function poDrop(e){e.preventDefault();const toIdx=parseInt(e.currentTarget.dataset.idx);const fromIdx=parseInt(poDragging.dataset.idx);if(toIdx===fromIdx)return;const moved=patrolOrder.splice(fromIdx,1)[0];patrolOrder.splice(toIdx,0,moved);renderPatrolOrderList();applyPatrolOrder();}
+function poDrop(e){e.preventDefault();const toIdx=parseInt(e.currentTarget.dataset.idx);const fromIdx=parseInt(poDragging.dataset.idx);if(toIdx===fromIdx)return;const moved=patrolOrder.splice(fromIdx,1)[0];patrolOrder.splice(toIdx,0,moved);renderPatrolOrderList();applyPatrolOrder();localStorage.setItem('patrol_order',JSON.stringify(patrolOrder));}
 function poDragEnd(){document.querySelectorAll('.patrol-order-item').forEach(el=>{el.classList.remove('dragging');el.classList.remove('drag-over');});poDragging=null;}
-function applyPatrolOrder(){const pane=document.getElementById('pane-patrols');if(!pane)return;const sectionMap={boiler:'.boiler-section',['meters-patrol']:'.meters-section',fe:'.fe-section'};patrolOrder.forEach((id,i)=>{const sel=sectionMap[id];if(!sel)return;const el=pane.querySelector(sel);if(el)pane.appendChild(el);});}
+function applyPatrolOrder(){const pane=document.getElementById('pane-patrols');if(!pane)return;const sectionMap={boiler:'.boiler-section',['meters-patrol']:'.meters-section',fe:'.fe-section'};patrolOrder.forEach((id,i)=>{const sel=sectionMap[id];if(!sel)return;const el=pane.querySelector(sel);if(el)pane.appendChild(el);});const boilerEl=pane.querySelector('.boiler-section');if(boilerEl)boilerEl.style.display=boilerActive?'':'none';}
 async function addOfficer(){const inp=document.getElementById('new-officer-name');const v=inp.value.trim();if(!v)return;if(window._supabase){try{await window._supabase.from('officers').insert({name:v});}catch(e){console.warn('addOfficer Supabase error:',e);}}officers.push(v);officers.sort((a,b)=>a.localeCompare(b));inp.value='';renderOfficerList();populateSelect();showToast('admin-toast');}
 async function removeOfficer(name){if(window._supabase){try{await window._supabase.from('officers').delete().eq('name',name);}catch(e){console.warn('removeOfficer Supabase error:',e);}}const i=officers.indexOf(name);if(i>-1)officers.splice(i,1);renderOfficerList();populateSelect();showToast('admin-toast');}
 function changePin(){const v=document.getElementById('new-pin').value.trim();if(v.length===4&&/^\d{4}$/.test(v)){adminPin=v;document.getElementById('new-pin').value='';showToast('admin-toast');}}
-function toggleBoiler(){const btn=document.getElementById('boiler-toggle');btn.textContent=btn.textContent==='Active'?'Inactive':'Active';}
+function toggleBoiler(){const btn=document.getElementById('boiler-toggle');btn.textContent=btn.textContent==='Active'?'Inactive':'Active';boilerActive=btn.textContent==='Active';localStorage.setItem('boiler_active',String(boilerActive));applyPatrolOrder();}
 function clearPinErr(){document.getElementById('pin-err').classList.remove('show');}
 function tryUnlock(){const v=document.getElementById('pin-field').value;if(v===adminPin){document.getElementById('admin-locked-panel').style.display='none';document.getElementById('admin-unlocked').style.display='block';renderOfficerList();renderAdminQRGrid();}else{document.getElementById('pin-err').classList.add('show');document.getElementById('pin-field').value='';}}
 function lockAdmin(){document.getElementById('admin-unlocked').style.display='none';document.getElementById('admin-locked-panel').style.display='block';document.getElementById('pin-field').value='';}
@@ -2614,6 +2617,10 @@ async function _initApp(){
   const appEl=document.getElementById('app');
   if(appEl)appEl.classList.add('dark');
   document.body.style.background='#1a1a1a';
+
+  // 1b. Set boiler toggle button text to match saved state
+  const boilerBtn=document.getElementById('boiler-toggle');
+  if(boilerBtn)boilerBtn.textContent=boilerActive?'Active':'Inactive';
 
   // 2. Initialize Supabase first — always, before any routing decision
   try{
