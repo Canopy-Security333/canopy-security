@@ -2222,12 +2222,21 @@ function togglePavilionMic(){if(!('webkitSpeechRecognition' in window)&&!('Speec
 // have elapsed; if so the riser renders as already-checked (green ✅) without
 // requiring the officer to re-scan.  Nothing about logging / DAR / Supabase
 // is changed — only the in-memory `saved` flag that drives the visual state.
-const _RISER_WEEK_MS = 7 * 24 * 60 * 60 * 1000; // 604 800 000 ms
 function _riserSavedThisWeek(id) {
   try {
     const ts = localStorage.getItem('riser_saved_ts_' + id);
     if (!ts) return false;
-    return (Date.now() - Number(ts)) < _RISER_WEEK_MS;
+    const saved = new Date(Number(ts));
+    const now = new Date();
+    // Get the most recent Sunday for any given date
+    function getSunday(d) {
+      const day = d.getDay(); // 0=Sun, 1=Mon ... 6=Sat
+      const diff = d.getDate() - day;
+      return new Date(d.getFullYear(), d.getMonth(), diff);
+    }
+    const savedWeekStart = getSunday(saved);
+    const currentWeekStart = getSunday(now);
+    return savedWeekStart.getTime() === currentWeekStart.getTime();
   } catch(e) { return false; }
 }
 const riserCP=[{id:'riser-C1',building:'Canopy 1',token:'canopy-riser-C1'},{id:'riser-C3',building:'Canopy 3',token:'canopy-riser-C3'},{id:'riser-C4',building:'Canopy 4',token:'canopy-riser-C4'},{id:'riser-C5',building:'Canopy 5',token:'canopy-riser-C5'}].map(c=>({...c,scanned:false,valveStatus:'open',saved:_riserSavedThisWeek(c.id)}));
@@ -2406,10 +2415,107 @@ async function resolveNearMiss(id, notes) {
   }
 }
 function downloadNMReport(){const mF=document.getElementById('nm-hist-month').value;const monthLabel=mF||fmtMonthYear(new Date());const recs=nmHistory.filter(r=>!mF||fmtMonthYear(r.time)===mF);const safety=recs.filter(r=>r.cats.includes('safety')).length;const security=recs.filter(r=>r.cats.includes('security')).length;const facilities=recs.filter(r=>r.cats.includes('facilities')).length;let txt='NEAR MISS MONTHLY REPORT\n================================\n';txt+=`Period:     ${monthLabel}\nGenerated:  ${fmtFull(new Date())}\nTotal:      ${recs.length} report${recs.length!==1?'s':''}\n--------------------------------\nSafety:     ${safety}\nSecurity:   ${security}\nFacilities: ${facilities}\n================================\n\n`;recs.forEach((r,i)=>{txt+=`#${i+1}  ${fmtFull(r.time)}\n    Officer:   ${r.officer}\n    Location:  ${r.building}\n    Category:  ${r.cats.length?r.cats.join(', '):'None'}\n    Details:   ${r.desc}\n\n`;});txt+='================================\nEnd of report';const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='NearMiss_'+monthLabel.replace(/\s/g,'_')+'.txt';a.click();URL.revokeObjectURL(url);}
-function autoStartSteps(){if(typeof DeviceMotionEvent==='undefined')return;if(typeof DeviceMotionEvent.requestPermission==='function'){setStepUI('inactive','Tap Enable to start step tracking');}else{startStepTracking();}}
-function toggleStepTracking(){if(stepTracking){stopStepTracking();return;}if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){DeviceMotionEvent.requestPermission().then(r=>{if(r==='granted')startStepTracking();else setStepUI('denied','Motion access denied');}).catch(()=>setStepUI('denied','Permission error'));}else{startStepTracking();}}
-function startStepTracking(){stepTracking=true;setStepUI('active','Step tracking active');document.getElementById('step-toggle-btn').textContent='Pause';stepListener=function(e){const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;const mag=Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z);if(lastMag!==null){const delta=Math.abs(mag-lastMag);if(delta>3.5&&!stepCooldown){stepCount++;stepCooldown=true;setTimeout(()=>{stepCooldown=false;},300);updateStepDisplay();checkMilestones();}}lastMag=mag;};window.addEventListener('devicemotion',stepListener);}
-function stopStepTracking(){stepTracking=false;if(stepListener)window.removeEventListener('devicemotion',stepListener);stepListener=null;setStepUI('inactive','Step tracking paused');document.getElementById('step-toggle-btn').textContent='Resume';}
+// ── Step tracking — sensor strategy ─────────────────────────────────────────
+// Priority 1: Generic Sensor API (Accelerometer) — W3C standard, available in
+//   Chrome 67+ on Android. Uses navigator.permissions for a proper browser
+//   permission prompt before starting. On Android this triggers the browser's
+//   accelerometer permission dialog (the closest a PWA can get to a motion
+//   permission prompt — Android's ACTIVITY_RECOGNITION is a native-only API
+//   that no browser can request from a web page).
+// Priority 2: DeviceMotionEvent — legacy fallback. Includes the iOS Safari 13+
+//   requestPermission() branch which prompts the iOS system dialog.
+// Priority 3: Neither available — inform the officer and hide the button.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Shared peak-detection logic — identical threshold/cooldown as before.
+// Extracted so both sensor paths use exactly the same algorithm.
+function _stepPeakDetect(mag){if(lastMag!==null){const delta=Math.abs(mag-lastMag);if(delta>3.5&&!stepCooldown){stepCount++;stepCooldown=true;setTimeout(()=>{stepCooldown=false;},300);updateStepDisplay();checkMilestones();}}lastMag=mag;}
+
+// Generic Sensor API path (primary on Android Chrome).
+// stepListener is set to the Accelerometer *object* so stopStepTracking can
+// call .stop() on it rather than removeEventListener.
+function startStepTrackingGeneric(){
+  try{
+    const accel=new Accelerometer({frequency:60});
+    accel.addEventListener('error',function(e){
+      console.warn('Accelerometer sensor error:',e.error);
+      try{accel.stop();}catch(_){}
+      stepListener=null;
+      if(typeof DeviceMotionEvent!=='undefined'){startStepTracking();}
+      else{setStepUI('denied','Sensor error — step tracking unavailable');}
+    });
+    accel.addEventListener('reading',function(){
+      _stepPeakDetect(Math.sqrt(accel.x*accel.x+accel.y*accel.y+accel.z*accel.z));
+    });
+    accel.start();
+    stepTracking=true;
+    stepListener=accel;
+    setStepUI('active','Step tracking active');
+    document.getElementById('step-toggle-btn').textContent='Pause';
+  }catch(e){
+    console.warn('Accelerometer() failed to start:',e);
+    if(typeof DeviceMotionEvent!=='undefined'){startStepTracking();}
+    else{setStepUI('denied','Step tracking not supported on this device');}
+  }
+}
+
+// DeviceMotionEvent path — legacy fallback (also used directly on iOS Safari).
+// stepListener is set to the event handler *function* so stopStepTracking
+// knows to call removeEventListener on it.
+function startStepTracking(){stepTracking=true;setStepUI('active','Step tracking active');document.getElementById('step-toggle-btn').textContent='Pause';stepListener=function(e){const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;_stepPeakDetect(Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z));};window.addEventListener('devicemotion',stepListener);}
+
+// Called on shift restore — picks the right path; requests permission if needed.
+function autoStartSteps(){
+  if(typeof Accelerometer!=='undefined'){
+    // Query first without prompting. State 'granted'|'prompt' → start (browser
+    // will show its dialog on accel.start() if state is 'prompt').
+    // State 'denied' → show message, don't attempt.
+    navigator.permissions.query({name:'accelerometer'}).then(function(result){
+      if(result.state==='denied'){
+        setStepUI('denied','Motion access denied — enable in browser settings');
+        document.getElementById('step-toggle-btn').textContent='Denied';
+      }else{
+        startStepTrackingGeneric();
+      }
+    }).catch(function(){startStepTrackingGeneric();});
+  }else if(typeof DeviceMotionEvent!=='undefined'){
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      setStepUI('inactive','Tap Enable to start step tracking');
+    }else{
+      startStepTracking();
+    }
+  }else{
+    setStepUI('denied','Step tracking not supported on this device');
+    document.getElementById('step-toggle-btn').style.display='none';
+  }
+}
+
+// Called by the Enable / Pause / Resume button tap.
+function toggleStepTracking(){
+  if(stepTracking){stopStepTracking();return;}
+  if(typeof Accelerometer!=='undefined'){
+    navigator.permissions.query({name:'accelerometer'}).then(function(result){
+      if(result.state==='denied'){setStepUI('denied','Motion access denied — enable in browser settings');}
+      else{startStepTrackingGeneric();}
+    }).catch(function(){startStepTrackingGeneric();});
+  }else if(typeof DeviceMotionEvent!=='undefined'){
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      DeviceMotionEvent.requestPermission().then(function(r){
+        if(r==='granted')startStepTracking();
+        else setStepUI('denied','Motion access denied');
+      }).catch(function(){setStepUI('denied','Permission error');});
+    }else{
+      startStepTracking();
+    }
+  }else{
+    setStepUI('denied','Step tracking not supported on this device');
+  }
+}
+
+// Stops whichever sensor is currently active.
+// stepListener is either a Function (devicemotion) or an Accelerometer object —
+// typeof check distinguishes them cleanly without needing instanceof.
+function stopStepTracking(){stepTracking=false;if(stepListener){if(typeof stepListener==='function'){window.removeEventListener('devicemotion',stepListener);}else{try{stepListener.stop();}catch(e){}}}stepListener=null;setStepUI('inactive','Step tracking paused');document.getElementById('step-toggle-btn').textContent='Resume';}
 function setStepUI(state,text){document.getElementById('step-dot').className='step-dot '+state;document.getElementById('step-status-txt').textContent=text;}
 function updateStepDisplay(){document.getElementById('step-count').textContent=stepCount.toLocaleString();document.getElementById('step-miles').textContent=(stepCount*0.000473).toFixed(2);document.getElementById('step-bar').style.width=Math.round(Math.min(stepCount/stepGoal*100,100))+'%';}
 function checkMilestones(){MILESTONES.forEach(m=>{if(stepCount>=m&&!reachedMilestones.has(m)){reachedMilestones.add(m);document.getElementById('ms-'+m).classList.add('reached');if(m<=stepGoal)addEntry('steps','Step milestone reached',stepCount.toLocaleString()+' steps completed.');updateStats();}});}
