@@ -2429,7 +2429,7 @@ function downloadNMReport(){const mF=document.getElementById('nm-hist-month').va
 
 // Shared peak-detection logic — identical threshold/cooldown as before.
 // Extracted so both sensor paths use exactly the same algorithm.
-function _stepPeakDetect(mag){if(lastMag!==null){const delta=Math.abs(mag-lastMag);if(delta>3.5&&!stepCooldown){stepCount++;stepCooldown=true;setTimeout(()=>{stepCooldown=false;},300);updateStepDisplay();checkMilestones();}}lastMag=mag;}
+function _stepPeakDetect(mag){if(mag<9.5){lastMag=mag;return;}if(lastMag!==null){const delta=Math.abs(mag-lastMag);if(delta>1.2&&!stepCooldown){stepCount++;stepCooldown=true;setTimeout(()=>{stepCooldown=false;},250);updateStepDisplay();checkMilestones();}}lastMag=mag;}
 
 // Generic Sensor API path (primary on Android Chrome).
 // stepListener is set to the Accelerometer *object* so stopStepTracking can
