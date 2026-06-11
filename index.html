@@ -1889,7 +1889,7 @@ function openPassDownModal(){
   document.getElementById('pd-modal').classList.add('open');
 }
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
-function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;passDowns.unshift({id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()});saveStorage();closePassDownModal();finalizeShift();}
+function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const pd={id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
 function skipPassDown(){closePassDownModal();finalizeShift();}
 function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
 function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
@@ -3392,6 +3392,10 @@ function confirmKeyReturn(){
     returned.push(entry.keyLabel);
   });
   saveKeyState();
+  passDowns=passDowns.filter(p=>!(p.key_ids&&p.key_ids.length&&p.key_ids.every(kid=>!keyCheckedOut[kid])));
+  saveStorage();
+  renderPassDownsBanner();
+  if(paneVisible('passdowns'))renderPassDownsPage();
   if(returned.length){
     const darDetail=`${returned.join(', ')} returned by ${samplePerson}.${returnNotes?' '+returnNotes:''}`;
     addEntry('key','Key return — '+(returned.length===1?returned[0]:returned.length+' keys'),darDetail);
