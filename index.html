@@ -565,7 +565,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .dar-tab{color:var(--text-secondary);background:none}
 .light .dar-tab.act{background:var(--text-primary);color:#111}
 .light .dar-tab:not(:last-child){border-color:var(--border-primary)}
-.dark #boiler-toggle,.dark #step-toggle-btn{color:var(--text-primary);border-color:var(--border-primary);background:var(--bg-secondary)}
+.dark #boiler-toggle{color:var(--text-primary);border-color:var(--border-primary);background:var(--bg-secondary)}
 .light .ci-wrap{background:linear-gradient(160deg,#2d4a3e 0%,#1a2e26 55%,#0f1f1a 100%)}
 .light .ci-logo,.light .ci-note{color:rgba(255,255,255,.25)}
 .light .ci-site{color:#fff}
@@ -689,6 +689,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     </div>
     <div class="modal-sub">Leave a note for the next officer on duty. Visible on the check-in screen for 7 days.</div>
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px"><textarea class="modal-textarea" id="pd-textarea" placeholder="e.g. North parking lot light is out — facilities notified…" oninput="updatePdBtn()" style="flex:1;margin-bottom:0"></textarea><button class="mic-btn" id="mic-btn-pd" onclick="toggleDictation('pd-textarea','mic-btn-pd')" title="Dictate note" style="flex-shrink:0;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button></div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:6px">
+        Steps this shift <span style="font-weight:400;color:var(--text-tertiary)">(check Google Fit or Samsung Health)</span>
+      </label>
+      <input type="number" id="pd-step-input" placeholder="e.g. 8500" min="0" style="width:100%;padding:11px 12px;font-size:15px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)">
+    </div>
     <button class="modal-primary-btn" id="pd-submit-btn" onclick="submitPassDown()" disabled>Save pass down &amp; end shift</button>
     <button class="modal-secondary-btn" onclick="skipPassDown()">No pass downs — end shift</button>
   </div>
@@ -931,13 +937,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="stat"><div class="stat-n" id="stat-nm">0</div><div class="stat-l">Near miss reports</div></div>
       <div class="stat"><div class="stat-n" id="stat-checks">0</div><div class="stat-l">Checkpoints cleared</div></div>
       <div class="stat"><div class="stat-n" id="stat-entries">0</div><div class="stat-l">DAR entries</div></div>
-    </div>
-    <div class="lbl">Steps this shift</div>
-    <div class="step-card">
-      <div class="step-main"><div class="step-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0F6E56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/><path d="M7.5 17.5 10 13l3 2 2.5-5"/><path d="M16 18l-1.5-4-2.5-1"/></svg></div><div><div class="step-count" id="step-count">0</div><div class="step-sub">steps · approx. <span id="step-miles">0.00</span> mi</div></div></div>
-      <div class="step-bar-wrap"><div class="step-bar-track"><div class="step-bar-fill" id="step-bar" style="width:0%"></div></div><div class="step-bar-labels"><span>0</span><span id="step-goal-label">Goal: 10,000</span></div></div>
-      <div class="step-milestones"><span class="milestone" id="ms-2500">2,500</span><span class="milestone" id="ms-5000">5,000</span><span class="milestone" id="ms-7500">7,500</span><span class="milestone" id="ms-10000">10,000</span></div>
-      <div class="step-status"><div class="step-dot inactive" id="step-dot"></div><span id="step-status-txt">Tap to enable step tracking</span><button id="step-toggle-btn" onclick="toggleStepTracking()" style="margin-left:auto;font-size:11px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--text-secondary)">Enable</button></div>
     </div>
     <div class="lbl">Shift</div>
     <button class="end-shift-btn" onclick="menuEndShift()">
@@ -1349,7 +1348,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="admin-section"><div class="admin-section-title">Change admin PIN</div><div style="display:flex;gap:8px"><input type="password" id="new-pin" placeholder="New 4-digit PIN" maxlength="4" style="flex:1;padding:9px 10px;font-size:14px;font-family:monospace;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);letter-spacing:.15em"/><button class="add-officer-btn" onclick="changePin()">Save</button></div><div style="font-size:11px;color:var(--text-secondary);margin-top:8px">Default PIN is 1234. Change after first setup.</div></div>
       <div class="admin-section"><div class="admin-section-title">App settings</div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:13px;color:var(--text-primary)">Boiler patrol season</span><button id="boiler-toggle" onclick="toggleBoiler()" style="font-size:11px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);padding:4px 10px;cursor:pointer;background:none;color:var(--text-secondary)">Active</button></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0"><span style="font-size:13px;color:var(--text-primary)">Daily step goal</span><select id="step-goal-select" onchange="updateStepGoal()" style="font-size:12px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-sm);padding:4px 8px;background:var(--bg-primary);color:var(--text-primary)"><option value="5000">5,000</option><option value="7500">7,500</option><option value="10000" selected>10,000</option><option value="12500">12,500</option><option value="15000">15,000</option></select></div>
       </div>
 <div class="admin-section" id="reports-section">
   <div class="admin-section-title">Monthly reports</div>
@@ -1695,7 +1693,6 @@ const FE_BLDGS=['C1','C3','C4','C5'];
 const ROTATION_MATRIX=[[0,1,2,3,-1],[1,2,3,-1,0],[2,3,-1,0,1],[3,-1,0,1,2],[-1,0,1,2,3]];
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SEVEN_DAYS=7*24*60*60*1000;
-const MILESTONES=[2500,5000,7500,10000];
 function getCycleMonth(m,y){const anchor={y:2026,m:5};const t=(y-anchor.y)*12+(m-anchor.m);return((t%5)+5)%5;}
 function getAssignment(oi,cm){const bi=ROTATION_MATRIX[cm][oi];return bi===-1?null:FE_BLDGS[bi];}
 function feIsComplete(bldgId){return localStorage.getItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldgId)==='1';}
@@ -1711,7 +1708,7 @@ const patrolMeta={boiler:{label:'Boiler room checks'},['meters-patrol']:{label:'
 let adminPin='1234',officer=null,shiftStart=null,shiftId=null,timerInt=null,prevScreen='checkin',_pendingOfficer=null;
 let darLog=[],activeCatsNM=[];
 let stats={patrols:0,nm:0,checks:0};
-let stepCount=0,stepGoal=10000,stepTracking=false,stepListener=null,lastMag=null,stepCooldown=false;
+let stepCount=0,stepGoal=10000;
 let reachedMilestones=new Set(),darkMode=true;
 let viewingRecord=null,darHistory=[],passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
@@ -1824,7 +1821,6 @@ function restoreActiveShift(){
         _applyOfficerToUI(officer);
         ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
         const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
-        updateStepDisplay();
         timerInt=setInterval(()=>{
           const d=Math.floor((Date.now()-shiftStart)/1000);
           const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;
@@ -1834,7 +1830,6 @@ function restoreActiveShift(){
         showScreen('main');
         showPane('home',null);
         updateHomeTiles();
-        autoStartSteps();
         return true;
       }
     }
@@ -1862,7 +1857,7 @@ function seedDemoPassDowns(){}
 function seedDemoData(){const n=new Date();const day=(d,h,m)=>{const x=new Date(n);x.setDate(x.getDate()-d);x.setHours(h,m,0,0);return x.toISOString();};darHistory=[{id:'dar-001',officer:'Matt Dalsing',date:day(1,6,2),dateLabel:fmtDate(new Date(day(1,6,2))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Matt Dalsing signed in.',time:day(1,6,2)},{type:'patrol',title:'Building patrol — Canopy 1',detail:'Officer conducted a patrol of Canopy 1. Tenant spaces walked.',time:day(1,6,45)},{type:'checkout',title:'Shift ended',detail:'Steps: 6,240. Duration: 7h 58m.',time:day(1,14,0)}],steps:6240},{id:'dar-002',officer:'Brian Davies',date:day(1,14,5),dateLabel:fmtDate(new Date(day(1,14,5))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Brian Davies signed in.',time:day(1,14,5)},{type:'nearmiss',title:'Near miss submitted – Canopy 3',detail:'Safety. Wet floor near east stairwell.',time:day(1,16,22)},{type:'checkout',title:'Shift ended',detail:'Steps: 8,120. Duration: 8h 0m.',time:day(1,22,5)}],steps:8120}];saveStorage();}
 function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
-function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);updateStepDisplay();document.querySelectorAll('.milestone').forEach(m=>m.classList.remove('reached'));addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();saveActiveShift();saveShiftToSupabase();}
+function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();saveActiveShift();saveShiftToSupabase();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
@@ -1886,11 +1881,13 @@ function openPassDownModal(){
   }
   textarea.value=prefix;
   document.getElementById('pd-submit-btn').disabled=!textarea.value.trim();
+  const stepInp=document.getElementById('pd-step-input');
+  if(stepInp)stepInp.value='';
   document.getElementById('pd-modal').classList.add('open');
 }
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
-function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const pd={id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
-function skipPassDown(){closePassDownModal();finalizeShift();}
+function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const pd={id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();const stepInp=document.getElementById('pd-step-input');if(stepInp&&stepInp.value.trim()){const parsed=parseInt(stepInp.value.trim(),10);if(!isNaN(parsed)&&parsed>=0)stepCount=parsed;}finalizeShift();}
+function skipPassDown(){closePassDownModal();const stepInp=document.getElementById('pd-step-input');if(stepInp&&stepInp.value.trim()){const parsed=parseInt(stepInp.value.trim(),10);if(!isNaN(parsed)&&parsed>=0)stepCount=parsed;}finalizeShift();}
 function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
 function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
 function showPDSub(id,btn){document.getElementById('pd-sub-active').style.display=id==='active'?'block':'none';document.getElementById('pd-sub-history').style.display=id==='history'?'block':'none';document.querySelectorAll('#pd-tab-active,#pd-tab-history').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history'){populatePDHistoryFilters();renderPDHistory();loadAllPassDownsFromSupabase();}}
@@ -1899,7 +1896,7 @@ function renderPDHistory(){const oF=document.getElementById('pd-hist-officer').v
 async function loadAllPassDownsFromSupabase(){try{if(!window._supabase)return;const{data,error}=await window._supabase.from('pass_downs').select('*').order('created_at',{ascending:false});if(error||!data)return;const mapped=data.map(r=>({id:String(r.id),officer:r.officer_name||r.officer||'',text:r.text||r.content||'',time:r.created_at||r.time||'',auto_nm:(r.text||r.content||'').startsWith('🚨')}));mapped.forEach(p=>{if(!passDowns.some(x=>x.id===p.id))passDowns.unshift(p);});saveStorage();}catch(e){}}
 function exportPassDownReport(){const oF=document.getElementById('pd-hist-officer').value;const mF=document.getElementById('pd-hist-month').value;let items=passDowns.filter(p=>{if(oF&&p.officer!==oF)return false;if(mF&&fmtMonthYear(p.time)!==mF)return false;return true;});items.sort((a,b)=>new Date(b.time)-new Date(a.time));let txt='PASS DOWN REPORT\n';txt+='Generated: '+fmtFull(new Date())+'\n';txt+='Filter: '+(oF||'All officers')+' \xB7 '+(mF||'All time')+'\n';txt+='Total: '+items.length+' pass down'+(items.length!==1?'s':'')+'\n\n';items.forEach(pd=>{txt+=fmtFull(pd.time)+'\n';txt+='Officer: '+pd.officer+'\n';txt+=pd.text+'\n';if(pd.auto_nm)txt+='(Auto-generated from Near Miss)\n';txt+='\n';});txt+='================\nEnd of report';const today=new Date().toISOString().slice(0,10);const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='passdown-report-'+today+'.txt';document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);}
 function exportMetersPDF(){var loggedCount=meters.filter(function(m){return m.saved;}).length;if(!loggedCount)return;showToast('meter-toast','Generating report…');var now=new Date();var monthYear=now.toLocaleString('en-US',{month:'long',year:'numeric'});var dateStr=fmtFull(now);var officerName=officer||'Unknown';var buildRows=function(bldg){return meters.filter(function(m){return m.building===bldg;}).map(function(m){var prev=m.history[11];if(m.saved){var curr=Number(m.reading);var diff=curr-prev;var sign=diff>=0?'+':'';var col=diff>=0?'#1D9E75':'#E24B4A';return'<tr><td>'+_esc(m.name)+'</td><td class="mono">'+_esc(m.id)+'</td><td class="num">'+prev.toLocaleString()+'</td><td class="num">'+curr.toLocaleString()+'</td><td class="num" style="color:'+col+';font-weight:600">'+sign+diff.toLocaleString()+'</td><td>'+m.unit+'</td></tr>';}return'<tr class="nr"><td>'+_esc(m.name)+'</td><td class="mono">'+_esc(m.id)+'</td><td class="num">'+prev.toLocaleString()+'</td><td class="num muted">— Not logged</td><td></td><td>'+m.unit+'</td></tr>';}).join('');};var th='<thead><tr><th>Meter</th><th>Meter ID</th><th style="text-align:right">Last Reading</th><th style="text-align:right">This Month</th><th style="text-align:right">Change</th><th>Unit</th></tr></thead>';var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:10pt;color:#111;background:#fff;padding:24px 28px}h1{font-size:16pt;font-weight:700;margin-bottom:6px}.meta{font-size:9pt;color:#444;line-height:1.9;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #111}.meta strong{color:#111}.bldg{font-size:11pt;font-weight:700;margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid #ccc}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:9pt}th{background:#222;color:#fff;padding:6px 8px;text-align:left;font-size:8pt;font-weight:600;letter-spacing:.04em;text-transform:uppercase}td{padding:5px 8px;border-bottom:0.5px solid #e0e0e0;vertical-align:middle}tr:last-child td{border-bottom:none}.num{text-align:right;font-variant-numeric:tabular-nums}.mono{font-family:"Courier New",monospace;font-size:8pt;color:#555}.muted{color:#aaa;font-style:italic}.nr td{color:#bbb}.nr td:first-child{color:#888}.footer{margin-top:20px;padding-top:8px;border-top:0.5px solid #ccc;font-size:8pt;color:#666;display:flex;justify-content:space-between}@media print{body{padding:0}tr{page-break-inside:avoid}.bldg{page-break-after:avoid}}';var html='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Utility Meter Report</title><style>'+css+'</style></head><body>';html+='<h1>Utility Meter Report</h1><div class="meta"><strong>Site:</strong> Canopy Campus &nbsp;&nbsp;<strong>Officer:</strong> '+_esc(officerName)+'&nbsp;&nbsp;<strong>Period:</strong> '+_esc(monthYear)+'<br><strong>Generated:</strong> '+_esc(dateStr)+'&nbsp;&nbsp;<strong>Meters logged:</strong> '+loggedCount+' of '+meters.length+'</div>';html+='<div class="bldg">Canopy 1</div><table>'+th+'<tbody>'+buildRows('Canopy 1')+'</tbody></table>';html+='<div class="bldg">Canopy 3</div><table>'+th+'<tbody>'+buildRows('Canopy 3')+'</tbody></table>';html+='<div class="footer"><span>Report generated by '+_esc(officerName)+' on '+_esc(dateStr)+'</span><span>Canopy Campus Security — Confidential</span></div></body></html>';var iframe=document.createElement('iframe');iframe.style.cssText='position:fixed;right:-9999px;bottom:-9999px;width:1px;height:1px;border:none;';document.body.appendChild(iframe);iframe.contentDocument.open();iframe.contentDocument.write(html);iframe.contentDocument.close();setTimeout(function(){try{iframe.contentWindow.print();}catch(e){}setTimeout(function(){if(iframe.parentNode)iframe.parentNode.removeChild(iframe);},1000);},400);}
-function finalizeShift(){clearShiftFromSupabase();if(stepTracking)stopStepTracking();const endTime=new Date();const dur=Math.floor((endTime-shiftStart)/60000);const h=Math.floor(dur/60),m=dur%60;const durStr=(h>0?h+'h ':'')+m+'m';addEntry('checkout','Shift ended','Officer '+officer+' signed out. Steps: '+stepCount.toLocaleString()+'. Duration: '+durStr+'.');clearInterval(timerInt);const record={id:'dar-'+Date.now(),officer,date:shiftStart.toISOString(),dateLabel:fmtDate(shiftStart),entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),steps:stepCount};darHistory.unshift(record);saveStorage();document.getElementById('eos-sub').textContent='Good work, '+officer.split(' ')[0]+'!';document.getElementById('eos-stats').innerHTML=`<div class="eos-stat-row"><span class="eos-stat-label">Officer</span><span class="eos-stat-val">${officer}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-in</span><span class="eos-stat-val">${fmt(shiftStart)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-out</span><span class="eos-stat-val">${fmt(endTime)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Duration</span><span class="eos-stat-val">${durStr}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Steps</span><span class="eos-stat-val">${stepCount.toLocaleString()}</span></div><div class="eos-stat-row"><span class="eos-stat-label">DAR entries</span><span class="eos-stat-val">${darLog.length}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Near miss reports</span><span class="eos-stat-val">${stats.nm}</span></div>`;const _shiftRecord=record;
+function finalizeShift(){clearShiftFromSupabase();const endTime=new Date();const dur=Math.floor((endTime-shiftStart)/60000);const h=Math.floor(dur/60),m=dur%60;const durStr=(h>0?h+'h ':'')+m+'m';addEntry('checkout','Shift ended','Officer '+officer+' signed out. Steps: '+stepCount.toLocaleString()+'. Duration: '+durStr+'.');clearInterval(timerInt);const record={id:'dar-'+Date.now(),officer,date:shiftStart.toISOString(),dateLabel:fmtDate(shiftStart),entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),steps:stepCount};darHistory.unshift(record);saveStorage();document.getElementById('eos-sub').textContent='Good work, '+officer.split(' ')[0]+'!';document.getElementById('eos-stats').innerHTML=`<div class="eos-stat-row"><span class="eos-stat-label">Officer</span><span class="eos-stat-val">${officer}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-in</span><span class="eos-stat-val">${fmt(shiftStart)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-out</span><span class="eos-stat-val">${fmt(endTime)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Duration</span><span class="eos-stat-val">${durStr}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Steps</span><span class="eos-stat-val">${stepCount.toLocaleString()}</span></div><div class="eos-stat-row"><span class="eos-stat-label">DAR entries</span><span class="eos-stat-val">${darLog.length}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Near miss reports</span><span class="eos-stat-val">${stats.nm}</span></div>`;const _shiftRecord=record;
   if(window._supabase){
     window._supabase.from('shift_summaries').upsert({
       shift_id:_shiftRecord.id,officer:_shiftRecord.officer,
@@ -1910,7 +1907,7 @@ function finalizeShift(){clearShiftFromSupabase();if(stepTracking)stopStepTracki
   }
   clearShiftFromSupabase();
   _supabaseUserId=null;
-  clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();showScreen('eos');}
+  clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;showScreen('eos');}
 function returnToCheckin(){
   renderPassDownsBanner();
   const sel=document.getElementById('ci-sel');
@@ -2443,99 +2440,7 @@ function downloadNMReport(){const mF=document.getElementById('nm-hist-month').va
 // Priority 3: Neither available — inform the officer and hide the button.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Shared peak-detection logic — identical threshold/cooldown as before.
-// Extracted so both sensor paths use exactly the same algorithm.
-function _stepPeakDetect(mag){if(mag<9.5){lastMag=mag;return;}if(lastMag!==null){const delta=Math.abs(mag-lastMag);if(delta>1.2&&!stepCooldown){stepCount++;stepCooldown=true;setTimeout(()=>{stepCooldown=false;},250);updateStepDisplay();checkMilestones();}}lastMag=mag;}
 
-// Generic Sensor API path (primary on Android Chrome).
-// stepListener is set to the Accelerometer *object* so stopStepTracking can
-// call .stop() on it rather than removeEventListener.
-function startStepTrackingGeneric(){
-  try{
-    const accel=new Accelerometer({frequency:60});
-    accel.addEventListener('error',function(e){
-      console.warn('Accelerometer sensor error:',e.error);
-      try{accel.stop();}catch(_){}
-      stepListener=null;
-      if(typeof DeviceMotionEvent!=='undefined'){startStepTracking();}
-      else{setStepUI('denied','Sensor error — step tracking unavailable');}
-    });
-    accel.addEventListener('reading',function(){
-      _stepPeakDetect(Math.sqrt(accel.x*accel.x+accel.y*accel.y+accel.z*accel.z));
-    });
-    accel.start();
-    stepTracking=true;
-    stepListener=accel;
-    setStepUI('active','Step tracking active');
-    document.getElementById('step-toggle-btn').textContent='Pause';
-  }catch(e){
-    console.warn('Accelerometer() failed to start:',e);
-    if(typeof DeviceMotionEvent!=='undefined'){startStepTracking();}
-    else{setStepUI('denied','Step tracking not supported on this device');}
-  }
-}
-
-// DeviceMotionEvent path — legacy fallback (also used directly on iOS Safari).
-// stepListener is set to the event handler *function* so stopStepTracking
-// knows to call removeEventListener on it.
-function startStepTracking(){stepTracking=true;setStepUI('active','Step tracking active');document.getElementById('step-toggle-btn').textContent='Pause';stepListener=function(e){const a=e.accelerationIncludingGravity;if(!a||a.x==null||a.y==null||a.z==null)return;_stepPeakDetect(Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z));};window.addEventListener('devicemotion',stepListener);}
-
-// Called on shift restore — picks the right path; requests permission if needed.
-function autoStartSteps(){
-  if(typeof Accelerometer!=='undefined'){
-    // Query first without prompting. State 'granted'|'prompt' → start (browser
-    // will show its dialog on accel.start() if state is 'prompt').
-    // State 'denied' → show message, don't attempt.
-    navigator.permissions.query({name:'accelerometer'}).then(function(result){
-      if(result.state==='denied'){
-        setStepUI('denied','Motion access denied — enable in browser settings');
-        document.getElementById('step-toggle-btn').textContent='Denied';
-      }else{
-        startStepTrackingGeneric();
-      }
-    }).catch(function(){startStepTrackingGeneric();});
-  }else if(typeof DeviceMotionEvent!=='undefined'){
-    if(typeof DeviceMotionEvent.requestPermission==='function'){
-      setStepUI('inactive','Tap Enable to start step tracking');
-    }else{
-      startStepTracking();
-    }
-  }else{
-    setStepUI('denied','Step tracking not supported on this device');
-    document.getElementById('step-toggle-btn').style.display='none';
-  }
-}
-
-// Called by the Enable / Pause / Resume button tap.
-function toggleStepTracking(){
-  if(stepTracking){stopStepTracking();return;}
-  if(typeof Accelerometer!=='undefined'){
-    navigator.permissions.query({name:'accelerometer'}).then(function(result){
-      if(result.state==='denied'){setStepUI('denied','Motion access denied — enable in browser settings');}
-      else{startStepTrackingGeneric();}
-    }).catch(function(){startStepTrackingGeneric();});
-  }else if(typeof DeviceMotionEvent!=='undefined'){
-    if(typeof DeviceMotionEvent.requestPermission==='function'){
-      DeviceMotionEvent.requestPermission().then(function(r){
-        if(r==='granted')startStepTracking();
-        else setStepUI('denied','Motion access denied');
-      }).catch(function(){setStepUI('denied','Permission error');});
-    }else{
-      startStepTracking();
-    }
-  }else{
-    setStepUI('denied','Step tracking not supported on this device');
-  }
-}
-
-// Stops whichever sensor is currently active.
-// stepListener is either a Function (devicemotion) or an Accelerometer object —
-// typeof check distinguishes them cleanly without needing instanceof.
-function stopStepTracking(){stepTracking=false;if(stepListener){if(typeof stepListener==='function'){window.removeEventListener('devicemotion',stepListener);}else{try{stepListener.stop();}catch(e){}}}stepListener=null;setStepUI('inactive','Step tracking paused');document.getElementById('step-toggle-btn').textContent='Resume';}
-function setStepUI(state,text){document.getElementById('step-dot').className='step-dot '+state;document.getElementById('step-status-txt').textContent=text;}
-function updateStepDisplay(){document.getElementById('step-count').textContent=stepCount.toLocaleString();document.getElementById('step-miles').textContent=(stepCount*0.000473).toFixed(2);document.getElementById('step-bar').style.width=Math.round(Math.min(stepCount/stepGoal*100,100))+'%';}
-function checkMilestones(){MILESTONES.forEach(m=>{if(stepCount>=m&&!reachedMilestones.has(m)){reachedMilestones.add(m);document.getElementById('ms-'+m).classList.add('reached');if(m<=stepGoal)addEntry('steps','Step milestone reached',stepCount.toLocaleString()+' steps completed.');updateStats();}});}
-function updateStepGoal(){stepGoal=parseInt(document.getElementById('step-goal-select').value);document.getElementById('step-goal-label').textContent='Goal: '+stepGoal.toLocaleString();updateStepDisplay();}
 function updateFEEntryCard(){const cycM=getCycleMonth(curMonth,curYear);const myIdx=FE_OFFICERS.indexOf(officer||'');const myBldId=myIdx>=0?getAssignment(myIdx,cycM):null;const meta=document.getElementById('fe-entry-meta');const bar=document.getElementById('fe-mini-bar');if(!myBldId){meta.textContent='No assignment this month · View schedule';bar.style.width='0%';}else{const bld=FE_DATA[myBldId];const done=feIsComplete(myBldId);const checked=done?bld.count:feGetChecked(myBldId);meta.textContent=done?'✓ '+bld.name+' complete this month':bld.name+' · '+checked+'/'+bld.count+' checked';bar.style.width=(done?100:Math.round(checked/bld.count*100))+'%';}}
 function openFESchedule(){showPane('fe-schedule',null);document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
 function renderFESchedule(){const cycM=getCycleMonth(curMonth,curYear);const label=MONTHS[curMonth]+' '+curYear;document.getElementById('fe-month-badge').textContent=label;document.getElementById('fe-month-label').textContent=label;const myIdx=FE_OFFICERS.indexOf(officer||'');const myBldId=myIdx>=0?getAssignment(myIdx,cycM):null;const asgn=document.getElementById('fe-my-assignment');const offNote=!myBldId?'<div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">You have no assigned building this month, but you can complete checks for any building below.</div>':'';asgn.innerHTML=offNote+'<div style="display:flex;flex-direction:column;gap:8px">'+FE_BLDGS.map(bldId=>{const bld=FE_DATA[bldId];const done=feIsComplete(bldId);const checked=done?bld.count:feGetChecked(bldId);const pct=Math.round(checked/bld.count*100);const assignedIdx=ROTATION_MATRIX[cycM].findIndex(bi=>FE_BLDGS[bi]===bldId);const assignedName=assignedIdx>=0?FE_OFFICERS[assignedIdx].split(' ')[0]:'â€”';const isOfficerBld=bldId===myBldId;return'<div style="background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:10px 12px'+(isOfficerBld?';border-left:3px solid var(--text-info)':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:13px;font-weight:600;color:var(--text-primary)">'+bld.name+'</div>'+(done?'<div class="complete-badge"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg><span>Complete</span></div>':'')+'</div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Assigned: '+assignedName+' \xB7 '+checked+'/'+bld.count+' checked</div><div class="ma-progress-track" style="margin-bottom:8px"><div class="ma-progress-fill" style="width:'+(done?100:pct)+'%"></div></div>'+(done?'':`<button class="start-btn" style="padding:8px;font-size:12px" onclick="startFEChecklist('${bldId}')">`+(checked>0?'Continue':'Start')+' inspection</button>')+'</div>';}).join('')+'</div>';
@@ -2665,16 +2570,15 @@ async function _initApp(){
     shiftStart=new Date(remoteShift.shift_start);
     darLog=(remoteShift.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
     stats=remoteShift.stats||{patrols:0,nm:0,checks:0};
-    stepCount=0;reachedMilestones=new Set();
+    stepCount=0;
     _applyOfficerToUI(officer);
     ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
     const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
-    updateStepDisplay();
     clearInterval(timerInt);
     timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
     saveActiveShift(); // re-hydrate localStorage cache from Supabase data
     _shiftRestored=true;
-    showScreen('main');showPane('home',null);updateHomeTiles();autoStartSteps();
+    showScreen('main');showPane('home',null);updateHomeTiles();
     return;
   }
 
@@ -2935,7 +2839,7 @@ function _setupRealtimeListeners(){
           clearInterval(timerInt);timerInt=null;
           clearActiveShift();
           officer=null;shiftStart=null;shiftId=null;darLog=[];
-          stats={patrols:0,nm:0,checks:0};stepCount=0;reachedMilestones=new Set();
+          stats={patrols:0,nm:0,checks:0};stepCount=0;
           _shiftRestored=false;
           showScreen('checkin');
           return;
