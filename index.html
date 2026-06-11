@@ -142,23 +142,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .stat{background:var(--bg-secondary);border-radius:var(--radius-md);padding:11px 12px}
 .stat-n{font-size:24px;font-weight:600;color:var(--text-primary);letter-spacing:-.5px}
 .stat-l{font-size:11px;color:var(--text-secondary);margin-top:2px}
-/* ── STEPS ── */
-.step-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
-.step-main{display:flex;align-items:center;gap:14px}
-.step-icon{width:50px;height:50px;border-radius:50%;background:var(--bg-success);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step-count{font-size:34px;font-weight:600;color:var(--text-primary);line-height:1;letter-spacing:-.5px}
-.step-sub{font-size:12px;color:var(--text-secondary);margin-top:3px}
-.step-bar-wrap{margin-top:12px}
-.step-bar-track{width:100%;height:6px;background:var(--bg-secondary);border-radius:4px;overflow:hidden}
-.step-bar-fill{height:6px;background:var(--green);border-radius:4px;transition:width .4s ease}
-.step-bar-labels{display:flex;justify-content:space-between;margin-top:5px}
-.step-bar-labels span{font-size:11px;color:var(--text-secondary)}
-.step-status{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--text-secondary)}
-.step-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.step-dot.active{background:var(--green)}.step-dot.inactive{background:var(--border-primary)}.step-dot.denied{background:var(--red)}
-.step-milestones{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.milestone{font-size:11px;padding:3px 9px;border-radius:999px;border:0.5px solid var(--border-secondary);color:var(--text-tertiary)}
-.milestone.reached{background:var(--bg-success);color:var(--text-success);border-color:rgba(29,158,117,.3)}
 /* ── PATROL ── */
 .patrol-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden}
 .patrol-hdr{padding:11px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
@@ -248,7 +231,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .t-meter{background:var(--bg-secondary);color:var(--text-secondary)}
 .t-nearmiss{background:var(--bg-danger);color:var(--text-danger)}
 .t-note{background:var(--bg-secondary);color:var(--text-secondary)}
-.t-steps{background:var(--bg-success);color:var(--text-success)}
 .t-fireext{background:rgba(226,75,74,.08);color:var(--red)}
 .t-checkout{background:var(--bg-secondary);color:var(--text-secondary)}
 .dot-checkin{background:var(--green)}.dot-patrol{background:var(--blue)}.dot-boiler{background:var(--orange)}
@@ -256,7 +238,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .dar-entry-note{background:rgba(201,150,58,0.07);border-left:2.5px solid #C9963A;padding-left:8px;border-radius:0 var(--radius-sm) var(--radius-sm) 0}
 .dar-entry-note .dtag{background:rgba(201,150,58,0.18) !important;color:#C9963A !important}
 .dar-entry-note .dar-detail{color:var(--text-primary) !important}
-.dot-steps{background:var(--green)}.dot-fireext{background:var(--red)}.dot-checkout{background:#888}
+.dot-fireext{background:var(--red)}.dot-checkout{background:#888}
 .filter-row{display:flex;gap:8px;margin-bottom:12px}
 .filter-row select{flex:1;padding:8px;font-size:12px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)}
 .search-bar{display:flex;gap:8px;margin-bottom:12px}
@@ -523,7 +505,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .menu-item:hover{background:var(--bg-secondary)}
 .light .menu-item-label{color:var(--text-primary)}
 .light .toggle-track{background:var(--border-primary)}
-.light .card,.light .stat,.light .nm-item,.light .meter-card,.light .patrol-card,.light .step-card,
+.light .card,.light .stat,.light .nm-item,.light .meter-card,.light .patrol-card,
 .light .my-assignment,.light .rotation-card,.light .bldg-card,.light .preview-grid,
 .light .saved-dar-card,.light .pd-full-item,.light .fe-entry-card,.light .fe-zone-block,
 .light .admin-section,.light .admin-overlay{background:var(--bg-primary);border-color:var(--border-secondary)}
@@ -617,8 +599,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .meter-name{color:var(--text-primary)}
 .light .meter-sub{color:var(--text-tertiary)}
 .light .seasonal-badge{background:rgba(186,117,23,.2);color:var(--text-warning)}
-.light .milestone{color:var(--text-tertiary);border-color:var(--border-secondary)}
-.light .milestone.reached{background:var(--bg-success);color:var(--text-success)}
 .light .rotation-row{border-bottom-color:var(--border-secondary)}
 .light .rot-name{color:var(--text-primary)}
 .light .rot-building{color:var(--text-secondary)}
@@ -689,12 +669,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     </div>
     <div class="modal-sub">Leave a note for the next officer on duty. Visible on the check-in screen for 7 days.</div>
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px"><textarea class="modal-textarea" id="pd-textarea" placeholder="e.g. North parking lot light is out — facilities notified…" oninput="updatePdBtn()" style="flex:1;margin-bottom:0"></textarea><button class="mic-btn" id="mic-btn-pd" onclick="toggleDictation('pd-textarea','mic-btn-pd')" title="Dictate note" style="flex-shrink:0;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button></div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label style="font-size:12px;font-weight:500;color:var(--text-secondary);display:block;margin-bottom:6px">
-        Steps this shift <span style="font-weight:400;color:var(--text-tertiary)">(check Google Fit or Samsung Health)</span>
-      </label>
-      <input type="number" id="pd-step-input" placeholder="e.g. 8500" min="0" style="width:100%;padding:11px 12px;font-size:15px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)">
-    </div>
     <button class="modal-primary-btn" id="pd-submit-btn" onclick="submitPassDown()" disabled>Save pass down &amp; end shift</button>
     <button class="modal-secondary-btn" onclick="skipPassDown()">No pass downs — end shift</button>
   </div>
@@ -1698,7 +1672,7 @@ function getAssignment(oi,cm){const bi=ROTATION_MATRIX[cm][oi];return bi===-1?nu
 function feIsComplete(bldgId){return localStorage.getItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldgId)==='1';}
 function feMarkComplete(bldgId){localStorage.setItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldgId,'1');}
 function feGetChecked(bldgId){return Object.keys(feCheckState).filter(k=>k.startsWith('EXT-'+bldgId+'-')&&feCheckState[k]).length;}
-const TC={checkin:{dot:'dot-checkin',tag:'t-checkin',label:'Check-in'},patrol:{dot:'dot-patrol',tag:'t-patrol',label:'Patrol'},boiler:{dot:'dot-boiler',tag:'t-boiler',label:'Boiler check'},meter:{dot:'dot-meter',tag:'t-meter',label:'Meter reading'},nearmiss:{dot:'dot-nearmiss',tag:'t-nearmiss',label:'Near miss'},note:{dot:'dot-note',tag:'t-note',label:'Note'},steps:{dot:'dot-steps',tag:'t-steps',label:'Milestone'},fireext:{dot:'dot-fireext',tag:'t-fireext',label:'Fire ext. inspection'},checkout:{dot:'dot-checkout',tag:'t-checkout',label:'Sign-out'}};
+const TC={checkin:{dot:'dot-checkin',tag:'t-checkin',label:'Check-in'},patrol:{dot:'dot-patrol',tag:'t-patrol',label:'Patrol'},boiler:{dot:'dot-boiler',tag:'t-boiler',label:'Boiler check'},meter:{dot:'dot-meter',tag:'t-meter',label:'Meter reading'},nearmiss:{dot:'dot-nearmiss',tag:'t-nearmiss',label:'Near miss'},note:{dot:'dot-note',tag:'t-note',label:'Note'},fireext:{dot:'dot-fireext',tag:'t-fireext',label:'Fire ext. inspection'},checkout:{dot:'dot-checkout',tag:'t-checkout',label:'Sign-out'}};
 let officers=['Brian Davies','Chase Montrose','Jameson Richards','Matt Dalsing','Randy Lazenby','Tyler Schlegelmilch'];
 let patrolOrder=['boiler','meters-patrol','fe'];
 try { const saved = localStorage.getItem('patrol_order'); if (saved) patrolOrder = JSON.parse(saved); } catch(e) {}
@@ -1708,8 +1682,7 @@ const patrolMeta={boiler:{label:'Boiler room checks'},['meters-patrol']:{label:'
 let adminPin='1234',officer=null,shiftStart=null,shiftId=null,timerInt=null,prevScreen='checkin',_pendingOfficer=null;
 let darLog=[],activeCatsNM=[];
 let stats={patrols:0,nm:0,checks:0};
-let stepCount=0,stepGoal=10000;
-let reachedMilestones=new Set(),darkMode=true;
+let darkMode=true;
 let viewingRecord=null,darHistory=[],passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
 const nowDate=new Date(),curMonth=nowDate.getMonth(),curYear=nowDate.getFullYear();
@@ -1789,7 +1762,6 @@ function saveActiveShift(){
       shiftStart:shiftStart.toISOString(),
       darLog:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),
       stats,
-      stepCount,
       bpScanned,
       nmReports
     };
@@ -1815,7 +1787,6 @@ function restoreActiveShift(){
         shiftStart=new Date(s.shiftStart);
         darLog=s.darLog.map(e=>({...e,time:new Date(e.time)}));
         stats=s.stats||{patrols:0,nm:0,checks:0};
-        stepCount=s.stepCount||0;
         if(s.bpScanned)Object.assign(bpScanned,s.bpScanned);
         if(s.nmReports)nmReports=s.nmReports;
         _applyOfficerToUI(officer);
@@ -1857,7 +1828,7 @@ function seedDemoPassDowns(){}
 function seedDemoData(){const n=new Date();const day=(d,h,m)=>{const x=new Date(n);x.setDate(x.getDate()-d);x.setHours(h,m,0,0);return x.toISOString();};darHistory=[{id:'dar-001',officer:'Matt Dalsing',date:day(1,6,2),dateLabel:fmtDate(new Date(day(1,6,2))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Matt Dalsing signed in.',time:day(1,6,2)},{type:'patrol',title:'Building patrol — Canopy 1',detail:'Officer conducted a patrol of Canopy 1. Tenant spaces walked.',time:day(1,6,45)},{type:'checkout',title:'Shift ended',detail:'Steps: 6,240. Duration: 7h 58m.',time:day(1,14,0)}],steps:6240},{id:'dar-002',officer:'Brian Davies',date:day(1,14,5),dateLabel:fmtDate(new Date(day(1,14,5))),entries:[{type:'checkin',title:'Shift started',detail:'Officer Brian Davies signed in.',time:day(1,14,5)},{type:'nearmiss',title:'Near miss submitted – Canopy 3',detail:'Safety. Wet floor near east stairwell.',time:day(1,16,22)},{type:'checkout',title:'Shift ended',detail:'Steps: 8,120. Duration: 8h 0m.',time:day(1,22,5)}],steps:8120}];saveStorage();}
 function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
-function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();saveActiveShift();saveShiftToSupabase();}
+function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+Date.now();darLog=[];stats={patrols:0,nm:0,checks:0};feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks','stat-entries'].forEach(id=>document.getElementById(id).textContent=0);addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();saveActiveShift();saveShiftToSupabase();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
@@ -1881,13 +1852,11 @@ function openPassDownModal(){
   }
   textarea.value=prefix;
   document.getElementById('pd-submit-btn').disabled=!textarea.value.trim();
-  const stepInp=document.getElementById('pd-step-input');
-  if(stepInp)stepInp.value='';
   document.getElementById('pd-modal').classList.add('open');
 }
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
-function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const pd={id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();const stepInp=document.getElementById('pd-step-input');if(stepInp&&stepInp.value.trim()){const parsed=parseInt(stepInp.value.trim(),10);if(!isNaN(parsed)&&parsed>=0)stepCount=parsed;}finalizeShift();}
-function skipPassDown(){closePassDownModal();const stepInp=document.getElementById('pd-step-input');if(stepInp&&stepInp.value.trim()){const parsed=parseInt(stepInp.value.trim(),10);if(!isNaN(parsed)&&parsed>=0)stepCount=parsed;}finalizeShift();}
+function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const pd={id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
+function skipPassDown(){closePassDownModal();finalizeShift();}
 function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
 function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
 function showPDSub(id,btn){document.getElementById('pd-sub-active').style.display=id==='active'?'block':'none';document.getElementById('pd-sub-history').style.display=id==='history'?'block':'none';document.querySelectorAll('#pd-tab-active,#pd-tab-history').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history'){populatePDHistoryFilters();renderPDHistory();loadAllPassDownsFromSupabase();}}
@@ -1896,18 +1865,18 @@ function renderPDHistory(){const oF=document.getElementById('pd-hist-officer').v
 async function loadAllPassDownsFromSupabase(){try{if(!window._supabase)return;const{data,error}=await window._supabase.from('pass_downs').select('*').order('created_at',{ascending:false});if(error||!data)return;const mapped=data.map(r=>({id:String(r.id),officer:r.officer_name||r.officer||'',text:r.text||r.content||'',time:r.created_at||r.time||'',auto_nm:(r.text||r.content||'').startsWith('🚨')}));mapped.forEach(p=>{if(!passDowns.some(x=>x.id===p.id))passDowns.unshift(p);});saveStorage();}catch(e){}}
 function exportPassDownReport(){const oF=document.getElementById('pd-hist-officer').value;const mF=document.getElementById('pd-hist-month').value;let items=passDowns.filter(p=>{if(oF&&p.officer!==oF)return false;if(mF&&fmtMonthYear(p.time)!==mF)return false;return true;});items.sort((a,b)=>new Date(b.time)-new Date(a.time));let txt='PASS DOWN REPORT\n';txt+='Generated: '+fmtFull(new Date())+'\n';txt+='Filter: '+(oF||'All officers')+' \xB7 '+(mF||'All time')+'\n';txt+='Total: '+items.length+' pass down'+(items.length!==1?'s':'')+'\n\n';items.forEach(pd=>{txt+=fmtFull(pd.time)+'\n';txt+='Officer: '+pd.officer+'\n';txt+=pd.text+'\n';if(pd.auto_nm)txt+='(Auto-generated from Near Miss)\n';txt+='\n';});txt+='================\nEnd of report';const today=new Date().toISOString().slice(0,10);const blob=new Blob([txt],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='passdown-report-'+today+'.txt';document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);}
 function exportMetersPDF(){var loggedCount=meters.filter(function(m){return m.saved;}).length;if(!loggedCount)return;showToast('meter-toast','Generating report…');var now=new Date();var monthYear=now.toLocaleString('en-US',{month:'long',year:'numeric'});var dateStr=fmtFull(now);var officerName=officer||'Unknown';var buildRows=function(bldg){return meters.filter(function(m){return m.building===bldg;}).map(function(m){var prev=m.history[11];if(m.saved){var curr=Number(m.reading);var diff=curr-prev;var sign=diff>=0?'+':'';var col=diff>=0?'#1D9E75':'#E24B4A';return'<tr><td>'+_esc(m.name)+'</td><td class="mono">'+_esc(m.id)+'</td><td class="num">'+prev.toLocaleString()+'</td><td class="num">'+curr.toLocaleString()+'</td><td class="num" style="color:'+col+';font-weight:600">'+sign+diff.toLocaleString()+'</td><td>'+m.unit+'</td></tr>';}return'<tr class="nr"><td>'+_esc(m.name)+'</td><td class="mono">'+_esc(m.id)+'</td><td class="num">'+prev.toLocaleString()+'</td><td class="num muted">— Not logged</td><td></td><td>'+m.unit+'</td></tr>';}).join('');};var th='<thead><tr><th>Meter</th><th>Meter ID</th><th style="text-align:right">Last Reading</th><th style="text-align:right">This Month</th><th style="text-align:right">Change</th><th>Unit</th></tr></thead>';var css='*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:10pt;color:#111;background:#fff;padding:24px 28px}h1{font-size:16pt;font-weight:700;margin-bottom:6px}.meta{font-size:9pt;color:#444;line-height:1.9;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #111}.meta strong{color:#111}.bldg{font-size:11pt;font-weight:700;margin:18px 0 8px;padding-bottom:4px;border-bottom:1px solid #ccc}table{width:100%;border-collapse:collapse;margin-bottom:8px;font-size:9pt}th{background:#222;color:#fff;padding:6px 8px;text-align:left;font-size:8pt;font-weight:600;letter-spacing:.04em;text-transform:uppercase}td{padding:5px 8px;border-bottom:0.5px solid #e0e0e0;vertical-align:middle}tr:last-child td{border-bottom:none}.num{text-align:right;font-variant-numeric:tabular-nums}.mono{font-family:"Courier New",monospace;font-size:8pt;color:#555}.muted{color:#aaa;font-style:italic}.nr td{color:#bbb}.nr td:first-child{color:#888}.footer{margin-top:20px;padding-top:8px;border-top:0.5px solid #ccc;font-size:8pt;color:#666;display:flex;justify-content:space-between}@media print{body{padding:0}tr{page-break-inside:avoid}.bldg{page-break-after:avoid}}';var html='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Utility Meter Report</title><style>'+css+'</style></head><body>';html+='<h1>Utility Meter Report</h1><div class="meta"><strong>Site:</strong> Canopy Campus &nbsp;&nbsp;<strong>Officer:</strong> '+_esc(officerName)+'&nbsp;&nbsp;<strong>Period:</strong> '+_esc(monthYear)+'<br><strong>Generated:</strong> '+_esc(dateStr)+'&nbsp;&nbsp;<strong>Meters logged:</strong> '+loggedCount+' of '+meters.length+'</div>';html+='<div class="bldg">Canopy 1</div><table>'+th+'<tbody>'+buildRows('Canopy 1')+'</tbody></table>';html+='<div class="bldg">Canopy 3</div><table>'+th+'<tbody>'+buildRows('Canopy 3')+'</tbody></table>';html+='<div class="footer"><span>Report generated by '+_esc(officerName)+' on '+_esc(dateStr)+'</span><span>Canopy Campus Security — Confidential</span></div></body></html>';var iframe=document.createElement('iframe');iframe.style.cssText='position:fixed;right:-9999px;bottom:-9999px;width:1px;height:1px;border:none;';document.body.appendChild(iframe);iframe.contentDocument.open();iframe.contentDocument.write(html);iframe.contentDocument.close();setTimeout(function(){try{iframe.contentWindow.print();}catch(e){}setTimeout(function(){if(iframe.parentNode)iframe.parentNode.removeChild(iframe);},1000);},400);}
-function finalizeShift(){clearShiftFromSupabase();const endTime=new Date();const dur=Math.floor((endTime-shiftStart)/60000);const h=Math.floor(dur/60),m=dur%60;const durStr=(h>0?h+'h ':'')+m+'m';addEntry('checkout','Shift ended','Officer '+officer+' signed out. Steps: '+stepCount.toLocaleString()+'. Duration: '+durStr+'.');clearInterval(timerInt);const record={id:'dar-'+Date.now(),officer,date:shiftStart.toISOString(),dateLabel:fmtDate(shiftStart),entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),steps:stepCount};darHistory.unshift(record);saveStorage();document.getElementById('eos-sub').textContent='Good work, '+officer.split(' ')[0]+'!';document.getElementById('eos-stats').innerHTML=`<div class="eos-stat-row"><span class="eos-stat-label">Officer</span><span class="eos-stat-val">${officer}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-in</span><span class="eos-stat-val">${fmt(shiftStart)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-out</span><span class="eos-stat-val">${fmt(endTime)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Duration</span><span class="eos-stat-val">${durStr}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Steps</span><span class="eos-stat-val">${stepCount.toLocaleString()}</span></div><div class="eos-stat-row"><span class="eos-stat-label">DAR entries</span><span class="eos-stat-val">${darLog.length}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Near miss reports</span><span class="eos-stat-val">${stats.nm}</span></div>`;const _shiftRecord=record;
+function finalizeShift(){clearShiftFromSupabase();const endTime=new Date();const dur=Math.floor((endTime-shiftStart)/60000);const h=Math.floor(dur/60),m=dur%60;const durStr=(h>0?h+'h ':'')+m+'m';addEntry('checkout','Shift ended','Officer '+officer+' signed out. Duration: '+durStr+'.');clearInterval(timerInt);const record={id:'dar-'+Date.now(),officer,date:shiftStart.toISOString(),dateLabel:fmtDate(shiftStart),entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};darHistory.unshift(record);saveStorage();document.getElementById('eos-sub').textContent='Good work, '+officer.split(' ')[0]+'!';document.getElementById('eos-stats').innerHTML=`<div class="eos-stat-row"><span class="eos-stat-label">Officer</span><span class="eos-stat-val">${officer}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-in</span><span class="eos-stat-val">${fmt(shiftStart)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Sign-out</span><span class="eos-stat-val">${fmt(endTime)}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Duration</span><span class="eos-stat-val">${durStr}</span></div><div class="eos-stat-row"><span class="eos-stat-label">DAR entries</span><span class="eos-stat-val">${darLog.length}</span></div><div class="eos-stat-row"><span class="eos-stat-label">Near miss reports</span><span class="eos-stat-val">${stats.nm}</span></div>`;const _shiftRecord=record;
   if(window._supabase){
     window._supabase.from('shift_summaries').upsert({
       shift_id:_shiftRecord.id,officer:_shiftRecord.officer,
       shift_type:'security',started_at:_shiftRecord.date,ended_at:new Date().toISOString(),
       entry_count:_shiftRecord.entries.length,patrol_count:stats.patrols,
-      nm_count:stats.nm,step_count:stepCount
+      nm_count:stats.nm
     }).then(({error})=>{if(error)console.warn('Supabase shift summary error:',error.message);});
   }
   clearShiftFromSupabase();
   _supabaseUserId=null;
-  clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};stepCount=0;showScreen('eos');}
+  clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};showScreen('eos');}
 function returnToCheckin(){
   renderPassDownsBanner();
   const sel=document.getElementById('ci-sel');
@@ -1985,10 +1954,10 @@ function viewRecord(id){viewingRecord=darHistory.find(r=>r.id===id);if(!viewingR
 function closeDetail(){document.getElementById('history-list-view').style.display='block';document.getElementById('history-detail-view').style.display='none';viewingRecord=null;}
 function populateSearchOfficers(){const s=document.getElementById('search-officer');const u=[...new Set(darHistory.map(r=>r.officer))].sort();s.innerHTML='<option value="">All officers</option>'+u.map(o=>`<option value="${o}">${o}</option>`).join('');}
 function runSearch(){const q=document.getElementById('search-input').value.trim().toLowerCase();const oF=document.getElementById('search-officer').value;if(!q&&!oF){document.getElementById('search-results').innerHTML='';document.getElementById('search-count').textContent='';return;}let results=[];darHistory.forEach(record=>{if(oF&&record.officer!==oF)return;record.entries.forEach(e=>{const hay=(e.title+' '+(e.detail||'')).toLowerCase();if(!q||hay.includes(q))results.push({record,entry:e});});});document.getElementById('search-count').textContent=results.length+' result'+(results.length!==1?'s':'');document.getElementById('search-results').innerHTML=results.length?results.map(({record,entry})=>{const c=TC[entry.type]||TC.note;const hl=(t,q)=>q?t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="search-highlight">$1</span>'):t;return`<div class="nm-item" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:600;color:var(--text-primary)">${record.officer}</span><span style="font-size:11px;color:var(--text-secondary)">${record.dateLabel}</span></div><div style="font-size:13px;color:var(--text-primary)">${hl(entry.title,q)}</div>${entry.detail?`<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${hl(entry.detail,q)}</div>`:''}<span class="dtag ${c.tag}" style="margin-top:4px">${c.label}</span></div>`;}).join(''):'<div class="no-results">No matching entries found.</div>';}
-function buildDARText(record){let t='DAILY ACTIVITY REPORT (DAR)\n================================\n';t+=`Officer:   ${record.officer}\nDate:      ${record.dateLabel}\nSteps:     ${(record.steps||0).toLocaleString()}\nEntries:   ${record.entries.length}\n================================\n\n`;record.entries.forEach(e=>{t+=`${fmt(e.time)}  [${(TC[e.type]||TC.note).label.toUpperCase()}]  ${e.title}${e.detail?' — '+e.detail:''}\n`;});t+=`\n================================\nEnd of report · Generated ${fmtFull(new Date())}`;return t;}
-function buildPreviewHTML(record){return`<div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:14px;margin-top:4px"><div style="font-size:13px;font-weight:600;color:var(--text-primary);border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px;margin-bottom:10px">Daily Activity Report (DAR)</div><div style="font-size:11px;color:var(--text-secondary);line-height:1.8;margin-bottom:10px;border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px">Officer: ${record.officer}<br>Date: ${record.dateLabel}<br>Total steps: ${(record.steps||0).toLocaleString()}<br>Entries: ${record.entries.length}</div>${record.entries.map(e=>`<div style="display:flex;gap:8px;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border-secondary);color:var(--text-primary)"><span style="min-width:50px;color:var(--text-secondary);flex-shrink:0">${fmt(e.time)}</span><span>${e.title}${e.detail?' — '+e.detail:''}</span></div>`).join('')}</div>`;}
-function copyDAR(){const r={officer:officer||'—',dateLabel:shiftStart?fmtDate(shiftStart):'—',entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),steps:stepCount};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
-function previewDAR(){const r={officer:officer||'—',dateLabel:shiftStart?fmtDate(shiftStart):'—',entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time})),steps:stepCount};document.getElementById('preview-area').innerHTML=buildPreviewHTML(r);}
+function buildDARText(record){let t='DAILY ACTIVITY REPORT (DAR)\n================================\n';t+=`Officer:   ${record.officer}\nDate:      ${record.dateLabel}\nEntries:   ${record.entries.length}\n================================\n\n`;record.entries.forEach(e=>{t+=`${fmt(e.time)}  [${(TC[e.type]||TC.note).label.toUpperCase()}]  ${e.title}${e.detail?' — '+e.detail:''}\n`;});t+=`\n================================\nEnd of report · Generated ${fmtFull(new Date())}`;return t;}
+function buildPreviewHTML(record){return`<div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:14px;margin-top:4px"><div style="font-size:13px;font-weight:600;color:var(--text-primary);border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px;margin-bottom:10px">Daily Activity Report (DAR)</div><div style="font-size:11px;color:var(--text-secondary);line-height:1.8;margin-bottom:10px;border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px">Officer: ${record.officer}<br>Date: ${record.dateLabel}<br>Entries: ${record.entries.length}</div>${record.entries.map(e=>`<div style="display:flex;gap:8px;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border-secondary);color:var(--text-primary)"><span style="min-width:50px;color:var(--text-secondary);flex-shrink:0">${fmt(e.time)}</span><span>${e.title}${e.detail?' — '+e.detail:''}</span></div>`).join('')}</div>`;}
+function copyDAR(){const r={officer:officer||'—',dateLabel:shiftStart?fmtDate(shiftStart):'—',entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
+function previewDAR(){const r={officer:officer||'—',dateLabel:shiftStart?fmtDate(shiftStart):'—',entries:darLog.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};document.getElementById('preview-area').innerHTML=buildPreviewHTML(r);}
 function copyDetailDAR(){if(!viewingRecord)return;navigator.clipboard.writeText(buildDARText(viewingRecord)).catch(()=>{});showToast('copy-toast');}
 function previewDetailDAR(){if(!viewingRecord)return;document.getElementById('detail-preview-area').innerHTML=buildPreviewHTML(viewingRecord);}
 const BP_BUILDINGS=[{id:'C1',name:'Canopy 1',token:'canopy-patrol-C1'},{id:'C3',name:'Canopy 3',token:'canopy-patrol-C3'},{id:'C4',name:'Canopy 4',token:'canopy-patrol-C4'},{id:'C5',name:'Canopy 5',token:'canopy-patrol-C5'}];
@@ -2570,7 +2539,6 @@ async function _initApp(){
     shiftStart=new Date(remoteShift.shift_start);
     darLog=(remoteShift.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
     stats=remoteShift.stats||{patrols:0,nm:0,checks:0};
-    stepCount=0;
     _applyOfficerToUI(officer);
     ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
     const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
@@ -2839,7 +2807,7 @@ function _setupRealtimeListeners(){
           clearInterval(timerInt);timerInt=null;
           clearActiveShift();
           officer=null;shiftStart=null;shiftId=null;darLog=[];
-          stats={patrols:0,nm:0,checks:0};stepCount=0;
+          stats={patrols:0,nm:0,checks:0};
           _shiftRestored=false;
           showScreen('checkin');
           return;
