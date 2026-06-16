@@ -859,7 +859,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
   <div id="pane-home" class="pane act" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - 112px)">
     <div style="flex:1;overflow-y:auto;padding:14px 14px 80px">
     <div class="toast" id="note-toast">Note added to DAR</div>
-    <div class="lbl" style="margin-top:0">Add note to DAR</div>
+    <!-- DAR Banner + Drawer -->
+    <div id="dar-banner-wrap" style="margin-bottom:4px">
+      <div id="dar-banner" style="border:1px solid var(--red);border-bottom:none;background:rgba(226,75,74,.12);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:12px 14px 10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span id="dar-pip-1" style="width:9px;height:9px;border-radius:50%;border:2px solid var(--red);background:transparent;display:inline-block;flex-shrink:0"></span>
+          <span id="dar-pip-2" style="width:9px;height:9px;border-radius:50%;border:2px solid var(--red);background:transparent;display:inline-block;flex-shrink:0"></span>
+          <span id="dar-banner-headline" style="font-size:13px;font-weight:600;color:var(--red);line-height:1.2">Add your first entry for this hour</span>
+        </div>
+        <div id="dar-banner-sub" style="font-size:12px;color:var(--text-secondary);line-height:1.4">Policy requires 2 entries per hour — what are you observing?</div>
+      </div>
+      <div id="dar-summary-row" onclick="toggleDARDrawer()" style="border:1px solid var(--red);border-top:none;border-bottom:none;background:rgba(226,75,74,.06);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer">
+        <span id="dar-summary-text" style="font-size:12px;color:var(--text-secondary)">0 this hour · <span id="dar-total-shift">0</span> total shift</span>
+        <svg id="dar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div id="dar-drawer" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;border:1px solid var(--red);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);background:var(--bg-secondary)">
+        <div id="dar-drawer-entries" style="padding:10px 14px 0"></div>
+        <div style="padding:10px 14px 12px;margin-top:2px;border-top:1px solid var(--border-secondary)"><button onclick="showPane('dar',null)" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0;font-family:inherit">View full DAR →</button></div>
+      </div>
+    </div>
+    <!-- Add note row -->
     <div class="add-note-row" style="margin-bottom:4px"><input type="text" id="note-input" placeholder="e.g. Escorted visitor to Canopy 3…"/><button class="mic-btn" id="mic-btn-home" onclick="toggleDictation('note-input','mic-btn-home')" title="Dictate note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button><button class="add-note-btn" onclick="addNote()">Add</button></div>
     <div class="lbl">Daily patrols</div>
     <div class="toast" id="datacenter-toast" style="margin-bottom:6px;border-radius:8px">Data center patrol logged to DAR</div>
@@ -1892,10 +1911,99 @@ function returnToCheckin(){
     },50);
   }
 }
+let hourEntryCount=0;
+let currentHour=new Date().getHours();
+let darDrawerOpen=false;
+let hourEntries=[];
+
+function renderDARBanner(){
+  const banner=document.getElementById('dar-banner');
+  const pip1=document.getElementById('dar-pip-1');
+  const pip2=document.getElementById('dar-pip-2');
+  const headline=document.getElementById('dar-banner-headline');
+  const sub=document.getElementById('dar-banner-sub');
+  const summaryRow=document.getElementById('dar-summary-row');
+  const summaryText=document.getElementById('dar-summary-text');
+  const drawer=document.getElementById('dar-drawer');
+  const totalEl=document.getElementById('dar-total-shift');
+  if(!banner)return;
+  let color,bgAlpha,borderColor,pip1Filled,pip2Filled,hl,sb;
+  if(hourEntryCount===0){
+    color='var(--red)';bgAlpha='rgba(226,75,74,.12)';borderColor='var(--red)';
+    pip1Filled=false;pip2Filled=false;
+    hl='Add your first entry for this hour';
+    sb='Policy requires 2 entries per hour — what are you observing?';
+  }else if(hourEntryCount===1){
+    color='var(--orange)';bgAlpha='rgba(186,117,23,.12)';borderColor='var(--orange)';
+    pip1Filled=true;pip2Filled=false;
+    hl='Good — one more entry needed';
+    sb='Halfway to the hourly goal. Keep observing.';
+  }else{
+    color='var(--green)';bgAlpha='rgba(29,158,117,.12)';borderColor='var(--green)';
+    pip1Filled=true;pip2Filled=true;
+    hl=hourEntryCount>2?'Hourly goal met · '+hourEntryCount+' entries logged':'Hourly goal met — great work';
+    sb='You\'re meeting policy. Keep logging anything noteworthy.';
+  }
+  banner.style.background=bgAlpha;
+  banner.style.borderColor=borderColor;
+  pip1.style.borderColor=color;pip1.style.background=pip1Filled?color:'transparent';
+  pip2.style.borderColor=color;pip2.style.background=pip2Filled?color:'transparent';
+  headline.style.color=color;headline.textContent=hl;
+  sub.textContent=sb;
+  summaryRow.style.borderColor=borderColor;
+  summaryRow.style.background=bgAlpha.replace('.12','.06');
+  if(drawer){drawer.style.borderColor=borderColor;}
+  if(totalEl)totalEl.textContent=darLog.length;
+  summaryText.innerHTML=hourEntryCount+' this hour · <span id="dar-total-shift">'+darLog.length+'</span> total shift';
+  // render drawer entries
+  const entriesEl=document.getElementById('dar-drawer-entries');
+  if(entriesEl){
+    entriesEl.innerHTML=hourEntries.length===0
+      ?'<div style="font-size:12px;color:var(--text-tertiary);padding-bottom:8px">No entries yet this hour.</div>'
+      :hourEntries.map(e=>{
+        const t=e.time instanceof Date?e.time:new Date(e.time);
+        const ts=t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        return '<div style="padding:6px 0;border-bottom:1px solid var(--border-secondary);font-size:12px"><span style="color:var(--text-secondary)">'+ts+'</span> <span style="color:var(--text-primary)">'+e.title+(e.detail?' — '+e.detail:'')+'</span></div>';
+      }).join('');
+  }
+}
+
+function toggleDARDrawer(){
+  const drawer=document.getElementById('dar-drawer');
+  const chevron=document.getElementById('dar-chevron');
+  if(!drawer)return;
+  darDrawerOpen=!darDrawerOpen;
+  drawer.style.maxHeight=darDrawerOpen?'400px':'0';
+  if(chevron)chevron.style.transform=darDrawerOpen?'rotate(180deg)':'rotate(0deg)';
+}
+
+function openDARDrawer(){
+  const drawer=document.getElementById('dar-drawer');
+  const chevron=document.getElementById('dar-chevron');
+  if(!drawer||darDrawerOpen)return;
+  darDrawerOpen=true;
+  drawer.style.maxHeight='400px';
+  if(chevron)chevron.style.transform='rotate(180deg)';
+}
+
+setInterval(()=>{
+  const h=new Date().getHours();
+  if(h!==currentHour){
+    currentHour=h;
+    hourEntryCount=0;
+    hourEntries=[];
+    renderDARBanner();
+  }
+},30000);
+
 function addEntry(type,title,detail){
   const entry={type,title,detail,time:new Date()};
   darLog.push(entry);
+  hourEntryCount++;
+  hourEntries.unshift(entry);
   const el=document.getElementById('stat-entries');if(el)el.textContent=darLog.length;
+  renderDARBanner();
+  openDARDrawer();
   saveActiveShift();
   saveShiftToSupabase();
   if(window._supabase&&officer&&shiftId){
