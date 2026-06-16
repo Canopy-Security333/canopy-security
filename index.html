@@ -652,6 +652,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .dot-key-in{background:var(--green)}
 .keys-empty{text-align:center;padding:28px 20px;font-size:13px;color:var(--text-secondary)}
 
+@media print {
+  body > * { display: none !important; }
+  #screen-qr { display: block !important; }
+  #screen-qr .hdr,
+  #screen-qr #qr-select-footer,
+  #screen-qr .lbl { display: none !important; }
+
+  #qr-grid-patrol,
+  #qr-grid-meters-c1,
+  #qr-grid-meters-c3 {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #qr-grid-patrol > div,
+  #qr-grid-meters-c1 > div,
+  #qr-grid-meters-c3 > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    background: #fff !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+  }
+
+  #qr-grid-patrol > div:last-child,
+  #qr-grid-meters-c1 > div:last-child,
+  #qr-grid-meters-c3 > div:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  [id^="admin-qr-"] {
+    display: block !important;
+    width: 180px !important;
+    height: 180px !important;
+    margin: 0 auto 12px !important;
+    background: #fff !important;
+    overflow: hidden !important;
+  }
+
+  [id^="admin-qr-"] img,
+  [id^="admin-qr-"] canvas {
+    display: block !important;
+    width: 180px !important;
+    height: 180px !important;
+    max-width: 180px !important;
+    max-height: 180px !important;
+  }
+
+  #qr-grid-patrol div,
+  #qr-grid-meters-c1 div,
+  #qr-grid-meters-c3 div {
+    color: #111 !important;
+  }
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1347,11 +1416,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
   </div>
   <div style="padding:14px;padding-bottom:80px">
     <div class="lbl" style="margin-top:0">Building Patrols &amp; Boiler Rooms</div>
-    <div id="qr-grid-patrol" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
+    <div id="qr-grid-patrol" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"></div>
     <div class="lbl">Utility Meters — Canopy 1</div>
-    <div id="qr-grid-meters-c1" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
+    <div id="qr-grid-meters-c1" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"></div>
     <div class="lbl">Utility Meters — Canopy 3</div>
-    <div id="qr-grid-meters-c3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
+    <div id="qr-grid-meters-c3" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"></div>
   </div>
   <div id="qr-select-footer" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--bg-primary);border-top:0.5px solid var(--border-secondary);padding:12px 14px;z-index:50">
     <div style="display:flex;align-items:center;gap:10px">
@@ -2232,13 +2301,13 @@ function renderAdminQRGrid(){
       const sel=qrSelected.has(idx);
       const selStyle=qrSelectMode?(sel?'outline:2.5px solid var(--text-primary);outline-offset:2px;':'outline:1.5px solid var(--border-secondary);outline-offset:2px;'):'';
       const checkmark=qrSelectMode?`<div style="position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:${sel?'var(--text-primary)':'#fff'};border:1.5px solid ${sel?'var(--text-primary)':'var(--border-primary)'};display:flex;align-items:center;justify-content:center">${sel?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>':''}</div>`:'';
-      return`<div data-qridx="${idx}" onclick="toggleQRCard(${idx})" style="position:relative;background:var(--bg-secondary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:10px 8px;text-align:center;${selStyle}cursor:${qrSelectMode?'pointer':'default'}">${checkmark}<div style="background:#fff;display:inline-block;border-radius:4px;padding:6px;margin-bottom:6px" id="admin-qr-${idx}"></div><div style="font-size:12px;font-weight:600;color:var(--text-primary);line-height:1.3">${qr.label}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:2px">${qr.sublabel}</div></div>`;
+      return`<div data-qridx="${idx}" onclick="toggleQRCard(${idx})" style="position:relative;background:var(--bg-secondary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:16px 16px 12px;text-align:center;width:100%;max-width:280px;box-sizing:border-box;${selStyle}cursor:${qrSelectMode?'pointer':'default'}">${checkmark}<div style="background:#fff;display:block;width:100%;border-radius:4px;padding:8px;margin-bottom:10px;box-sizing:border-box;line-height:0" id="admin-qr-${idx}"></div><div style="font-size:13px;font-weight:600;color:var(--text-primary);line-height:1.3">${qr.label}</div><div style="font-size:11px;color:var(--text-secondary);margin-top:3px">${qr.sublabel}</div></div>`;
     }).join('');
   }
   fillGrid('qr-grid-patrol',patrolCodes,0);
   fillGrid('qr-grid-meters-c1',c1Meters,patrolCodes.length);
   fillGrid('qr-grid-meters-c3',c3Meters,patrolCodes.length+c1Meters.length);
-  setTimeout(()=>{ALL_QR_CODES.forEach((qr,i)=>{const el=document.getElementById('admin-qr-'+i);if(!el||!window.QRCode)return;try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:80,height:80,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}});},60);
+  setTimeout(()=>{ALL_QR_CODES.forEach((qr,i)=>{const el=document.getElementById('admin-qr-'+i);if(!el||!window.QRCode)return;try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:180,height:180,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});const img=el.querySelector('img,canvas');if(img){img.style.width='180px';img.style.height='180px';img.style.display='block';}}catch(e){}});},60);
 }
 function toggleQRSelectMode(){
   qrSelectMode=!qrSelectMode;
@@ -2287,46 +2356,28 @@ function printQRSheet(codes){
   const win=window.open('','_blank','width=820,height=960');
   if(!win){alert('Please allow pop-ups to print the QR sheet.');return;}
 
-  // Split into pages of exactly 12 (3 cols × 4 rows)
-  const pages=[];
-  for(let i=0;i<codes.length;i+=12)pages.push(codes.slice(i,i+12));
-
-  const pagesHtml=pages.map((pg,pi)=>{
-    const cells=pg.map((qr,ci)=>{
-      const idx=pi*12+ci;
-      return`<div class="cell"><div class="qr-wrap" id="pqr${idx}"></div><div class="lbl">${qr.label}</div><div class="sub">${qr.sublabel}</div></div>`;
-    }).join('');
-    return`<div class="page${pi>0?' page-break':''}">\n<div class="grid">${cells}</div>\n</div>`;
-  }).join('\n');
+  const cellsHtml='<div class="grid">'+codes.map((qr,i)=>`<div class="cell"><div class="qr-wrap" id="pqr${i}"></div><div class="lbl">${qr.label}</div><div class="sub">${qr.sublabel}</div></div>`).join('')+'</div>';
 
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Canopy Security — QR Codes</title><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:#fff}
-@page{size:letter;margin:0.4in}
-/* Each .page fills exactly one US Letter sheet (10.2in tall at 0.4in margins) */
-.page{width:100%;height:10.2in;display:flex;flex-direction:column}
-.page-break{break-before:page;page-break-before:always}
-/* 3-col x 4-row grid that fills the full page height */
-.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:5mm}
-/* Each cell centers its QR + labels vertically and horizontally */
-.cell{border:0.5px solid #ccc;border-radius:5px;padding:2mm;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;break-inside:avoid;page-break-inside:avoid}
-/* QR image locked to exactly 1.75 in regardless of canvas pixel size */
-.qr-wrap{display:inline-flex;background:#fff;margin-bottom:2.5mm;line-height:0}
-.qr-wrap canvas,.qr-wrap img{display:block !important;width:1.75in !important;height:1.75in !important}
-/* Labels — minimum 10pt per spec */
-.lbl{font-size:11pt;font-weight:700;color:#111;line-height:1.25;margin-bottom:1mm}
-.sub{font-size:9pt;color:#444;line-height:1.25}
+@page{size:8.5in 11in landscape;margin:0.35in}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+.cell{border:0.5px solid #ccc;border-radius:6px;padding:8px 6px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;break-inside:avoid;page-break-inside:avoid}
+.qr-wrap{width:130px;height:130px;margin:0 auto 5px;background:#fff;overflow:hidden;flex-shrink:0;line-height:0}
+.qr-wrap canvas,.qr-wrap img{display:block!important;width:130px!important;height:130px!important;max-width:130px!important;max-height:130px!important}
+.lbl{font-size:8pt;font-weight:700;color:#111;line-height:1.3;margin-bottom:2px}
+.sub{font-size:6.5pt;color:#444;line-height:1.3}
 @media print{
   body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .page{height:10.2in}
 }
-<\/style></head><body>${pagesHtml}<script>
+<\/style></head><body>${cellsHtml}<script>
 window.onload=function(){
   var codes=${JSON.stringify(codes)};
   codes.forEach(function(qr,i){
     var el=document.getElementById('pqr'+i);
     if(!el||!window.QRCode)return;
-    try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:200,height:200,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
+    try{new QRCode(el,{text:'https://canopysecurity.app/scan?code='+qr.token,width:130,height:130,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}catch(e){}
   });
   setTimeout(function(){window.print();},1000);
 };
