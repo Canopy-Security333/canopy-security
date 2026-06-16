@@ -733,6 +733,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
   </div>
 </div>
 
+<!-- BADGE PRINTER MODAL -->
+<div class="modal-backdrop" id="badge-printer-modal-backdrop">
+  <div class="modal">
+    <div class="modal-title">Badge created</div>
+    <div class="modal-sub">Who was this badge created for?</div>
+    <div id="badge-rows"></div>
+    <button onclick="addBadgeRow()" style="background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:0 0 16px;font-family:inherit;text-align:left;display:block">+ Add another badge</button>
+    <button class="modal-primary-btn" id="badge-log-btn" onclick="submitBadgePrinter()" disabled>Log to DAR</button>
+    <button class="modal-secondary-btn" onclick="closeBadgePrinterModal()">Cancel</button>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="riser-closed-modal-backdrop">
   <div class="modal">
     <div class="modal-title" style="color:var(--text-danger)">🚨 Valve Found CLOSED</div>
@@ -966,6 +978,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="scan-patrol-sub" id="pavilion-scan-sub">Tap to scan and log patrol</div>
       </div>
       <div class="scan-patrol-count" id="pavilion-scan-count"></div>
+    </button>
+
+    <div class="lbl" style="margin-top:16px">Security cameras</div>
+    <div class="toast" id="cameras-toast" style="margin-bottom:6px;border-radius:8px">Camera review already logged this hour.</div>
+    <button class="scan-patrol-btn" onclick="scanSecurityCameras()" id="cameras-scan-btn">
+      <div class="scan-patrol-icon" style="background:var(--bg-info)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-info)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+        </svg>
+      </div>
+      <div class="scan-patrol-text">
+        <div class="scan-patrol-title">Security cameras</div>
+        <div class="scan-patrol-sub" id="cameras-scan-sub">Tap to scan and log review</div>
+      </div>
+      <div class="scan-patrol-count" id="cameras-scan-count"></div>
+    </button>
+
+    <div class="lbl" style="margin-top:16px">Badge printer</div>
+    <button class="scan-patrol-btn" onclick="scanBadgePrinter()" id="badge-printer-scan-btn" style="margin-bottom:8px">
+      <div class="scan-patrol-icon" style="background:var(--bg-info)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-info)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <div class="scan-patrol-text">
+        <div class="scan-patrol-title">Badge printer</div>
+        <div class="scan-patrol-sub" id="badge-printer-scan-sub">Tap to scan and log badge</div>
+      </div>
+      <div class="scan-patrol-count" id="badge-printer-scan-count"></div>
     </button>
 
     <div class="lbl">Fire risers</div>
@@ -1297,7 +1338,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 <!-- QR CODES PAGE -->
 <div id="screen-qr" class="screen">
   <div class="hdr">
-    <div><div style="font-size:17px;font-weight:600;color:var(--text-primary)">QR Codes</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px" id="qr-hdr-sub">24 codes · Canopy Campus Security</div></div>
+    <div><div style="font-size:17px;font-weight:600;color:var(--text-primary)">QR Codes</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px" id="qr-hdr-sub">31 codes · Canopy Campus Security</div></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button id="qr-print-all-btn" onclick="printQRSheet()" style="font-size:11px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);color:var(--text-secondary);border-radius:var(--radius-md);padding:5px 12px;cursor:pointer;display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6V2h8v4"/><rect x="1" y="6" width="14" height="7" rx="1"/><path d="M4 10h8M4 13h8"/></svg>Print all</button>
       <button id="qr-select-btn" onclick="toggleQRSelectMode()" style="font-size:11px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);color:var(--text-secondary);border-radius:var(--radius-md);padding:5px 12px;cursor:pointer">Select</button>
@@ -1332,7 +1373,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="admin-section"><div class="admin-section-title">Patrol section order</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder how patrol sections appear on the Patrols tab.</div><div id="patrol-order-list"></div></div>
       <div class="admin-section">
         <div class="admin-section-title">QR codes</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">All 24 scannable QR codes for building patrols, boiler rooms, and utility meters.</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">All 31 scannable QR codes for building patrols, boiler rooms, utility meters, security cameras, and badge printer.</div>
         <button onclick="openQRPage()" style="width:100%;padding:11px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
           View QR codes
@@ -1992,6 +2033,7 @@ setInterval(()=>{
     currentHour=h;
     hourEntryCount=0;
     hourEntries=[];
+    cameraReviewHour=-1;
     renderDARBanner();
   }
 },30000);
@@ -2074,7 +2116,7 @@ function renderBP(){const list=document.getElementById('bp-list');if(!list)retur
 function logBPScan(id){const bldg=BP_BUILDINGS.find(b=>b.id===id);if(!bldg)return;bpScanned[id]=fmt(new Date());addEntry('patrol','Building patrol \u2014 '+bldg.name,'Officer '+(officer||'\u2014')+' conducted a patrol of '+bldg.name+'. Tenant spaces walked. No issues noted unless Near Miss filed.');stats.patrols++;updateStats();renderBP();showToast('bp-toast','\u2713 '+bldg.name+' patrol logged');}
 
 
-let qrStream=null,qrAnimFrame=null,qrDone=false,qrConfig=null;
+let qrStream=null,qrAnimFrame=null,qrDone=false,qrConfig=null,_qrCooldown=false;
 function openQRScanner(cfg){
   qrConfig=cfg;qrDone=false;
   const modal=document.getElementById('qr-scanner-modal');
@@ -2140,7 +2182,7 @@ function handleQRCode(raw){
     return;
   }
   qrDone=true;cancelAnimationFrame(qrAnimFrame);
-  qrConfig.onSuccess();
+  if(qrConfig.onSuccess()===false){qrDone=false;_qrCooldown=true;setTimeout(()=>{_qrCooldown=false;},3000);startQRLoop();return;}
   document.getElementById('qr-success-label').textContent=qrConfig.successLabel||'Logged';
   document.getElementById('qr-success-sub').textContent=qrConfig.successSub||'';
   document.getElementById('qr-scanner-success').style.display='flex';
@@ -2173,7 +2215,9 @@ const ALL_QR_CODES=[{label:'Canopy 1',sublabel:'Building Patrol',token:'canopy-p
 {token:'canopy-riser-C1',label:'Fire Riser — C1',sublabel:'Canopy 1 Main Sprinkler Valve'},
 {token:'canopy-riser-C3',label:'Fire Riser — C3',sublabel:'Canopy 3 Main Sprinkler Valve'},
 {token:'canopy-riser-C4',label:'Fire Riser — C4',sublabel:'Canopy 4 Main Sprinkler Valve'},
-{token:'canopy-riser-C5',label:'Fire Riser — C5',sublabel:'Canopy 5 Main Sprinkler Valve'}];
+{token:'canopy-riser-C5',label:'Fire Riser — C5',sublabel:'Canopy 5 Main Sprinkler Valve'},
+{token:'security-cameras',label:'Security Cameras',sublabel:'Camera Review · Hourly'},
+{token:'badge-printer',label:'Badge Printer',sublabel:'Access Badge Log'}];
 let qrSelectMode=false;
 const qrSelected=new Set();
 function renderAdminQRGrid(){
@@ -2306,6 +2350,85 @@ function scanPavilion(){openQRScanner({title:'Scan Pavilion QR',sub:'Point at th
 function closePavilionModal(){document.getElementById('pavilion-modal-backdrop').classList.remove('open');if(pavilionMicActive)togglePavilionMic();}
 function submitPavilionPatrol(){const notes=document.getElementById('pavilion-notes').value.trim();const detail='Pavilion area patrol completed.'+(notes?' '+notes:'');addEntry('patrol','Pavilion patrol',detail);pavilionPatrolCount++;stats.patrols++;updateStats();saveActiveShift();saveShiftToSupabase();const countEl=document.getElementById('pavilion-scan-count');if(countEl)countEl.textContent=pavilionPatrolCount+'x';const subEl=document.getElementById('pavilion-scan-sub');if(subEl)subEl.textContent='Last patrol: '+fmt(new Date());closePavilionModal();showToast('patrol-toast','✓ Pavilion patrol logged');}
 function togglePavilionMic(){if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){alert('Speech recognition is not supported in this browser.');return;}if(pavilionMicActive){if(pavilionMicRecognition)pavilionMicRecognition.stop();pavilionMicActive=false;document.getElementById('pavilion-mic-btn').classList.remove('recording');return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;pavilionMicRecognition=new SR();pavilionMicRecognition.continuous=true;pavilionMicRecognition.interimResults=false;pavilionMicRecognition.lang='en-US';pavilionMicRecognition.onresult=e=>{const transcript=Array.from(e.results).map(r=>r[0].transcript).join(' ');const ta=document.getElementById('pavilion-notes');ta.value=(ta.value+' '+transcript).trim();};pavilionMicRecognition.onerror=()=>{pavilionMicActive=false;document.getElementById('pavilion-mic-btn').classList.remove('recording');};pavilionMicRecognition.onend=()=>{pavilionMicActive=false;document.getElementById('pavilion-mic-btn').classList.remove('recording');};pavilionMicRecognition.start();pavilionMicActive=true;document.getElementById('pavilion-mic-btn').classList.add('recording');}
+// ── Security Cameras ────────────────────────────────────────────────────────
+let cameraReviewHour=-1;
+let cameraReviewCount=0;
+function scanSecurityCameras(){
+  openQRScanner({
+    title:'Scan — Security Cameras',
+    sub:'Point at the Security Camera review QR code',
+    token:'security-cameras',
+    wrongMsg:'Wrong QR code. Please scan the Security Cameras code.',
+    successLabel:'Camera review logged',
+    successSub:'Security feeds monitored — no issues noted',
+    onSuccess:()=>{
+      const h=new Date().getHours();
+      if(cameraReviewHour===h){
+        const errEl=document.getElementById('qr-scanner-error');
+        if(errEl){errEl.textContent='Camera review already logged this hour.';errEl.style.display='block';setTimeout(()=>{if(errEl)errEl.style.display='none';},3000);}
+        return false;
+      }
+      cameraReviewHour=h;
+      cameraReviewCount++;
+      addEntry('patrol','Security camera review','Security camera review completed — monitored feeds for suspicious activity, no issues noted.');
+      const countEl=document.getElementById('cameras-scan-count');
+      if(countEl)countEl.textContent=cameraReviewCount+'x';
+      const subEl=document.getElementById('cameras-scan-sub');
+      if(subEl)subEl.textContent='Last review: '+fmt(new Date());
+    }
+  });
+}
+// ── Badge Printer ────────────────────────────────────────────────────────────
+let badgeRows=[{name:'',company:''}];
+let badgePrinterCount=0;
+function renderBadgeRows(){
+  const container=document.getElementById('badge-rows');
+  if(!container)return;
+  container.innerHTML=badgeRows.map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><input type="text" id="badge-name-${i}" placeholder="Full name" style="flex:1;min-width:0;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)" oninput="badgeRows[${i}].name=this.value${i===0?';validateBadgeForm()':''}"><input type="text" id="badge-co-${i}" placeholder="Company" style="flex:1;min-width:0;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)" oninput="badgeRows[${i}].company=this.value">${i>0?`<button onclick="removeBadgeRow(${i})" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;color:var(--text-secondary);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`:'<div style="width:28px;flex-shrink:0"></div>'}</div>`).join('');
+  badgeRows.forEach((r,i)=>{const n=document.getElementById('badge-name-'+i);const c=document.getElementById('badge-co-'+i);if(n)n.value=r.name;if(c)c.value=r.company;});
+}
+function validateBadgeForm(){
+  const btn=document.getElementById('badge-log-btn');
+  if(btn)btn.disabled=!(badgeRows[0]&&badgeRows[0].name.trim().length>0);
+}
+function addBadgeRow(){badgeRows.push({name:'',company:''});renderBadgeRows();}
+function removeBadgeRow(i){badgeRows.splice(i,1);renderBadgeRows();validateBadgeForm();}
+function scanBadgePrinter(){
+  openQRScanner({
+    title:'Scan — Badge Printer',
+    sub:'Point at the Badge Printer QR code',
+    token:'badge-printer',
+    wrongMsg:'Wrong QR code. Please scan the Badge Printer code.',
+    successLabel:'Badge Printer scanned',
+    successSub:'Enter badge details below',
+    onSuccess:()=>{
+      badgeRows=[{name:'',company:''}];
+      renderBadgeRows();
+      validateBadgeForm();
+      document.getElementById('badge-printer-modal-backdrop').classList.add('open');
+    }
+  });
+}
+function closeBadgePrinterModal(){document.getElementById('badge-printer-modal-backdrop').classList.remove('open');}
+function submitBadgePrinter(){
+  const filled=badgeRows.filter(r=>r.name.trim());
+  if(!filled.length)return;
+  let detail;
+  if(filled.length===1){
+    const r=filled[0];
+    detail='Access badge created for '+r.name.trim()+(r.company.trim()?', '+r.company.trim():'')+'.';
+  }else{
+    const parts=filled.map(r=>r.name.trim()+(r.company.trim()?' ('+r.company.trim()+')':''));
+    detail='Access badges created for '+parts.join(', ')+'.';
+  }
+  addEntry('patrol','Badge created',detail);
+  badgePrinterCount++;
+  const countEl=document.getElementById('badge-printer-scan-count');
+  if(countEl)countEl.textContent=badgePrinterCount+'x';
+  const subEl=document.getElementById('badge-printer-scan-sub');
+  if(subEl)subEl.textContent='Last badge: '+fmt(new Date());
+  closeBadgePrinterModal();
+}
 // ── Fire Riser weekly-reset helpers ─────────────────────────────────────────
 // Each riser's completion timestamp is stored in localStorage under the key
 // 'riser_saved_ts_<id>'.  On page load we check whether fewer than 7 days
