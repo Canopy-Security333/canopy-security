@@ -2021,6 +2021,7 @@ function finalizeShift(){clearShiftFromSupabase();const endTime=new Date();const
     }).then(({error})=>{if(error)console.warn('Supabase shift summary error:',error.message);});
   }
   clearShiftFromSupabase();
+  clearInterval(window._darPollInterval);
   _supabaseUserId=null;
   clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};showScreen('eos');}
 function returnToCheckin(){
@@ -2861,6 +2862,7 @@ async function _initApp(){
 
   // 5b. Start Realtime listeners now that we have a confirmed user
   _setupRealtimeListeners();
+  _startDARPolling();
 
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
   const remoteShift=await loadShiftFromSupabase();
@@ -3267,6 +3269,28 @@ function _setupRealtimeListeners(){
     });
 }
 
+function _startDARPolling(){
+  if(window._darPollInterval) clearInterval(window._darPollInterval);
+  window._darPollInterval = setInterval(async()=>{
+    if(!window._supabase||!officer||!shiftStart||!_supabaseUserId) return;
+    try{
+      const{data,error}=await window._supabase
+        .from('dar_entries')
+        .select('*')
+        .eq('user_id',_supabaseUserId)
+        .order('created_at',{ascending:true});
+      if(error||!data) return;
+      if(data.length===darLog.length) return;
+      darLog=data.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
+      _rebuildHourlyState();
+      const entEl=document.getElementById('stat-entries');
+      if(entEl) entEl.textContent=darLog.length;
+      updateHomeTiles();
+      const paneVisible=id=>{const el=document.getElementById('pane-'+id);return el&&el.style.display!=='none';};
+      if(paneVisible('dar')) renderCurrentDAR();
+    }catch(e){}
+  }, 15000);
+}
 
 // ═══════════════════════════════════════════════════════
 //  KEYS SYSTEM
