@@ -3153,7 +3153,12 @@ function _setupRealtimeListeners(){
         if(incoming.length===darLog.length&&
            inStats.patrols===stats.patrols&&
            inStats.nm===stats.nm&&
-           inStats.checks===stats.checks)return;
+           inStats.checks===stats.checks&&
+           (incoming.length===0||darLog.length===0||
+            incoming[incoming.length-1].time===
+            (darLog[darLog.length-1].time instanceof Date
+              ?darLog[darLog.length-1].time.toISOString()
+              :darLog[darLog.length-1].time)))return;
         darLog=incoming.map(e=>({...e,time:new Date(e.time)}));
         _rebuildHourlyState();
         stats=inStats;
@@ -3186,10 +3191,18 @@ function _setupRealtimeListeners(){
         });
         if(alreadyHave)return;
         // Entry is genuinely from another device — add it
-        darLog.push({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||e.time||Date.now())});
+        const newEntry={type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||e.time||Date.now())};
+        darLog.push(newEntry);
         darLog.sort((a,b)=>new Date(a.time)-new Date(b.time));
+        // Also update hourly state so the DAR banner reflects the incoming entry
+        const entryHour=newEntry.time.getHours();
+        if(entryHour===currentHour&&newEntry.time.toDateString()===new Date().toDateString()){
+          hourEntryCount++;
+          hourEntries.unshift(newEntry);
+        }
         const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
         updateHomeTiles();
+        renderDARBanner();
         if(paneVisible('dar')){renderCurrentDAR();}
       }catch(e){}
     })
