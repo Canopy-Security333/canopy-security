@@ -2021,7 +2021,7 @@ function finalizeShift(){clearShiftFromSupabase();const endTime=new Date();const
     }).then(({error})=>{if(error)console.warn('Supabase shift summary error:',error.message);});
   }
   clearShiftFromSupabase();
-  clearInterval(window._darPollInterval);
+  clearInterval(window._pollInterval);
   _supabaseUserId=null;
   clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};showScreen('eos');}
 function returnToCheckin(){
@@ -2862,7 +2862,7 @@ async function _initApp(){
 
   // 5b. Start Realtime listeners now that we have a confirmed user
   _setupRealtimeListeners();
-  _startDARPolling();
+  _startPolling();
 
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
   const remoteShift=await loadShiftFromSupabase();
@@ -3269,26 +3269,100 @@ function _setupRealtimeListeners(){
     });
 }
 
-function _startDARPolling(){
-  if(window._darPollInterval) clearInterval(window._darPollInterval);
-  window._darPollInterval = setInterval(async()=>{
-    if(!window._supabase||!officer||!shiftStart||!_supabaseUserId) return;
+function _startPolling(){
+  if(window._pollInterval) clearInterval(window._pollInterval);
+  window._pollInterval = setInterval(async()=>{
+    if(!window._supabase||!_supabaseUserId) return;
+    const paneVisible=id=>{const el=document.getElementById('pane-'+id);return el&&el.style.display!=='none';};
     try{
-      const{data,error}=await window._supabase
-        .from('dar_entries')
+      // ── 1. Active shift sync ──────────────────────────────
+      const{data:shiftData}=await window._supabase
+        .from('active_shifts')
         .select('*')
         .eq('user_id',_supabaseUserId)
-        .order('created_at',{ascending:true});
-      if(error||!data) return;
-      if(data.length===darLog.length) return;
-      darLog=data.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
-      _rebuildHourlyState();
-      const entEl=document.getElementById('stat-entries');
-      if(entEl) entEl.textContent=darLog.length;
-      updateHomeTiles();
-      const paneVisible=id=>{const el=document.getElementById('pane-'+id);return el&&el.style.display!=='none';};
-      if(paneVisible('dar')) renderCurrentDAR();
-    }catch(e){}
+        .maybeSingle();
+      if(!shiftData&&officer&&shiftStart){
+        // Shift was ended on another device
+        clearInterval(timerInt);timerInt=null;
+        clearActiveShift();
+        officer=null;shiftStart=null;shiftId=null;darLog=[];
+        stats={patrols:0,nm:0,checks:0};
+        _shiftRestored=false;
+        showScreen('checkin');
+        return;
+      }
+      if(shiftData&&!officer){
+        // New shift started on another device — restore it
+        officer=shiftData.officer_name;
+        shiftId=shiftData.shift_id||('shift-'+Date.now());
+        shiftStart=new Date(shiftData.shift_start);
+        darLog=(shiftData.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
+        stats=shiftData.stats||{patrols:0,nm:0,checks:0};
+        _applyOfficerToUI(officer);
+        ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
+        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+        clearInterval(timerInt);
+        timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
+        saveActiveShift();
+        _shiftRestored=true;
+        showScreen('main');showPane('home',null);updateHomeTiles();
+        _rebuildHourlyState();
+        return;
+      }
+      // ── 2. DAR entries sync ───────────────────────────────
+      if(officer&&shiftStart){
+        const{data:darData}=await window._supabase
+          .from('dar_entries')
+          .select('*')
+          .eq('user_id',_supabaseUserId)
+          .order('created_at',{ascending:true});
+        if(darData&&darData.length!==darLog.length){
+          darLog=darData.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
+          _rebuildHourlyState();
+          const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
+          updateHomeTiles();
+          if(paneVisible('dar')) renderCurrentDAR();
+        }
+      }
+      // ── 3. Key checkout sync ──────────────────────────────
+      const{data:keyData}=await window._supabase
+        .from('key_checked_out_current')
+        .select('*');
+      if(keyData){
+        let keysChanged=false;
+        keyData.forEach(r=>{
+          if(!r?.key_id) return;
+          const existing=keyCheckedOut[r.key_id];
+          if(!existing||existing.person!==r.person){
+            keyCheckedOut[r.key_id]={keyId:r.key_id,keyLabel:r.key_label||r.key_id,catId:r.cat_id||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
+            keysChanged=true;
+          }
+        });
+        // Check for returned keys
+        Object.keys(keyCheckedOut).forEach(kid=>{
+          if(!keyData.find(r=>r.key_id===kid)){
+            delete keyCheckedOut[kid];
+            keysChanged=true;
+          }
+        });
+        if(keysChanged&&paneVisible('keys')) renderKeys();
+      }
+      // ── 4. Pass downs sync ────────────────────────────────
+      const{data:pdData}=await window._supabase
+        .from('pass_downs')
+        .select('*')
+        .order('created_at',{ascending:false})
+        .limit(20);
+      if(pdData){
+        const newPDs=pdData.map(r=>({id:String(r.id),officer:r.officer_name||'',text:r.text||'',time:r.created_at}));
+        if(JSON.stringify(newPDs.map(p=>p.id))!==JSON.stringify(passDowns.map(p=>p.id))){
+          passDowns=newPDs;
+          saveStorage();
+          renderPassDownsBanner();
+          if(paneVisible('passdowns')) renderPassDownsPage();
+        }
+      }
+    }catch(e){console.warn('Polling error:',e.message);}
   }, 15000);
 }
 
