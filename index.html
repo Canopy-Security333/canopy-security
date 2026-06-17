@@ -1931,6 +1931,7 @@ function restoreActiveShift(){
         shiftId=s.shiftId||'shift-'+Date.now();
         shiftStart=new Date(s.shiftStart);
         darLog=s.darLog.map(e=>({...e,time:new Date(e.time)}));
+        _rebuildHourlyState();
         stats=s.stats||{patrols:0,nm:0,checks:0};
         if(s.bpScanned)Object.assign(bpScanned,s.bpScanned);
         if(s.nmReports)nmReports=s.nmReports;
@@ -2042,6 +2043,20 @@ let currentHour=new Date().getHours();
 let darDrawerOpen=false;
 let hourEntries=[];
 
+function _rebuildHourlyState() {
+  const now = new Date();
+  const h = now.getHours();
+  const today = now.toDateString();
+  currentHour = h;
+  const thisHourEntries = darLog.filter(e => {
+    const t = e.time instanceof Date ? e.time : new Date(e.time);
+    return t.getHours() === h && t.toDateString() === today;
+  });
+  hourEntryCount = thisHourEntries.length;
+  hourEntries = [...thisHourEntries].sort((a, b) => new Date(b.time) - new Date(a.time));
+  renderDARBanner();
+}
+
 function renderDARBanner(){
   const banner=document.getElementById('dar-banner');
   const pip1=document.getElementById('dar-pip-1');
@@ -2134,7 +2149,7 @@ function addEntry(type,title,detail){
   saveActiveShift();
   saveShiftToSupabase();
   if(window._supabase&&officer&&shiftId){
-    window._supabase.from('dar_entries').insert({shift_id:shiftId,officer,type,title,detail,created_at:entry.time.toISOString()}).then(({error})=>{if(error)console.warn('Supabase write error:',error.message);});
+    window._supabase.from('dar_entries').insert({shift_id:shiftId,user_id:_supabaseUserId,officer,type,title,detail,created_at:entry.time.toISOString()}).then(({error})=>{if(error)console.warn('Supabase write error:',error.message);});
   }
 }
 let activeDictation=null;
@@ -2854,6 +2869,7 @@ async function _initApp(){
     shiftId=remoteShift.shift_id||('shift-'+Date.now());
     shiftStart=new Date(remoteShift.shift_start);
     darLog=(remoteShift.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
+    _rebuildHourlyState();
     stats=remoteShift.stats||{patrols:0,nm:0,checks:0};
     _applyOfficerToUI(officer);
     ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
@@ -3139,6 +3155,7 @@ function _setupRealtimeListeners(){
            inStats.nm===stats.nm&&
            inStats.checks===stats.checks)return;
         darLog=incoming.map(e=>({...e,time:new Date(e.time)}));
+        _rebuildHourlyState();
         stats=inStats;
         ['patrols','nm','checks'].forEach(k=>{const el=document.getElementById('stat-'+k);if(el)el.textContent=stats[k]||0;});
         const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
@@ -3159,7 +3176,7 @@ function _setupRealtimeListeners(){
         const e=payload.new;
         if(!e||!officer||!shiftStart)return;
         // Q3 fix: only handle entries that belong to the current shift
-        if(e.shift_id&&shiftId&&e.shift_id!==shiftId)return;
+        if(e.user_id&&_supabaseUserId&&e.user_id!==_supabaseUserId)return;
         // Q2 fix: dedup by content + timestamp proximity (≤3 s)
         // This correctly identifies self-writes where local entries have no id
         const eMs=new Date(e.created_at||e.time||0).getTime();
