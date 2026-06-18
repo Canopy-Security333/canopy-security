@@ -3312,10 +3312,12 @@ function _startPolling(){
       }
       // ── 2. DAR entries sync ───────────────────────────────
       if(officer&&shiftStart){
+        const todayStart=new Date();todayStart.setHours(0,0,0,0);
         const{data:darData}=await window._supabase
           .from('dar_entries')
           .select('*')
           .eq('user_id',_supabaseUserId)
+          .gte('created_at',todayStart.toISOString())
           .order('created_at',{ascending:true});
         if(darData&&darData.length!==darLog.length){
           darLog=darData.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
