@@ -2961,6 +2961,7 @@ async function saveShiftToSupabase() {
       .from('active_shifts')
       .upsert({
         user_id: session.user.id,
+        shift_id: shiftId,
         officer_name: officer,
         shift_start: shiftStart.toISOString(),
         dar_entries: darLog || [],
@@ -3317,7 +3318,7 @@ function _startPolling(){
           .from('dar_entries')
           .select('*')
           .eq('user_id',_supabaseUserId)
-          .gte('created_at',todayStart.toISOString())
+          .eq('shift_id',shiftId)
           .order('created_at',{ascending:true});
         if(darData&&darData.length!==darLog.length){
           darLog=darData.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
