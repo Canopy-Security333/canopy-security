@@ -3316,7 +3316,6 @@ function _startPolling(){
           .from('dar_entries')
           .select('*')
           .eq('user_id',_supabaseUserId)
-          .eq('shift_id',shiftId)
           .order('created_at',{ascending:true});
         if(darData&&darData.length!==darLog.length){
           darLog=darData.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
