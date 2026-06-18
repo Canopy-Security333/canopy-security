@@ -3182,8 +3182,9 @@ function _setupRealtimeListeners(){
       try{
         const e=payload.new;
         if(!e||!officer||!shiftStart)return;
-        // Q3 fix: only handle entries that belong to the current shift
+        // Only handle entries that belong to the current account and shift
         if(e.user_id&&_supabaseUserId&&e.user_id!==_supabaseUserId)return;
+        if(e.shift_id&&shiftId&&e.shift_id!==shiftId)return;
         // Q2 fix: dedup by content + timestamp proximity (≤3 s)
         // This correctly identifies self-writes where local entries have no id
         const eMs=new Date(e.created_at||e.time||0).getTime();
@@ -3315,6 +3316,7 @@ function _startPolling(){
           .from('dar_entries')
           .select('*')
           .eq('user_id',_supabaseUserId)
+          .eq('shift_id',shiftId)
           .order('created_at',{ascending:true});
         if(darData&&darData.length!==darLog.length){
           darLog=darData.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
