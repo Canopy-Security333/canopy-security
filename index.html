@@ -3366,6 +3366,38 @@ function _startPolling(){
           if(paneVisible('passdowns')) renderPassDownsPage();
         }
       }
+      // ── 5. Near miss reports sync ─────────────────────────
+      const{data:nmData}=await window._supabase
+        .from('near_miss_reports')
+        .select('*')
+        .order('submitted_at',{ascending:false})
+        .limit(50);
+      if(nmData){
+        const incomingIds=nmData.map(r=>String(r.id));
+        const localIds=nmHistory.map(r=>String(r.id));
+        const hasNew=incomingIds.some(id=>!localIds.includes(id));
+        const hasResolved=nmData.some(r=>{
+          const local=nmHistory.find(x=>String(x.id)===String(r.id));
+          return local&&local.status!==r.status;
+        });
+        if(hasNew||hasResolved){
+          nmHistory=nmData.map(r=>({
+            id:r.id,
+            officer:r.officer_name||'',
+            building:r.building||'',
+            cats:r.categories||[],
+            desc:r.description||'',
+            photo:r.photo||null,
+            time:new Date(r.submitted_at||Date.now()).toISOString(),
+            status:r.status||'open',
+            resolved_by:r.resolved_by||null,
+            resolved_at:r.resolved_at||null,
+            resolution_notes:r.resolution_notes||null
+          }));
+          saveNMHistory();
+          if(paneVisible('nearmiss')) renderNMHistory();
+        }
+      }
     }catch(e){console.warn('Polling error:',e.message);}
   }, 15000);
 }
