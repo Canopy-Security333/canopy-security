@@ -3873,6 +3873,8 @@ async function confirmKeyReturn(){
   const returnedBy=officer||'—';
   const returned=[];
   let samplePerson='—';
+
+  // Snapshot entries BEFORE deletion so Supabase blocks can use them
   const _returnSnapshot={};
   _keyReturnChecked.forEach(kid=>{
     if(keyCheckedOut[kid])_returnSnapshot[kid]=keyCheckedOut[kid];
@@ -3881,20 +3883,39 @@ async function confirmKeyReturn(){
       if(found)_returnSnapshot[kid]=found;
     }
   });
-  console.log('[KeyReturn] _keyReturnChecked:', [..._keyReturnChecked], 'size:', _keyReturnChecked.size, 'keyCheckedOut keys:', Object.keys(keyCheckedOut));
+
+  // Build returned list and clean up local state
   _keyReturnChecked.forEach(keyId=>{
-    let entry=keyCheckedOut[keyId];
-    if(!entry){
-      // Fallback: find most recent checkout entry in keyLog for this key
-      entry=[...keyLog].reverse().find(e=>e.keyId===keyId&&e.type==='out');
-    }
+    const entry=_returnSnapshot[keyId];
     if(!entry)return;
-    if(samplePerson==='—')samplePerson=entry.person||entry.person||'—';
+    if(samplePerson==='—')samplePerson=entry.person||'—';
     keyLog.push({...entry,id:'klog_in_'+Date.now()+'_'+keyId,type:'in',returnTime,returnNotes,returnedBy});
     delete keyCheckedOut[keyId];
     returned.push(entry.keyLabel||keyId);
   });
   saveKeyState();
+
+  // Always close sheet and update UI immediately — don't wait for Supabase
+  closeKeyReturnSheet();
+  renderKeysPane();
+  updateHomeTiles();
+
+  // DAR entry — use returned list if populated, otherwise use snapshot keys
+  const returnedLabels=returned.length
+    ? returned
+    : [..._keyReturnChecked].map(kid=>_returnSnapshot[kid]?.keyLabel||kid);
+  const person=samplePerson!=='—'
+    ? samplePerson
+    : [..._keyReturnChecked].map(kid=>_returnSnapshot[kid]?.person).find(Boolean)||'—';
+  if(returnedLabels.length){
+    const darDetail=`${returnedLabels.join(', ')} returned by ${person}.${returnNotes?' '+returnNotes:''}`;
+    addEntry('key','Key return — '+(returnedLabels.length===1?returnedLabels[0]:returnedLabels.length+' keys'),darDetail);
+    showToast('keys-toast','✓ '+returnedLabels.length+' key'+(returnedLabels.length!==1?'s':'')+' returned');
+  }else{
+    showToast('keys-toast','✓ Key returned');
+  }
+
+  // Supabase delete — fires regardless of returned.length
   try{
     if(window._supabase&&_keyReturnChecked.size){
       const{data:{session}}=await window._supabase.auth.getSession();
@@ -3907,8 +3928,10 @@ async function confirmKeyReturn(){
       }
     }
   }catch(e){console.warn('key return supabase exception:',e.message);}
+
+  // key_log insert
   try{
-    if(window._supabase&&returned.length){
+    if(window._supabase&&_keyReturnChecked.size){
       const{data:{session}}=await window._supabase.auth.getSession();
       if(session){
         const returnRows=[..._keyReturnChecked].map(keyId=>{
@@ -3917,10 +3940,10 @@ async function confirmKeyReturn(){
           return{
             user_id:session.user.id,
             key_id:keyId,
-            key_label:entry.keyLabel,
+            key_label:entry.keyLabel||keyId,
             cat_label:entry.catLabel||entry.cat?.label||'',
             type:'in',
-            person:entry.person,
+            person:entry.person||'—',
             company:entry.company||'',
             phone:entry.phone||'',
             notes:returnNotes||'',
@@ -3939,25 +3962,11 @@ async function confirmKeyReturn(){
       }
     }
   }catch(e){console.warn('key_log return insert exception:',e.message);}
+
   passDowns=passDowns.filter(p=>!(p.key_ids&&p.key_ids.length&&p.key_ids.every(kid=>!keyCheckedOut[kid])));
   saveStorage();
   renderPassDownsBanner();
   if(paneVisible('passdowns'))renderPassDownsPage();
-  if(returned.length){
-    const darDetail=`${returned.join(', ')} returned by ${samplePerson}.${returnNotes?' '+returnNotes:''}`;
-    addEntry('key','Key return — '+(returned.length===1?returned[0]:returned.length+' keys'),darDetail);
-  }
-  closeKeyReturnSheet();
-  renderKeysPane();
-  updateHomeTiles();
-  if(returned.length){
-    showToast('keys-toast','✓ '+returned.length+' key'+(returned.length!==1?'s':'')+' returned');
-  }else{
-    // Key was returned via polling data — clear local state and refresh
-    _keyReturnChecked.forEach(kid=>{ delete keyCheckedOut[kid]; });
-    saveKeyState();
-    showToast('keys-toast','✓ Key returned');
-  }
 }
 
 </script>
