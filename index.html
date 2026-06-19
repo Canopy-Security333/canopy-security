@@ -1016,7 +1016,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="qa-tile-icon" style="background:rgba(29,158,117,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
         <div><div class="qa-tile-label">Reports</div><div class="qa-tile-sub" id="qa-reports-sub">DAR &amp; pass downs</div></div>
       </button>
-      <button class="qa-tile" onclick="showPane('keys',null)">
+      <button id="home-tile-keys" class="qa-tile" onclick="showPane('keys',null)">
         <div class="qa-tile-icon" style="background:rgba(186,117,23,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
         <div><div class="qa-tile-label">Keys</div><div class="qa-tile-sub" id="qa-keys-sub">Key sign-out log</div></div>
       </button>
@@ -1878,6 +1878,17 @@ function updateHomeTiles(){
   if(repEl)repEl.textContent='DAR & pass downs';
   const keysEl=document.getElementById('qa-keys-sub');
   if(keysEl)keysEl.textContent='Key sign-out log';
+  const keysTile=document.getElementById('home-tile-keys');
+  if(keysTile){
+    const outCount=Object.keys(keyCheckedOut).length;
+    if(outCount>0){
+      keysTile.style.border='1.5px solid var(--orange)';
+      keysTile.style.boxShadow='0 0 12px rgba(186,117,23,.25)';
+    }else{
+      keysTile.style.border='0.5px solid var(--border-secondary)';
+      keysTile.style.boxShadow='';
+    }
+  }
 }
 function updateReportsTiles(){
   const darSub=document.getElementById('reports-dar-sub');
@@ -3351,6 +3362,7 @@ function _startPolling(){
         });
         if(keysChanged){
           saveKeyState();
+          updateHomeTiles();
           if(paneVisible('keys')) renderKeysPane();
         }
       }
@@ -3534,6 +3546,7 @@ function renderKeysPane(){
     </button>
   </div>`;
   pane.innerHTML=h;
+  updateHomeTiles();
 }
 
 function _buildKeyCats(){
