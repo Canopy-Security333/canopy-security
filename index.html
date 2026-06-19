@@ -3345,7 +3345,7 @@ function _startPolling(){
         .from('key_checked_out_current')
         .select('*')
         .eq('user_id',_supabaseUserId);
-      if(keyData){
+      if(keyData&&!_keyReturnPending){
         let keysChanged=false;
         keyData.forEach(r=>{
           if(!r?.key_id) return;
@@ -3451,6 +3451,7 @@ let keySelection=new Set();
 let keyCatOpen={};
 let keysActiveTab='keys';
 let _keyReturnChecked=new Set();
+let _keyReturnPending=false;
 
 function loadKeyState(){
   try{const d=localStorage.getItem('key_log');if(d)keyLog=JSON.parse(d);}catch(e){keyLog=[];}
@@ -3894,6 +3895,7 @@ async function confirmKeyReturn(){
     returned.push(entry.keyLabel||keyId);
   });
   saveKeyState();
+  _keyReturnPending=true;
   const _checkedIds=[..._keyReturnChecked];
 
   // DAR entry — use returned list if populated, otherwise use snapshot keys
@@ -3924,6 +3926,7 @@ async function confirmKeyReturn(){
       }
     }
   }catch(e){console.warn('key return supabase exception:',e.message);}
+  _keyReturnPending=false;
   closeKeyReturnSheet();
   renderKeysPane();
   updateHomeTiles();
