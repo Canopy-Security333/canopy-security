@@ -3715,7 +3715,8 @@ async function confirmKeyCheckout(){
             person,company,phone,notes,
             issued_by:issuedBy,
             batch_id:batchId,
-            checked_out_at:time
+            checked_out_at:time,
+            shift_id:shiftId
           };
         }).filter(Boolean);
         if(rows.length){
@@ -3825,13 +3826,18 @@ async function confirmKeyReturn(){
   const returnedBy=officer||'—';
   const returned=[];
   let samplePerson='—';
+  console.log('[KeyReturn] _keyReturnChecked:', [..._keyReturnChecked], 'keyCheckedOut keys:', Object.keys(keyCheckedOut));
   _keyReturnChecked.forEach(keyId=>{
-    const entry=keyCheckedOut[keyId];
+    let entry=keyCheckedOut[keyId];
+    if(!entry){
+      // Fallback: find most recent checkout entry in keyLog for this key
+      entry=[...keyLog].reverse().find(e=>e.keyId===keyId&&e.type==='out');
+    }
     if(!entry)return;
-    if(samplePerson==='—')samplePerson=entry.person;
+    if(samplePerson==='—')samplePerson=entry.person||entry.person||'—';
     keyLog.push({...entry,id:'klog_in_'+Date.now()+'_'+keyId,type:'in',returnTime,returnNotes,returnedBy});
     delete keyCheckedOut[keyId];
-    returned.push(entry.keyLabel);
+    returned.push(entry.keyLabel||keyId);
   });
   saveKeyState();
   try{
