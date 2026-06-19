@@ -3711,7 +3711,7 @@ async function confirmKeyCheckout(){
             user_id:session.user.id,
             key_id:keyId,
             key_label:info.key,
-            cat_id:info.catId,
+            cat_label:info.cat.label,
             person,company,phone,notes,
             issued_by:issuedBy,
             batch_id:batchId,
@@ -3739,7 +3739,6 @@ async function confirmKeyCheckout(){
             user_id:session.user.id,
             key_id:keyId,
             key_label:info.key,
-            cat_id:info.catId,
             cat_label:info.cat.label,
             type:'out',
             person,company,phone,notes,
@@ -3826,6 +3825,14 @@ async function confirmKeyReturn(){
   const returnedBy=officer||'—';
   const returned=[];
   let samplePerson='—';
+  const _returnSnapshot={};
+  _keyReturnChecked.forEach(kid=>{
+    if(keyCheckedOut[kid])_returnSnapshot[kid]=keyCheckedOut[kid];
+    else{
+      const found=[...keyLog].reverse().find(e=>e.keyId===kid&&e.type==='out');
+      if(found)_returnSnapshot[kid]=found;
+    }
+  });
   console.log('[KeyReturn] _keyReturnChecked:', [..._keyReturnChecked], 'keyCheckedOut keys:', Object.keys(keyCheckedOut));
   _keyReturnChecked.forEach(keyId=>{
     let entry=keyCheckedOut[keyId];
@@ -3857,14 +3864,13 @@ async function confirmKeyReturn(){
       const{data:{session}}=await window._supabase.auth.getSession();
       if(session){
         const returnRows=[..._keyReturnChecked].map(keyId=>{
-          const entry=keyCheckedOut[keyId];
+          const entry=_returnSnapshot[keyId];
           if(!entry)return null;
           return{
             user_id:session.user.id,
             key_id:keyId,
             key_label:entry.keyLabel,
-            cat_id:entry.catId,
-            cat_label:entry.catLabel||'',
+            cat_label:entry.catLabel||entry.cat?.label||'',
             type:'in',
             person:entry.person,
             company:entry.company||'',
