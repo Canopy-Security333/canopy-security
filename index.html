@@ -3865,7 +3865,7 @@ async function confirmKeyReturn(){
   });
   saveKeyState();
   try{
-    if(window._supabase&&returned.length){
+    if(window._supabase&&_keyReturnChecked.size){
       const{data:{session}}=await window._supabase.auth.getSession();
       if(session){
         const{error}=await window._supabase
@@ -3918,7 +3918,15 @@ async function confirmKeyReturn(){
   }
   closeKeyReturnSheet();
   renderKeysPane();
-  showToast('keys-toast','✓ '+returned.length+' key'+(returned.length!==1?'s':'')+' returned');
+  updateHomeTiles();
+  if(returned.length){
+    showToast('keys-toast','✓ '+returned.length+' key'+(returned.length!==1?'s':'')+' returned');
+  }else{
+    // Key was returned via polling data — clear local state and refresh
+    _keyReturnChecked.forEach(kid=>{ delete keyCheckedOut[kid]; });
+    saveKeyState();
+    showToast('keys-toast','✓ Key returned');
+  }
 }
 
 </script>
