@@ -3770,6 +3770,7 @@ async function confirmKeyCheckout(){
 
 // ── RETURN SHEET ──
 function openKeyReturnSheet(keyId,batchId){
+  console.log('[ReturnSheet] opened with keyId:', keyId, 'batchId:', batchId, 'keyCheckedOut keys:', Object.keys(keyCheckedOut));
   let entry=keyId?keyCheckedOut[keyId]:null;
   if(!entry&&batchId){entry=Object.values(keyCheckedOut).find(e=>(e.batchId||e.id)===batchId);}
   if(!entry)return;
@@ -3836,7 +3837,7 @@ async function confirmKeyReturn(){
       if(found)_returnSnapshot[kid]=found;
     }
   });
-  console.log('[KeyReturn] _keyReturnChecked:', [..._keyReturnChecked], 'keyCheckedOut keys:', Object.keys(keyCheckedOut));
+  console.log('[KeyReturn] _keyReturnChecked:', [..._keyReturnChecked], 'size:', _keyReturnChecked.size, 'keyCheckedOut keys:', Object.keys(keyCheckedOut));
   _keyReturnChecked.forEach(keyId=>{
     let entry=keyCheckedOut[keyId];
     if(!entry){
