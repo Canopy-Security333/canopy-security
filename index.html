@@ -3894,19 +3894,15 @@ async function confirmKeyReturn(){
     returned.push(entry.keyLabel||keyId);
   });
   saveKeyState();
-
-  // Always close sheet and update UI immediately — don't wait for Supabase
-  closeKeyReturnSheet();
-  renderKeysPane();
-  updateHomeTiles();
+  const _checkedIds=[..._keyReturnChecked];
 
   // DAR entry — use returned list if populated, otherwise use snapshot keys
   const returnedLabels=returned.length
     ? returned
-    : [..._keyReturnChecked].map(kid=>_returnSnapshot[kid]?.keyLabel||kid);
+    : _checkedIds.map(kid=>_returnSnapshot[kid]?.keyLabel||kid);
   const person=samplePerson!=='—'
     ? samplePerson
-    : [..._keyReturnChecked].map(kid=>_returnSnapshot[kid]?.person).find(Boolean)||'—';
+    : _checkedIds.map(kid=>_returnSnapshot[kid]?.person).find(Boolean)||'—';
   if(returnedLabels.length){
     const darDetail=`${returnedLabels.join(', ')} returned by ${person}.${returnNotes?' '+returnNotes:''}`;
     addEntry('key','Key return — '+(returnedLabels.length===1?returnedLabels[0]:returnedLabels.length+' keys'),darDetail);
@@ -3923,18 +3919,21 @@ async function confirmKeyReturn(){
         const{error}=await window._supabase
           .from('key_checked_out_current')
           .delete()
-          .in('key_id',[..._keyReturnChecked]);
+          .in('key_id',_checkedIds);
         if(error)console.warn('key return supabase error:',error.message);
       }
     }
   }catch(e){console.warn('key return supabase exception:',e.message);}
+  closeKeyReturnSheet();
+  renderKeysPane();
+  updateHomeTiles();
 
   // key_log insert
   try{
     if(window._supabase&&_keyReturnChecked.size){
       const{data:{session}}=await window._supabase.auth.getSession();
       if(session){
-        const returnRows=[..._keyReturnChecked].map(keyId=>{
+        const returnRows=_checkedIds.map(keyId=>{
           const entry=_returnSnapshot[keyId];
           if(!entry)return null;
           return{
