@@ -3221,7 +3221,7 @@ function _setupRealtimeListeners(){
           // Deduplicate: if data is identical skip re-render
           const existing=keyCheckedOut[r.key_id];
           if(existing&&existing.person===r.person&&String(existing.time)===String(new Date(r.checked_out_at)))return;
-          keyCheckedOut[r.key_id]={keyId:r.key_id,keyLabel:r.key_label||r.key_id,catId:r.cat_id||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
+          keyCheckedOut[r.key_id]={keyId:r.key_id,keyLabel:r.key_label||r.key_id,catId:'',catLabel:r.cat_label||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
         }else if(payload.eventType==='DELETE'){
           const r=payload.old;
           if(!r?.key_id||!keyCheckedOut[r.key_id])return; // already gone locally
@@ -3338,7 +3338,7 @@ function _startPolling(){
           if(!r?.key_id) return;
           const existing=keyCheckedOut[r.key_id];
           if(!existing||existing.person!==r.person){
-            keyCheckedOut[r.key_id]={keyId:r.key_id,keyLabel:r.key_label||r.key_id,catId:r.cat_id||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
+            keyCheckedOut[r.key_id]={keyId:r.key_id,keyLabel:r.key_label||r.key_id,catId:'',catLabel:r.cat_label||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
             keysChanged=true;
           }
         });
@@ -3349,7 +3349,10 @@ function _startPolling(){
             keysChanged=true;
           }
         });
-        if(keysChanged&&paneVisible('keys')) renderKeysPane();
+        if(keysChanged){
+          saveKeyState();
+          if(paneVisible('keys')) renderKeysPane();
+        }
       }
       // ── 4. Pass downs sync ────────────────────────────────
       const{data:pdData}=await window._supabase
@@ -3489,7 +3492,7 @@ function _keyInfo(keyId){
 function _esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function renderKeysPane(){
-  loadKeyState();
+  if(!Object.keys(keyCheckedOut).length) loadKeyState();
   loadKeyLogFromSupabase();
   const pane=document.getElementById('pane-keys');
   if(!pane)return;
