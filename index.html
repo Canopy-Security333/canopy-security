@@ -1858,7 +1858,7 @@ function showPane(id,btn){
   if(id==='home'){renderBP();renderDCPatrol();renderBunkerPatrol();updateHomePatrolCounts();updateHomeTiles();}
   if(id==='home-bp'){renderBP();renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='reports'){updateReportsTiles();}
-  if(id==='keys'){renderKeysPane();}
+  if(id==='keys'){loadKeyLogFromSupabase();renderKeysPane();}
   if(id==='patrols'){renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='nearmiss')renderNMList();
   if(id==='passdowns')renderPassDownsPage();
@@ -2870,6 +2870,7 @@ async function _initApp(){
   // 4. No session = go to login, full stop
   if(!session){showScreen('login');return;}
   _supabaseUserId=session.user.id;
+  await loadKeyCheckedOutFromSupabase();
 
   // 5b. Start Realtime listeners now that we have a confirmed user
   _setupRealtimeListeners();
@@ -3342,7 +3343,8 @@ function _startPolling(){
       // ── 3. Key checkout sync ──────────────────────────────
       const{data:keyData}=await window._supabase
         .from('key_checked_out_current')
-        .select('*');
+        .select('*')
+        .eq('user_id',_supabaseUserId);
       if(keyData){
         let keysChanged=false;
         keyData.forEach(r=>{
@@ -3487,6 +3489,36 @@ async function loadKeyLogFromSupabase(){
     saveKeyState();
   }catch(e){console.warn('loadKeyLogFromSupabase exception:',e.message);}
 }
+async function loadKeyCheckedOutFromSupabase(){
+  try{
+    if(!window._supabase||!_supabaseUserId)return;
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session)return;
+    const{data,error}=await window._supabase
+      .from('key_checked_out_current')
+      .select('*')
+      .eq('user_id',_supabaseUserId);
+    if(error||!data)return;
+    data.forEach(r=>{
+      if(!r?.key_id)return;
+      keyCheckedOut[r.key_id]={
+        keyId:r.key_id,
+        keyLabel:r.key_label||r.key_id,
+        catId:'',
+        catLabel:r.cat_label||'',
+        person:r.person||'',
+        company:r.company||'',
+        phone:r.phone||'',
+        notes:r.notes||'',
+        time:new Date(r.checked_out_at||Date.now()),
+        issuedBy:r.issued_by||'',
+        batchId:r.batch_id||''
+      };
+    });
+    saveKeyState();
+    updateHomeTiles();
+  }catch(e){console.warn('loadKeyCheckedOutFromSupabase exception:',e.message);}
+}
 function saveKeyState(){
   try{localStorage.setItem('key_log',JSON.stringify(keyLog));}catch(e){}
   try{localStorage.setItem('key_checked_out',JSON.stringify(keyCheckedOut));}catch(e){}
@@ -3505,7 +3537,6 @@ function _esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/
 
 function renderKeysPane(){
   if(!Object.keys(keyCheckedOut).length) loadKeyState();
-  loadKeyLogFromSupabase();
   const pane=document.getElementById('pane-keys');
   if(!pane)return;
   const selN=keySelection.size;
