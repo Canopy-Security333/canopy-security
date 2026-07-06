@@ -2841,6 +2841,7 @@ async function loadOfficersFromSupabase(){
 // never navigate away from the main screen after a restore.
 let _shiftRestored=false;
 let _supabaseUserId=null; // cached Supabase user ID — set on login/restore, cleared on end-shift
+let _realtimeRetryCount=0;  // consecutive reconnect attempts; resets on successful SUBSCRIBED
 
 async function _initApp(){
   // 1. Apply dark mode immediately
@@ -2853,9 +2854,15 @@ async function _initApp(){
   if(boilerBtn)boilerBtn.textContent=boilerActive?'Active':'Inactive';
 
   // 2. Initialize Supabase first — always, before any routing decision
-  try{
-    window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-  }catch(e){console.warn('Supabase init failed:',e);}
+  // Singleton: _initApp can re-run (pageshow/bfcache restore). Creating a fresh client
+  // every time would orphan the previous client's Realtime socket — later teardown calls
+  // removeChannel() on the NEW client, which can't reach a channel owned by the OLD one,
+  // so the old socket stayed open and kept streaming broadcasts indefinitely.
+  if(!window._supabase){
+    try{
+      window._supabase=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+    }catch(e){console.warn('Supabase init failed:',e);}
+  }
 
   // 2b. Load officer roster from Supabase (falls back to hardcoded if unreachable)
   await loadOfficersFromSupabase();
@@ -2874,7 +2881,7 @@ async function _initApp(){
 
   // 5b. Start Realtime listeners now that we have a confirmed user
   _setupRealtimeListeners();
-  _startPolling();
+  // _startPolling(); — kept as manual fallback if Realtime sync issues resurface; uncomment to re-enable
 
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
   const remoteShift=await loadShiftFromSupabase();
@@ -2882,7 +2889,7 @@ async function _initApp(){
     officer=remoteShift.officer_name;
     shiftId=remoteShift.shift_id||('shift-'+Date.now());
     shiftStart=new Date(remoteShift.shift_start);
-    darLog=(remoteShift.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
+    darLog=await _loadDarEntriesForShift(shiftId);
     _rebuildHourlyState();
     stats=remoteShift.stats||{patrols:0,nm:0,checks:0};
     _applyOfficerToUI(officer);
@@ -2924,6 +2931,14 @@ window.addEventListener('pageshow',(e)=>{
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'){
     if(officer&&shiftStart){saveActiveShift();saveShiftToSupabase();}
+  }else if(document.visibilityState==='visible'){
+    // Mobile OSes often suspend the socket without firing CHANNEL_ERROR/CLOSED while
+    // backgrounded, so the reconnect-with-backoff above can miss it. Force a resubscribe
+    // on foreground too — _setupRealtimeListeners() tears down any stale channel first.
+    if(window._supabase&&_supabaseUserId){
+      _realtimeRetryCount=0;
+      _setupRealtimeListeners();
+    }
   }
 });
 
@@ -2976,7 +2991,10 @@ async function saveShiftToSupabase() {
         shift_id: shiftId,
         officer_name: officer,
         shift_start: shiftStart.toISOString(),
-        dar_entries: darLog || [],
+        // dar_entries intentionally omitted — individual entries are written to the
+        // dar_entries table (see addEntry()) and hydrated via _loadDarEntriesForShift().
+        // Including the full growing array here caused every entry to re-upload and
+        // re-broadcast (via Realtime) the entire shift's history — an O(n^2) egress cost.
         stats: stats || {},
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
@@ -3000,6 +3018,22 @@ async function loadShiftFromSupabase() {
     console.warn('loadShiftFromSupabase failed:', e.message);
     return null;
   }
+}
+// Fetches a shift's DAR entries from the dar_entries table (the source of truth for
+// entry content). Used to hydrate darLog instead of the removed active_shifts.dar_entries
+// blob — keeps active_shifts small and Realtime-cheap regardless of shift length.
+async function _loadDarEntriesForShift(shiftId){
+  try{
+    if(!window._supabase||!_supabaseUserId||!shiftId)return [];
+    const{data,error}=await window._supabase
+      .from('dar_entries')
+      .select('*')
+      .eq('user_id',_supabaseUserId)
+      .eq('shift_id',shiftId)
+      .order('created_at',{ascending:true});
+    if(error||!data)return [];
+    return data.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at)}));
+  }catch(e){console.warn('_loadDarEntriesForShift exception:',e.message);return [];}
 }
 async function clearShiftFromSupabase(){
   try{
@@ -3138,7 +3172,7 @@ function _setupRealtimeListeners(){
     /* ── active_shifts ──────────────────────────────────────
        • UPDATE — sync DAR log + stats from another device
        • DELETE — shift ended elsewhere; transition to check-in */
-    .on('postgres_changes',{event:'*',schema:'public',table:'active_shifts'},async(payload)=>{
+    .on('postgres_changes',{event:'*',schema:'public',table:'active_shifts',filter:'user_id=eq.'+_supabaseUserId},async(payload)=>{
       try{
         const rec=payload.new||payload.old;
         // Ignore rows belonging to other users
@@ -3160,27 +3194,36 @@ function _setupRealtimeListeners(){
           return;
         }
 
+        // INSERT: shift started on another device — restore it on this one
+        if(payload.eventType==='INSERT'&&!officer){
+          const ins=payload.new;
+          if(!ins||ins.user_id!==_supabaseUserId)return;
+          officer=ins.officer_name;
+          shiftId=ins.shift_id||('shift-'+Date.now());
+          shiftStart=new Date(ins.shift_start);
+          darLog=await _loadDarEntriesForShift(shiftId);
+          stats=ins.stats||{patrols:0,nm:0,checks:0};
+          _applyOfficerToUI(officer);
+          ['patrols','nm','checks'].forEach(k=>{const el=document.getElementById('stat-'+k);if(el)el.textContent=stats[k]||0;});
+          const entEl2=document.getElementById('stat-entries');if(entEl2)entEl2.textContent=darLog.length;
+          clearInterval(timerInt);
+          timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
+          saveActiveShift();
+          _shiftRestored=true;
+          showScreen('main');showPane('home',null);updateHomeTiles();
+          _rebuildHourlyState();
+          return;
+        }
+
         const d=payload.new;
         if(!d||!officer||!shiftStart)return; // no active shift on this device yet
-        // Skip if nothing changed (avoids re-rendering our own writes)
-        const incoming=d.dar_entries||[];
+        // Entry content itself syncs via the dedicated dar_entries INSERT listener below —
+        // this UPDATE only needs to mirror the small `stats` counters across devices.
         const inStats=d.stats||{};
-        if(incoming.length===darLog.length&&
-           inStats.patrols===stats.patrols&&
-           inStats.nm===stats.nm&&
-           inStats.checks===stats.checks&&
-           (incoming.length===0||darLog.length===0||
-            incoming[incoming.length-1].time===
-            (darLog[darLog.length-1].time instanceof Date
-              ?darLog[darLog.length-1].time.toISOString()
-              :darLog[darLog.length-1].time)))return;
-        darLog=incoming.map(e=>({...e,time:new Date(e.time)}));
-        _rebuildHourlyState();
+        if(inStats.patrols===stats.patrols&&inStats.nm===stats.nm&&inStats.checks===stats.checks)return;
         stats=inStats;
         ['patrols','nm','checks'].forEach(k=>{const el=document.getElementById('stat-'+k);if(el)el.textContent=stats[k]||0;});
-        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
         updateHomeTiles();
-        if(paneVisible('dar')){renderCurrentDAR();}
       }catch(e){/* keep existing local state on any error */}
     })
 
@@ -3191,7 +3234,7 @@ function _setupRealtimeListeners(){
        2. content+timestamp dedup — suppress the Realtime bounce-back of
           our own writes (local entries have no Supabase id, so id-equality
           never matches; content+time within 3 s is the reliable signal) */
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'dar_entries'},(payload)=>{
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'dar_entries',filter:'user_id=eq.'+_supabaseUserId},(payload)=>{
       try{
         const e=payload.new;
         if(!e||!officer||!shiftStart)return;
@@ -3225,11 +3268,12 @@ function _setupRealtimeListeners(){
 
     /* ── key_checked_out_current ────────────────────────────
        Key checkout / return syncs instantly to all devices */
-    .on('postgres_changes',{event:'*',schema:'public',table:'key_checked_out_current'},(payload)=>{
+    .on('postgres_changes',{event:'*',schema:'public',table:'key_checked_out_current',filter:'user_id=eq.'+_supabaseUserId},(payload)=>{
       try{
         if(payload.eventType==='INSERT'||payload.eventType==='UPDATE'){
           const r=payload.new;
           if(!r?.key_id)return;
+          if(r.user_id&&r.user_id!==_supabaseUserId)return;
           // Deduplicate: if data is identical skip re-render
           const existing=keyCheckedOut[r.key_id];
           if(existing&&existing.person===r.person&&String(existing.time)===String(new Date(r.checked_out_at)))return;
@@ -3277,15 +3321,27 @@ function _setupRealtimeListeners(){
     .subscribe((status)=>{
       if(status==='SUBSCRIBED'){
         console.log('[Realtime] Live sync active');
-      }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
-        console.warn('[Realtime] '+status+' — running on local state');
+        _realtimeRetryCount=0;
+      }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+        // Keep retrying indefinitely with a backoff that caps at 30s — a security app
+        // can't afford to permanently drop sync until someone notices and reloads.
+        _realtimeRetryCount++;
+        const delay=Math.min(30000,5000*_realtimeRetryCount);
+        console.warn('[Realtime] '+status+' — reconnecting in '+(delay/1000)+'s (attempt '+_realtimeRetryCount+')…');
+        setTimeout(()=>_setupRealtimeListeners(),delay);
       }
     });
+}
+
+function _isPollingWindow(){
+  const h=new Date().getHours();
+  return h>=9&&h<17;
 }
 
 function _startPolling(){
   if(window._pollInterval) clearInterval(window._pollInterval);
   window._pollInterval = setInterval(async()=>{
+    if(!_isPollingWindow()) return;
     if(!window._supabase||!_supabaseUserId) return;
     const paneVisible=id=>{const el=document.getElementById('pane-'+id);return el&&el.style.display!=='none';};
     try{
@@ -3310,7 +3366,7 @@ function _startPolling(){
         officer=shiftData.officer_name;
         shiftId=shiftData.shift_id||('shift-'+Date.now());
         shiftStart=new Date(shiftData.shift_start);
-        darLog=(shiftData.dar_entries||[]).map(e=>({...e,time:new Date(e.time)}));
+        darLog=await _loadDarEntriesForShift(shiftId);
         stats=shiftData.stats||{patrols:0,nm:0,checks:0};
         _applyOfficerToUI(officer);
         ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
