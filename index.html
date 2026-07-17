@@ -2854,6 +2854,8 @@ async function loadOfficersFromSupabase(){
 let _shiftRestored=false;
 let _supabaseUserId=null; // cached Supabase user ID — set on login/restore, cleared on end-shift
 let _realtimeRetryCount=0;  // consecutive reconnect attempts; resets on successful SUBSCRIBED
+let _realtimeSubscribed=false;  // true while the channel is confirmed SUBSCRIBED and healthy
+let _lastRealtimeSetupAt=0;  // timestamp of the last _setupRealtimeListeners() call — debounces overlapping triggers
 
 async function _initApp(){
   // 1. Apply dark mode immediately
@@ -2957,7 +2959,9 @@ document.addEventListener('visibilitychange',()=>{
     // Mobile OSes often suspend the socket without firing CHANNEL_ERROR/CLOSED while
     // backgrounded, so the reconnect-with-backoff above can miss it. Force a resubscribe
     // on foreground too — _setupRealtimeListeners() tears down any stale channel first.
-    if(window._supabase&&_supabaseUserId){
+    // But skip it if the channel is already confirmed healthy — no need to tear down
+    // a working connection just because the tab became visible.
+    if(window._supabase&&_supabaseUserId&&!_realtimeSubscribed){
       _realtimeRetryCount=0;
       _setupRealtimeListeners();
     }
@@ -3182,6 +3186,13 @@ async function loadAllNearMissFromSupabase() {
 function _setupRealtimeListeners(){
   if(!window._supabase||!_supabaseUserId)return;
 
+  // Debounce: ignore any call within 3s of the last one, regardless of trigger —
+  // prevents the backoff handler and the visibilitychange handler from racing
+  // and tearing down each other's freshly-built channel.
+  const _now=Date.now();
+  if(_now-_lastRealtimeSetupAt<3000)return;
+  _lastRealtimeSetupAt=_now;
+
   // Tear down any previous channel (e.g. after _initApp re-runs on pageshow)
   if(window._realtimeChannel){
     try{window._supabase.removeChannel(window._realtimeChannel);}catch(e){}
@@ -3343,7 +3354,9 @@ function _setupRealtimeListeners(){
       if(status==='SUBSCRIBED'){
         console.log('[Realtime] Live sync active');
         _realtimeRetryCount=0;
+        _realtimeSubscribed=true;
       }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+        _realtimeSubscribed=false;
         // Keep retrying indefinitely with a backoff that caps at 30s — a security app
         // can't afford to permanently drop sync until someone notices and reloads.
         _realtimeRetryCount++;
