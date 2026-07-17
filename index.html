@@ -3053,7 +3053,7 @@ async function clearShiftFromSupabase(){
     const{data:{session}}=await window._supabase.auth.getSession();
     if(!session)return;
     await window._supabase.from('active_shifts').delete()
-      .eq('user_id',session.user.id);
+      .eq('officer_name',officer);
   }catch(e){console.warn('clearShiftFromSupabase failed:',e.message);}
 }
 async function saveNearMissToSupabase(report) {
