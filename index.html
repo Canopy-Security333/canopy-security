@@ -2856,6 +2856,8 @@ let _supabaseUserId=null; // cached Supabase user ID — set on login/restore, c
 let _realtimeRetryCount=0;  // consecutive reconnect attempts; resets on successful SUBSCRIBED
 let _realtimeSubscribed=false;  // true while the channel is confirmed SUBSCRIBED and healthy
 let _lastRealtimeSetupAt=0;  // timestamp of the last _setupRealtimeListeners() call — debounces overlapping triggers
+let _healthCheckInterval=null;  // interval id for the Realtime channel-state health check
+let _catchupInterval=null;  // interval id for the 9am-5pm DAR/keys catch-up refresh
 
 async function _initApp(){
   // 1. Apply dark mode immediately
@@ -2895,6 +2897,8 @@ async function _initApp(){
 
   // 5b. Start Realtime listeners now that we have a confirmed user
   _setupRealtimeListeners();
+  _startRealtimeHealthCheck();
+  _startCatchupRefresh();
   // _startPolling(); — kept as manual fallback if Realtime sync issues resurface; uncomment to re-enable
 
   // 5. Session exists — check Supabase for an active shift FIRST (authoritative source),
@@ -3363,6 +3367,56 @@ function _setupRealtimeListeners(){
         setTimeout(()=>_setupRealtimeListeners(),delay);
       }
     });
+}
+
+// Piece 1 — lightweight health check: catches silent WebSocket death (mobile OS
+// suspends the socket without ever firing CHANNEL_ERROR/CLOSED) that the
+// .subscribe() status callback alone can miss. Reads local channel state only —
+// no network request — so it's safe to run frequently all day.
+function _startRealtimeHealthCheck(){
+  if(_healthCheckInterval)clearInterval(_healthCheckInterval);
+  _healthCheckInterval=setInterval(()=>{
+    if(!window._supabase||!_supabaseUserId)return;
+    const state=window._realtimeChannel?.state;
+    if(state&&state!=='joined'){
+      console.warn('[Realtime] health check found stale channel state: '+state+' — reconnecting');
+      _setupRealtimeListeners(); // debounced internally via _lastRealtimeSetupAt
+    }
+  },75000);
+}
+
+// Piece 2 — 9am-5pm catch-up refresh: a secondary safety net for DAR entries and
+// key checkouts in case Realtime silently missed an update. Outside the polling
+// window this is a no-op — no fetch happens at all.
+function _startCatchupRefresh(){
+  if(_catchupInterval)clearInterval(_catchupInterval);
+  _catchupInterval=setInterval(async()=>{
+    if(!_isPollingWindow())return;
+    if(!window._supabase||!_supabaseUserId)return;
+    const paneVisible=id=>{const el=document.getElementById('pane-'+id);return el&&el.style.display!=='none';};
+    try{
+      const monthEntries=await _loadDarEntriesForMonth();
+      let added=false;
+      monthEntries.forEach(e=>{
+        const eMs=(e.time instanceof Date?e.time:new Date(e.time)).getTime();
+        const alreadyHave=darLog.some(x=>{
+          const xMs=(x.time instanceof Date?x.time:new Date(x.time)).getTime();
+          return x.type===e.type&&x.title===e.title&&x.detail===e.detail&&Math.abs(xMs-eMs)<3000;
+        });
+        if(!alreadyHave){darLog.push(e);added=true;}
+      });
+      if(added){
+        darLog.sort((a,b)=>new Date(a.time)-new Date(b.time));
+        renderDARBanner();
+        if(paneVisible('dar')){renderCurrentDAR();}
+      }
+    }catch(e){console.warn('[Catch-up] DAR refresh failed:',e.message);}
+    try{
+      await loadKeyCheckedOutFromSupabase();
+      saveKeyState();
+      if(paneVisible('keys')){renderKeysPane();}
+    }catch(e){console.warn('[Catch-up] Key refresh failed:',e.message);}
+  },120000);
 }
 
 function _isPollingWindow(){
