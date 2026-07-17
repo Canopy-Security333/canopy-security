@@ -2895,8 +2895,18 @@ async function _initApp(){
   _setupRealtimeListeners();
   // _startPolling(); — kept as manual fallback if Realtime sync issues resurface; uncomment to re-enable
 
-  // 5. Session exists — check Supabase for an active shift FIRST (authoritative source)
-  const remoteShift=await loadShiftFromSupabase();
+  // 5. Session exists — check Supabase for an active shift FIRST (authoritative source),
+  // but only for THIS device's last-known officer — never "whatever officer happens to be active".
+  let savedOfficerName=null;
+  try{savedOfficerName=localStorage.getItem('current_officer');}catch(e){}
+  let remoteShift=null;
+  if(savedOfficerName){
+    remoteShift=await loadShiftFromSupabase(savedOfficerName);
+    if(!remoteShift){
+      // Stale: this device's saved officer no longer has an active shift (ended elsewhere or expired)
+      try{localStorage.removeItem('current_officer');}catch(e){}
+    }
+  }
   if(remoteShift&&remoteShift.officer_name&&remoteShift.shift_start){
     officer=remoteShift.officer_name;
     shiftId=remoteShift.shift_id||('shift-'+Date.now());
@@ -3015,14 +3025,14 @@ async function saveShiftToSupabase() {
     console.warn('saveShiftToSupabase exception:', e.message);
   }
 }
-async function loadShiftFromSupabase() {
+async function loadShiftFromSupabase(officerName) {
   try {
     const { data: { session } } = await window._supabase.auth.getSession();
     if (!session) return null;
     const { data, error } = await window._supabase
       .from('active_shifts')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('officer_name', officerName)
       .maybeSingle();
     if (error || !data) return null;
     return data;
