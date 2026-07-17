@@ -2959,9 +2959,7 @@ document.addEventListener('visibilitychange',()=>{
     // Mobile OSes often suspend the socket without firing CHANNEL_ERROR/CLOSED while
     // backgrounded, so the reconnect-with-backoff above can miss it. Force a resubscribe
     // on foreground too — _setupRealtimeListeners() tears down any stale channel first.
-    // But skip it if the channel is already confirmed healthy — no need to tear down
-    // a working connection just because the tab became visible.
-    if(window._supabase&&_supabaseUserId&&!_realtimeSubscribed){
+    if(window._supabase&&_supabaseUserId){
       _realtimeRetryCount=0;
       _setupRealtimeListeners();
     }
