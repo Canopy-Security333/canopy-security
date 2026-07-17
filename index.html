@@ -3318,6 +3318,7 @@ function _setupRealtimeListeners(){
           delete keyCheckedOut[r.key_id];
         }
         saveKeyState();
+        updateHomeTiles();
         if(paneVisible('keys')){renderKeysPane();}
       }catch(e){}
     })
