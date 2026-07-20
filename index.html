@@ -102,8 +102,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
 .menu-overlay{display:none;position:absolute;top:0;left:0;right:0;bottom:0;z-index:5}
 .menu-overlay.open{display:block}
-.menu-drawer{position:absolute;top:58px;right:0;width:230px;background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-top:none;border-right:none;z-index:20;transform:translateX(100%);transition:transform .2s ease;border-radius:0 0 0 var(--radius-lg);box-shadow:-4px 4px 20px rgba(0,0,0,.08)}
-.menu-drawer.open{transform:translateX(0)}
+.menu-drawer{position:absolute;top:58px;right:0;width:230px;background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-top:none;border-right:none;z-index:20;opacity:0;transform:translateY(-10px);transition:opacity .18s ease,transform .18s ease;pointer-events:none;border-radius:0 0 0 var(--radius-lg);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.menu-drawer.open{opacity:1;transform:translateY(0);pointer-events:auto}
 .menu-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;border-bottom:0.5px solid var(--border-secondary);transition:background .1s}
 .menu-item:last-child{border-bottom:none}
 .menu-item:hover{background:var(--bg-secondary)}
@@ -1472,9 +1472,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div id="admin-locked-panel"><div class="admin-overlay"><p>Enter admin PIN to unlock settings.</p><input class="pin-input" type="password" id="pin-field" maxlength="4" placeholder="••••" oninput="clearPinErr()"/><div class="pin-err" id="pin-err">Incorrect PIN. Try again.</div><button class="unlock-btn" onclick="tryUnlock()">Unlock</button></div></div>
     <div id="admin-unlocked" style="display:none">
       <div class="toast" id="admin-toast">Changes saved</div>
-      <div class="admin-section"><div class="admin-section-title">Security officer roster</div><div id="officer-list"></div><div class="lbl" style="margin-top:12px">Add officer</div><div class="add-officer-row"><input type="text" id="new-officer-name" placeholder="Full name..."/><button class="add-officer-btn" onclick="addOfficer()">Add</button></div></div>
-      <div class="admin-section"><div class="admin-section-title">Monthly near miss compliance</div><div id="nm-compliance-admin-list"></div></div>
-      <div class="admin-section"><div class="admin-section-title">Monthly safety tip</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px" id="mst-admin-sub"></div><div id="mst-compliance-admin-list"></div></div>
+      <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('officer-roster')">Security officer roster<span class="chevron" id="officer-roster-chev">›</span></div><div class="patrol-body" id="officer-roster-body"><div id="officer-list"></div><div class="lbl" style="margin-top:12px">Add officer</div><div class="add-officer-row"><input type="text" id="new-officer-name" placeholder="Full name..."/><button class="add-officer-btn" onclick="addOfficer()">Add</button></div></div></div>
+      <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('nm-compliance')">Monthly near miss compliance<span class="chevron" id="nm-compliance-chev">›</span></div><div class="patrol-body" id="nm-compliance-body"><div id="nm-compliance-admin-list"></div></div></div>
+      <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('mst-compliance')">Monthly safety tip<span class="chevron" id="mst-compliance-chev">›</span></div><div class="patrol-body" id="mst-compliance-body"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px" id="mst-admin-sub"></div><div id="mst-compliance-admin-list"></div></div></div>
       <div class="admin-section"><div class="admin-section-title">Patrol section order</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder how patrol sections appear on the Patrols tab.</div><div id="patrol-order-list"></div></div>
       <div class="admin-section">
         <div class="admin-section-title">QR codes</div>
