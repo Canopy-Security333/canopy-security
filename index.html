@@ -956,6 +956,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
   <div id="pane-home" class="pane act" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - 112px)">
     <div style="flex:1;overflow-y:auto;padding:14px 14px 80px">
     <div class="toast" id="note-toast">Note added to DAR</div>
+    <!-- Monthly Safety Tip Banner -->
+    <div id="mst-banner-wrap" style="margin-bottom:10px">
+      <div id="mst-banner" style="border:1px solid var(--green);background:var(--bg-success);border-radius:var(--radius-lg);padding:12px 14px;transition:background .2s,border-color .2s">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div style="flex:1;min-width:0">
+            <div id="mst-banner-text" style="font-size:13px;font-weight:600;color:var(--text-success);line-height:1.3"></div>
+            <div id="mst-banner-sub" style="font-size:11px;color:var(--text-secondary);margin-top:2px"></div>
+          </div>
+          <button id="mst-yes-btn" onclick="completeMonthlySafetyTip()" style="flex-shrink:0;font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);padding:8px 16px;cursor:pointer">Yes</button>
+        </div>
+      </div>
+    </div>
     <!-- DAR Banner + Drawer -->
     <div id="dar-banner-wrap" style="margin-bottom:4px">
       <div id="dar-banner" style="border:1px solid var(--red);border-bottom:none;background:rgba(226,75,74,.12);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:12px 14px 10px">
@@ -1461,6 +1473,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="toast" id="admin-toast">Changes saved</div>
       <div class="admin-section"><div class="admin-section-title">Security officer roster</div><div id="officer-list"></div><div class="lbl" style="margin-top:12px">Add officer</div><div class="add-officer-row"><input type="text" id="new-officer-name" placeholder="Full name..."/><button class="add-officer-btn" onclick="addOfficer()">Add</button></div></div>
       <div class="admin-section"><div class="admin-section-title">Monthly near miss compliance</div><div id="nm-compliance-admin-list"></div></div>
+      <div class="admin-section"><div class="admin-section-title">Monthly safety tip</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px" id="mst-admin-sub"></div><div id="mst-compliance-admin-list"></div></div>
       <div class="admin-section"><div class="admin-section-title">Patrol section order</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder how patrol sections appear on the Patrols tab.</div><div id="patrol-order-list"></div></div>
       <div class="admin-section">
         <div class="admin-section-title">QR codes</div>
@@ -1872,6 +1885,7 @@ function showPane(id,btn){
   if(id==='fe-schedule')renderFESchedule();
 }
 function updateHomeTiles(){
+  renderMSTBanner();
   const nmEl=document.getElementById('qa-nm-sub');
   if(nmEl)nmEl.textContent=stats.nm===0?'0 reports this shift':stats.nm+' report'+(stats.nm!==1?'s':'')+' this shift';
   const nmTile=document.getElementById('home-tile-nearmiss');
@@ -2802,6 +2816,73 @@ function saveFEOrder(){try{const edits={};Object.keys(FE_DATA).forEach(k=>{edits
 function resetFEOrder(){try{localStorage.removeItem('ext_data_edits');}catch(e){}location.reload();}
 function renderOfficerList(){document.getElementById('officer-list').innerHTML=officers.map(o=>`<div class="officer-row-admin"><div class="av-sm">${initials(o)}</div><div class="o-name">${o}</div><button class="del-btn" onclick="removeOfficer(${JSON.stringify(o)})">Remove</button></div>`).join('');renderPatrolOrderList();if(feDrawerOpen)renderFEReorderBody();}
 function renderNMComplianceAdmin(){document.getElementById('nm-compliance-admin-list').innerHTML=officers.map(o=>{const c=getNMComplianceForOfficer(o);return`<div class="officer-row-admin"><div class="av-sm">${initials(o)}</div><div class="o-name">${o}</div><span style="font-size:10px;padding:2px 8px;border-radius:999px;${c.met?'background:var(--bg-success);color:var(--text-success);border:0.5px solid rgba(29,158,117,.3)':'background:var(--bg-warning);color:var(--text-warning);border:0.5px solid rgba(186,117,23,.3)'}">${c.met?'Met':'Not met'}</span><span style="font-size:11px;color:var(--text-secondary);margin-left:8px">${c.count} this month</span></div>`;}).join('');}
+
+/* ══════════════════════════════════════
+   MONTHLY SAFETY TIP
+══════════════════════════════════════ */
+let mstStatus={}; // officer name -> ISO completed_at string, for the CURRENT month only
+function mstMonthKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function mstMonthName(d){d=d||new Date();return d.toLocaleDateString('en-US',{month:'long'});}
+function mstColorForToday(){const day=new Date().getDate();if(day<=10)return{key:'green',border:'var(--green)',bg:'var(--bg-success)',text:'var(--text-success)'};if(day<=20)return{key:'orange',border:'var(--orange)',bg:'var(--bg-warning)',text:'var(--text-warning)'};return{key:'red',border:'var(--red)',bg:'var(--bg-danger)',text:'var(--text-danger)'};}
+async function loadMonthlySafetyTipFromSupabase(){
+  if(!window._supabase)return;
+  try{
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session)return;
+    const{data,error}=await window._supabase.from('monthly_safety_tips').select('officer_name,completed_at').eq('month',mstMonthKey());
+    if(error||!data)return;
+    mstStatus={};
+    data.forEach(r=>{if(r.officer_name)mstStatus[r.officer_name]=r.completed_at;});
+    renderMSTBanner();
+    if(document.getElementById('mst-compliance-admin-list')&&document.getElementById('admin-unlocked').style.display!=='none')renderMSTComplianceAdmin();
+  }catch(e){console.warn('loadMonthlySafetyTipFromSupabase error:',e.message);}
+}
+function renderMSTBanner(){
+  const wrap=document.getElementById('mst-banner-wrap');const banner=document.getElementById('mst-banner');
+  if(!wrap||!banner||!officer||officer==='Admin'){if(wrap)wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const monthName=mstMonthName();
+  const done=!!mstStatus[officer];
+  const textEl=document.getElementById('mst-banner-text');
+  const subEl=document.getElementById('mst-banner-sub');
+  const btn=document.getElementById('mst-yes-btn');
+  if(done){
+    banner.style.border='1px solid var(--green)';banner.style.background='var(--bg-success)';
+    textEl.style.color='var(--text-success)';
+    textEl.textContent='✓ Monthly Safety Tip completed for '+monthName;
+    subEl.textContent='Completed '+fmtFull(new Date(mstStatus[officer]));
+    btn.style.display='none';
+  }else{
+    const c=mstColorForToday();
+    banner.style.border='1px solid '+c.border;banner.style.background=c.bg;
+    textEl.style.color=c.text;
+    textEl.textContent='Have you completed the Monthly Safety Tip for '+monthName+'?';
+    subEl.textContent='';
+    btn.style.display='';
+  }
+}
+async function completeMonthlySafetyTip(){
+  if(!officer||officer==='Admin')return;
+  const now=new Date().toISOString();
+  mstStatus[officer]=now;
+  renderMSTBanner();
+  try{
+    if(window._supabase){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        await window._supabase.from('monthly_safety_tips').upsert({officer_name:officer,month:mstMonthKey(),completed_at:now},{onConflict:'officer_name,month'});
+      }
+    }
+  }catch(e){console.warn('completeMonthlySafetyTip Supabase error:',e.message);}
+}
+function renderMSTComplianceAdmin(){
+  const list=document.getElementById('mst-compliance-admin-list');if(!list)return;
+  const sub=document.getElementById('mst-admin-sub');if(sub)sub.textContent='Who has completed the Monthly Safety Tip for '+mstMonthName()+'.';
+  list.innerHTML=officers.map(o=>{
+    const ts=mstStatus[o];const met=!!ts;
+    return`<div class="officer-row-admin"><div class="av-sm">${initials(o)}</div><div class="o-name">${o}</div><span style="font-size:10px;padding:2px 8px;border-radius:999px;${met?'background:var(--bg-success);color:var(--text-success);border:0.5px solid rgba(29,158,117,.3)':'background:var(--bg-warning);color:var(--text-warning);border:0.5px solid rgba(186,117,23,.3)'}">${met?'Completed':'Not completed'}</span>${met?`<span style="font-size:11px;color:var(--text-secondary);margin-left:8px">${fmtFull(new Date(ts))}</span>`:''}</div>`;
+  }).join('');
+}
 let feDrawerOpen=false;
 function renderPatrolOrderList(){const el=document.getElementById('patrol-order-list');if(!el)return;el.innerHTML=patrolOrder.map((id,i)=>{const isFE=id==='fe';const label=patrolMeta[id]?.label||id;const chevron=isFE?`<svg id="fe-drawer-chev" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" style="opacity:.5;transition:transform .2s;${feDrawerOpen?'transform:rotate(90deg)':''}"><path d="M6 4l4 4-4 4"/></svg>`:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3"><path d="M6 4l4 4-4 4"/></svg>`;const row=`<div class="patrol-order-item${isFE?' po-fe-row':''}" draggable="${!isFE||!feDrawerOpen}" data-id="${id}" data-idx="${i}" ondragstart="poDragStart(event)" ondragover="poDragOver(event)" ondrop="poDrop(event)" ondragend="poDragEnd(event)" ${isFE?`onclick="toggleFEDrawer(event)"`:''}  style="${isFE?'cursor:pointer;':''}"><div class="drag-handle"><span></span><span></span><span></span></div><span class="patrol-order-label" style="${isFE?'font-weight:600;color:var(--text-primary)':''}">${isFE?'🧯 ':' '}${label}</span>${isFE?`<span style="font-size:10px;color:var(--text-secondary);margin-right:4px">Edit</span>`:''}${chevron}</div>`;const drawer=isFE?`<div id="fe-inline-drawer" style="display:${feDrawerOpen?'block':'none'};background:var(--bg-secondary);border-top:0.5px solid var(--border-secondary);border-bottom:0.5px solid var(--border-secondary);padding:12px;margin-bottom:0"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder zones or individual extinguishers. Tap ✏️ to rename a location.</div><div style="display:flex;gap:6px;margin-bottom:10px"><button class="fe-bldg-tab act" data-bldg="C1" onclick="selectFEAdminBldg('C1',this)">C1</button><button class="fe-bldg-tab" data-bldg="C3" onclick="selectFEAdminBldg('C3',this)">C3</button><button class="fe-bldg-tab" data-bldg="C4" onclick="selectFEAdminBldg('C4',this)">C4</button><button class="fe-bldg-tab" data-bldg="C5" onclick="selectFEAdminBldg('C5',this)">C5</button></div><div id="fe-reorder-body"></div><div style="display:flex;gap:8px;margin-top:10px"><button onclick="saveFEOrder()" style="flex:1;padding:9px;font-size:12px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer">Save changes</button><button onclick="resetFEOrder()" style="padding:9px 12px;font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary)">Reset all</button></div><div class="toast" id="fe-order-toast" style="margin-top:8px">Changes saved</div></div>`:'';return row+drawer;}).join('');}
 function toggleFEDrawer(e){if(e.target.closest('.drag-handle'))return;feDrawerOpen=!feDrawerOpen;renderPatrolOrderList();if(feDrawerOpen){feAdminBldg='C1';renderFEReorderBody();setTimeout(()=>{const drawer=document.getElementById('fe-inline-drawer');if(drawer)drawer.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}}
@@ -2816,7 +2897,7 @@ async function removeOfficer(name){if(window._supabase){try{await window._supaba
 function changePin(){const v=document.getElementById('new-pin').value.trim();if(v.length===4&&/^\d{4}$/.test(v)){adminPin=v;document.getElementById('new-pin').value='';showToast('admin-toast');}}
 function toggleBoiler(){const btn=document.getElementById('boiler-toggle');btn.textContent=btn.textContent==='Active'?'Inactive':'Active';boilerActive=btn.textContent==='Active';localStorage.setItem('boiler_active',String(boilerActive));applyPatrolOrder();}
 function clearPinErr(){document.getElementById('pin-err').classList.remove('show');}
-function tryUnlock(){const v=document.getElementById('pin-field').value;if(v===adminPin){document.getElementById('admin-locked-panel').style.display='none';document.getElementById('admin-unlocked').style.display='block';renderOfficerList();renderAdminQRGrid();renderNMComplianceAdmin();}else{document.getElementById('pin-err').classList.add('show');document.getElementById('pin-field').value='';}}
+function tryUnlock(){const v=document.getElementById('pin-field').value;if(v===adminPin){document.getElementById('admin-locked-panel').style.display='none';document.getElementById('admin-unlocked').style.display='block';renderOfficerList();renderAdminQRGrid();renderNMComplianceAdmin();renderMSTComplianceAdmin();}else{document.getElementById('pin-err').classList.add('show');document.getElementById('pin-field').value='';}}
 function lockAdmin(){document.getElementById('admin-unlocked').style.display='none';document.getElementById('admin-locked-panel').style.display='block';document.getElementById('pin-field').value='';}
 (function(){const h=new Date().getHours();const morning=h>=5&&h<12;const afternoon=h>=12&&h<17;const evening=h>=17&&h<21;const greetings=[...(morning?['Good morning.','Rise and shine.','Morning. Let\'s keep it safe.','Start strong, stay sharp.','Morning officer. The campus is yours.']:[]),...(afternoon?['Good afternoon.','Afternoon. All quiet?','Hey there. Ready to roll?','Midday check — you\'re on.','Keep your eyes open out there.']:[]),...(evening?['Good evening.','Evening shift. You\'ve got this.','Good evening, officer.','Evening patrol starts now.','The campus is counting on you.']:[]),...(!morning&&!afternoon&&!evening?['Burning the midnight oil.','Night shift. Stay sharp.','All quiet on the night watch?','Darkness is no excuse for complacency.','The night belongs to the prepared.']:[]),'Good to see you.','Welcome back.','Another day, another safe campus.','Ready to make the rounds?','Eyes open, coffee ready.','Glad you\'re here.','Let\'s keep Canopy safe.','The campus is in good hands.','On duty and looking sharp.','You\'re on. Let\'s go.','Safety first. Always.','Boots on the ground.','If you see something, say something.','A safe campus starts with you.','Stay alert. Stay safe.','Your presence makes a difference.','Trust your instincts out there.','Check in, check around, check back.','Every patrol matters.','Secure the campus. Protect the people.','Report it. Don\'t ignore it.','Be the reason someone feels safe today.','Awareness is your best tool.','You\'re not just watching — you\'re protecting.','Stay hydrated and stay focused.','One shift at a time. You\'ve got this.'];const shuffled=greetings.sort(()=>Math.random()-0.5);let idx=0;function cycleGreeting(){const el=document.getElementById('ci-greeting');if(!el)return;el.classList.add('fading');setTimeout(()=>{idx=(idx+1)%shuffled.length;el.textContent=shuffled[idx];el.classList.remove('fading');},500);}idx=Math.floor(Math.random()*shuffled.length);const el=document.getElementById('ci-greeting');if(el)el.textContent=shuffled[idx];setInterval(cycleGreeting,4000);})();
 loadStorage();loadNMHistory();populateSelect();renderPassDownsBanner();loadNearMissFromSupabase();
@@ -2894,6 +2975,7 @@ async function _initApp(){
   if(!session){showScreen('login');return;}
   _supabaseUserId=session.user.id;
   await loadKeyCheckedOutFromSupabase();
+  loadMonthlySafetyTipFromSupabase();
 
   // 5b. Start Realtime listeners now that we have a confirmed user
   _setupRealtimeListeners();
