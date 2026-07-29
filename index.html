@@ -1049,6 +1049,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div><div class="qa-tile-label">Keys</div><div class="qa-tile-sub" id="qa-keys-sub">Key sign-out log</div></div>
       </button>
     </div>
+
+    <div class="fe-section">
+      <div class="lbl">Fire extinguisher inspection</div>
+      <div class="fe-entry-card" onclick="openFESchedule()">
+        <div class="fe-entry-inner"><div class="fe-icon">🧯</div><div class="fe-info"><div class="fe-title">Fire Extinguishers</div><div class="fe-meta" id="fe-entry-meta">Monthly inspection · Tap to view schedule</div></div><div class="fe-chevron">›</div></div>
+        <div class="fe-progress-mini"><div class="fe-progress-mini-fill" id="fe-mini-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
     <!-- Monthly Safety Tip Banner -->
     <div id="mst-banner-wrap" style="margin-bottom:10px">
       <div id="mst-banner" style="border:1px solid var(--green);background:var(--bg-success);border-radius:var(--radius-lg);padding:12px 14px;transition:background .2s,border-color .2s">
@@ -1242,14 +1251,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
             </button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="fe-section">
-      <div class="lbl">Fire extinguisher inspection</div>
-      <div class="fe-entry-card" onclick="openFESchedule()">
-        <div class="fe-entry-inner"><div class="fe-icon">🧯</div><div class="fe-info"><div class="fe-title">Fire Extinguishers</div><div class="fe-meta" id="fe-entry-meta">Monthly inspection · Tap to view schedule</div></div><div class="fe-chevron">›</div></div>
-        <div class="fe-progress-mini"><div class="fe-progress-mini-fill" id="fe-mini-bar" style="width:0%"></div></div>
       </div>
     </div>
 
@@ -1920,7 +1921,7 @@ function showPane(id,btn){
   if(id==='home'){p.style.display='flex';}else{p.style.display='block';}
   p.classList.add('act');
   if(id==='dar'){renderCurrentDAR();renderHistory();populateSearchOfficers();}
-  if(id==='home'){renderBP();renderDCPatrol();renderBunkerPatrol();updateHomePatrolCounts();updateHomeTiles();}
+  if(id==='home'){renderBP();renderDCPatrol();renderBunkerPatrol();updateHomePatrolCounts();updateHomeTiles();updateFEEntryCard();}
   if(id==='home-bp'){renderBP();renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='reports'){updateReportsTiles();}
   if(id==='keys'){loadKeyLogFromSupabase();renderKeysPane();}
