@@ -372,6 +372,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .cl-footer{padding:14px;background:var(--bg-secondary);border-top:0.5px solid var(--border-secondary);position:sticky;bottom:0}
 .complete-btn{width:100%;padding:13px;font-size:14px;font-family:inherit;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer}
 .complete-btn:disabled{opacity:.35;cursor:not-allowed}
+/* ── FE MAP VIEW (Canopy 1 / First Floor only) ── */
+.fe-map-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:var(--bg-primary);border-bottom:0.5px solid var(--border-secondary)}
+.fe-view-toggle{display:flex;background:var(--bg-secondary);border-radius:var(--radius-md);padding:2px;gap:2px}
+.fe-view-btn{font-size:11px;font-family:inherit;font-weight:600;padding:6px 11px;border:none;border-radius:8px;background:none;color:var(--text-secondary);cursor:pointer}
+.fe-view-btn.act{background:var(--bg-primary);color:var(--text-primary);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.fe-edit-toggle-btn{font-size:11px;font-family:inherit;font-weight:600;padding:7px 12px;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:none;color:var(--text-secondary);cursor:pointer}
+.fe-edit-toggle-btn.act{background:var(--text-danger);border-color:var(--text-danger);color:#fff}
+.fe-map-sub{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--bg-primary);border-bottom:0.5px solid var(--border-secondary);font-size:11px;color:var(--text-secondary)}
+.fe-map-editing-note{color:var(--text-danger);font-weight:600}
+.fe-map-wrap{position:relative;background:var(--bg-secondary)}
+.fe-map-viewport{position:relative;width:100%;height:60vh;min-height:340px;overflow:hidden;touch-action:none;background:var(--bg-secondary);cursor:grab}
+.fe-map-viewport.fe-map-editing{cursor:crosshair}
+.fe-map-canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.fe-map-img{display:block;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.fe-map-pins-layer{position:absolute;top:0;left:0;width:100%;height:100%}
+.fe-map-pin{position:absolute;width:24px;height:24px;margin-left:-12px;margin-top:-12px;border-radius:50%;background:var(--red);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;transform:scale(calc(1/var(--fe-zoom,1)))}
+.fe-map-pin svg{width:11px;height:11px;display:none}
+.fe-map-pin.fe-map-pin-checked{background:var(--green)}
+.fe-map-pin.fe-map-pin-checked svg{display:block}
+.fe-map-fit-btn{position:absolute;right:10px;bottom:10px;padding:8px 14px;font-size:12px;font-family:inherit;font-weight:600;background:var(--bg-primary);color:var(--text-primary);border:0.5px solid var(--border-primary);border-radius:999px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.fe-map-loading{padding:40px 20px;text-align:center;font-size:12px;color:var(--text-secondary)}
+.fe-edit-pin-modal .modal{text-align:center}
+/* list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE below for the replacement */
 /* ── EOS ── */
 .eos-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:36px 24px;text-align:center}
 .eos-icon{font-size:52px;margin-bottom:20px}
@@ -579,6 +602,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .tn-title{color:var(--text-primary)}
 .light .tn-divider{background:var(--border-secondary)}
 .light .cl-header,.light .cl-legend,.light .zone-hdr,.light .ext-item{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .fe-map-toolbar,.light .fe-map-sub{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .fe-view-toggle{background:var(--bg-secondary)}
+.light .fe-view-btn.act{background:var(--bg-primary)}
+.light .fe-map-wrap,.light .fe-map-viewport{background:var(--bg-secondary)}
 .light .cl-building{color:var(--text-primary)}
 .light .cl-meta{color:var(--text-secondary)}
 .light .ext-item:hover{background:var(--bg-secondary)}
@@ -1436,6 +1463,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div id="cl-body"></div>
     <div class="cl-footer"><button class="complete-btn" id="complete-btn" disabled onclick="completeInspection()">Mark inspection complete</button></div>
   </div>
+  <div class="modal-backdrop fe-edit-pin-modal" id="fe-edit-pin-modal">
+    <div class="modal">
+      <div class="modal-title">Edit mode</div>
+      <div class="admin-overlay" style="margin-bottom:0">
+        <p>Enter admin PIN to edit extinguisher positions on the map.</p>
+        <input class="pin-input" type="password" id="fe-edit-pin-field" maxlength="4" placeholder="••••" oninput="feClearEditPinErr()"/>
+        <div class="pin-err" id="fe-edit-pin-err">Incorrect PIN. Try again.</div>
+        <button class="unlock-btn" onclick="feTryEditPin()">Unlock</button>
+      </div>
+      <button class="modal-secondary-btn" style="margin-top:10px" onclick="feCloseEditPinModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- QR CODES PAGE -->
@@ -1850,6 +1889,9 @@ let stats={patrols:0,nm:0,checks:0};
 let darkMode=true;
 let viewingRecord=null,darHistory=[],passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
+// FE MAP VIEW MODULE state — self-contained, only ever touched for C1 / First Floor.
+// feViewMode is the single toggle driving list-vs-map render switch (see renderFEChecklist).
+let feViewMode='list',feEditUnlocked=false,feEditModeActive=false,feFirstFloorSynced=false,feFirstFloorSyncing=false;
 const nowDate=new Date(),curMonth=nowDate.getMonth(),curYear=nowDate.getFullYear();
 const initials=n=>n.split(' ').map(p=>p[0]).join('');
 const officerSlug=n=>(n||'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-');
@@ -1872,6 +1914,7 @@ function showScreen(id){
   if(id==='checkin')refreshActiveOfficers();
 }
 function showPane(id,btn){
+  if(id!=='fe-checklist')feLockEditMode();
   document.querySelectorAll('.pane').forEach(p=>{p.style.display='none';p.classList.remove('act')});
   const p=document.getElementById('pane-'+id);
   if(id==='home'){p.style.display='flex';}else{p.style.display='block';}
@@ -2798,12 +2841,317 @@ document.getElementById('fe-bldg-status').innerHTML=FE_BLDGS.map(bldId=>{const b
 document.getElementById('fe-rotation-table').innerHTML=FE_OFFICERS.map((o,i)=>{const bldId=getAssignment(i,cycM);const bld=bldId?FE_DATA[bldId]:null;const isYou=o===officer;const done=bld&&feIsComplete(bldId);return`<div class="rotation-row${isYou?' you':''}${done?' comp-row':''}"><div class="rot-av">${initials(o)}</div><div style="flex:1"><div class="rot-name">${o}${isYou?'<span class="you-chip">you</span>':''}</div><div class="rot-building">${bld?bld.name:'Month off'}</div></div>${done?`<div class="complete-badge"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg><span>Done</span></div>`:`<span class="rot-tag ${bld?bld.color:'rt-off'}">${bld?bld.count+' units':'Off'}</span>`}</div>`;}).join('');
 const previewMonths=[];for(let offset=0;offset<5;offset++){let m=curMonth+offset,y=curYear;if(m>11){m-=12;y++;}previewMonths.push({m,y,label:MONTHS[m].slice(0,3)+" '"+String(y).slice(2),cycle:getCycleMonth(m,y),isCurrent:m===curMonth&&y===curYear});}
 const cols=`65px repeat(5,1fr)`;let grid=`<div class="pg-head" style="grid-template-columns:${cols}"><div></div>${previewMonths.map(p=>`<div class="pg-cell" style="${p.isCurrent?'color:var(--text-primary);font-weight:600':''}">${p.label}</div>`).join('')}</div>`;FE_OFFICERS.forEach((o,i)=>{const isYou=o===officer;grid+=`<div class="pg-row${isYou?' you-row':''}" style="grid-template-columns:${cols}"><div class="pg-name">${o.split(' ')[0]}</div>`;previewMonths.forEach(p=>{const bldId=getAssignment(i,p.cycle);const done=bldId&&p.isCurrent&&feIsComplete(bldId);if(done){grid+=`<div class="pg-cell"><span class="pg-done-pill"><svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>${bldId}</span></div>`;}else{grid+=`<div class="pg-cell">${bldId?`<span class="pg-pill">${bldId}</span>`:`<span class="pg-off">off</span>`}</div>`;}});grid+='</div>';});document.getElementById('fe-preview-grid').innerHTML=grid;}
-function startFEChecklist(bldgId){feCurrentBldgId=bldgId;const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
-function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl">${zoneDone}/${zone.items.length}</span><span class="zone-chev${!allDone?' open':''}" id="fezchev-${zi}">›</span></div></div><div class="zone-items${!allDone?' open':''}" id="fezitems-${zi}">${zone.items.map(ext=>{const chk=!!feCheckState[ext.id];return`<div class="ext-item${chk?' checked':''}" onclick="toggleFEExt('${ext.id}',${zi})"><div class="ext-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div><div class="ext-info"><div class="ext-id">${ext.id}</div><div class="ext-location">${ext.location}</div></div><span class="type-badge type-${ext.type.toLowerCase()}">${ext.type}</span></div>`;}).join('')}</div></div>`;}).join('');}
+function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feViewMode='list';feEditModeActive=false;feEditUnlocked=false;const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);if(bldgId==='C1')feEnsureFirstFloorSynced().then(ok=>{if(ok&&feCurrentBldgId==='C1')renderFEChecklist();});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
+// list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE for the replacement
+function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const isFirstFloorMap=feCurrentBldgId==='C1'&&zone.zone==='First Floor';const bodyHtml=isFirstFloorMap?feRenderFirstFloorZoneBody(zone,zi):`<div class="zone-items${!allDone?' open':''}" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${!allDone?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');if(feCurrentBldgId==='C1'&&feViewMode==='map')setTimeout(initFEMap,0);}
+function feRenderZoneListItems(zone,zi){return zone.items.map(ext=>{const chk=!!feCheckState[ext.id];return`<div class="ext-item${chk?' checked':''}" onclick="toggleFEExt('${ext.id}',${zi})"><div class="ext-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div><div class="ext-info"><div class="ext-id">${ext.id}</div><div class="ext-location">${ext.location}</div></div><span class="type-badge type-${ext.type.toLowerCase()}">${ext.type}</span></div>`;}).join('');}
 function toggleFEZone(zi){document.getElementById('fezitems-'+zi).classList.toggle('open');document.getElementById('fezchev-'+zi).classList.toggle('open');}
-function toggleFEExt(extId,zi){feCheckState[extId]=!feCheckState[extId];try{localStorage.setItem('fe_progress_'+feCurrentBldgId,JSON.stringify(feCheckState));}catch(e){}renderFEChecklist();const bld=FE_DATA[feCurrentBldgId];if(bld.zones[zi].items.every(e=>feCheckState[e.id])){document.getElementById('fezitems-'+zi).classList.remove('open');document.getElementById('fezchev-'+zi).classList.remove('open');}}
+// Shared completion-tracking core — used by both the list item tap handler (toggleFEExt) and the map pin tap handler (feMapPinTap). Do not duplicate this logic per view.
+function toggleExtinguisherChecked(id){feCheckState[id]=!feCheckState[id];try{localStorage.setItem('fe_progress_'+feCurrentBldgId,JSON.stringify(feCheckState));}catch(e){}}
+function toggleFEExt(extId,zi){toggleExtinguisherChecked(extId);renderFEChecklist();const bld=FE_DATA[feCurrentBldgId];if(bld.zones[zi].items.every(e=>feCheckState[e.id])){const itemsEl=document.getElementById('fezitems-'+zi);if(itemsEl)itemsEl.classList.remove('open');const chevEl=document.getElementById('fezchev-'+zi);if(chevEl)chevEl.classList.remove('open');}}
 function completeInspection(){const bld=FE_DATA[feCurrentBldgId];feMarkComplete(feCurrentBldgId);try{localStorage.removeItem('fe_progress_'+feCurrentBldgId);}catch(e){}addEntry('fireext','Fire extinguisher inspection complete',bld.name+' · All '+bld.count+' units inspected for '+MONTHS[curMonth]+'.');updateStats();backToFESchedule();showToast('cp-toast','✓ '+bld.name+' inspection complete!');}
 function backToFESchedule(){feCurrentBldgId=null;openFESchedule();}
+
+// ══════════════════════════════════════════════════════════════════
+// FE MAP VIEW MODULE (Canopy 1 / First Floor only) — self-contained.
+// Reads/writes the same FE_DATA.C1 "First Floor" zone.items array and
+// feCheckState / toggleExtinguisherChecked used by list view above.
+// Nothing here should need to change if list view is later deleted.
+// ══════════════════════════════════════════════════════════════════
+const FE_MAP_IMG_SRC='Canopy%20Maps/Canopy%201%20First%20Floor.jpg';
+let feMapZoom=1,feMapPanX=0,feMapPanY=0,feMapBaseZoom=1;
+let feMapPointers=new Map(),feMapMoved=false,feMapDragStart=null,feMapDragPinEl=null,feMapDragPinStart=null,feMapDownPinId=null;
+let feMapPinchStartDist=0,feMapPinchStartZoom=1;
+
+function feGetFirstFloorZone(){return FE_DATA.C1.zones.find(z=>z.zone==='First Floor');}
+function feSetViewMode(mode){if(feViewMode===mode)return;feViewMode=mode;renderFEChecklist();}
+
+function feRenderFirstFloorZoneBody(zone,zi){
+  const allDone=zone.items.length>0&&zone.items.every(e=>feCheckState[e.id]);
+  const remaining=zone.items.filter(e=>!feCheckState[e.id]).length;
+  const toolbar=`<div class="fe-map-toolbar"><div class="fe-view-toggle"><button class="fe-view-btn${feViewMode==='list'?' act':''}" onclick="event.stopPropagation();feSetViewMode('list')">List view</button><button class="fe-view-btn${feViewMode==='map'?' act':''}" onclick="event.stopPropagation();feSetViewMode('map')">Map view</button></div><button class="fe-edit-toggle-btn${feEditModeActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick()">${feEditModeActive?'Editing…':'Edit'}</button></div>`;
+  let content;
+  if(feViewMode==='map'){
+    if(!feFirstFloorSynced){
+      content=`<div class="fe-map-loading">Loading extinguisher positions…</div>`;
+    }else{
+      content=`<div class="fe-map-sub"><span id="fe-map-remaining-count">${remaining} remaining</span>${feEditModeActive?'<span class="fe-map-editing-note">Tap empty space to add · tap a pin to delete · drag to reposition</span>':''}</div><div class="fe-map-wrap"><div class="fe-map-viewport${feEditModeActive?' fe-map-editing':''}" id="fe-map-viewport"><div class="fe-map-canvas" id="fe-map-canvas"><img class="fe-map-img" id="fe-map-img" src="${FE_MAP_IMG_SRC}" draggable="false" alt="Canopy 1 First Floor plan"/><div class="fe-map-pins-layer" id="fe-map-pins-layer"></div></div></div><button class="fe-map-fit-btn" onclick="event.stopPropagation();feMapFit()">Fit</button></div>`;
+    }
+  }else{
+    content=feRenderZoneListItems(zone,zi);
+  }
+  return `<div class="zone-items${allDone?'':' open'}" id="fezitems-${zi}">${toolbar}${content}</div>`;
+}
+
+// ── EDIT MODE (PIN gate reuses the existing adminPin variable/pattern from the Admin screen) ──
+function feHandleEditButtonClick(){
+  if(!feEditUnlocked){feOpenEditPinModal();return;}
+  feEditModeActive=!feEditModeActive;
+  renderFEChecklist();
+}
+function feOpenEditPinModal(){const m=document.getElementById('fe-edit-pin-modal');if(!m)return;document.getElementById('fe-edit-pin-field').value='';document.getElementById('fe-edit-pin-err').classList.remove('show');m.classList.add('open');}
+function feCloseEditPinModal(){const m=document.getElementById('fe-edit-pin-modal');if(m)m.classList.remove('open');}
+function feClearEditPinErr(){const e=document.getElementById('fe-edit-pin-err');if(e)e.classList.remove('show');}
+function feTryEditPin(){
+  const v=document.getElementById('fe-edit-pin-field').value;
+  if(v===adminPin){
+    feEditUnlocked=true;feEditModeActive=true;
+    feCloseEditPinModal();
+    renderFEChecklist();
+  }else{
+    document.getElementById('fe-edit-pin-err').classList.add('show');
+    document.getElementById('fe-edit-pin-field').value='';
+  }
+}
+function feLockEditMode(){feEditUnlocked=false;feEditModeActive=false;}
+
+// ── SUPABASE SYNC ──
+async function feMapFetchRows(){
+  if(!window._supabase)return null;
+  try{
+    const{data,error}=await window._supabase.from('extinguishers').select('*').eq('building_id','C1').eq('zone','First Floor').order('id');
+    if(error){console.warn('extinguishers fetch error:',error.message);return null;}
+    return data||[];
+  }catch(e){console.warn('extinguishers fetch exception:',e.message);return null;}
+}
+async function feEnsureFirstFloorSynced(){
+  if(feFirstFloorSynced)return true;
+  if(feFirstFloorSyncing)return false;
+  feFirstFloorSyncing=true;
+  try{
+    let rows=await feMapFetchRows();
+    if(rows===null){feFirstFloorSyncing=false;return false;}
+    if(rows.length===0){
+      const seedZone=feGetFirstFloorZone();
+      const seed=seedZone.items.map((it,i)=>({id:it.id,building_id:'C1',zone:'First Floor',location:it.location,type:it.type,x:20+(i%3)*30,y:12+Math.floor(i/3)*22}));
+      try{
+        const{data,error}=await window._supabase.from('extinguishers').insert(seed).select();
+        if(error){console.warn('extinguishers seed error:',error.message);rows=seed;}
+        else rows=(data&&data.length)?data:seed;
+      }catch(e){console.warn('extinguishers seed exception:',e.message);rows=seed;}
+    }
+    const zone=feGetFirstFloorZone();
+    zone.items=rows.map(r=>({id:r.id,location:r.location,type:r.type,x:r.x,y:r.y}));
+    feFirstFloorSynced=true;
+    feFirstFloorSyncing=false;
+    return true;
+  }catch(e){console.warn('feEnsureFirstFloorSynced exception:',e.message);feFirstFloorSyncing=false;return false;}
+}
+
+// ── SHARED CHECK-STATE REFRESH (map side only; avoids a full renderFEChecklist so pan/zoom survive a pin tap) ──
+function feRefreshFEChecklistChrome(){
+  const bld=FE_DATA[feCurrentBldgId];
+  const total=bld.count,checked=feGetChecked(feCurrentBldgId);
+  const pct=Math.round(checked/total*100);
+  document.getElementById('cl-fill').style.width=pct+'%';
+  document.getElementById('cl-done-count').textContent=checked+' checked';
+  document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';
+  document.getElementById('complete-btn').disabled=checked<total;
+  const zi=bld.zones.findIndex(z=>z.zone==='First Floor');
+  if(zi<0)return;
+  const zone=bld.zones[zi];
+  const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;
+  const allDone=zoneDone===zone.items.length&&zone.items.length>0;
+  const nameEl=document.getElementById('fe-zone-name-'+zi);
+  if(nameEl)nameEl.innerHTML=zone.zone+(allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':'');
+  const doneLbl=document.getElementById('fe-zone-donelbl-'+zi);
+  if(doneLbl)doneLbl.textContent=zoneDone+'/'+zone.items.length;
+}
+function feMapPinTap(id){
+  toggleExtinguisherChecked(id);
+  feRefreshFEChecklistChrome();
+  feRenderMapPins();
+}
+
+// ── MAP RENDER / MOUNT (pan, zoom, pins) ──
+function feRenderMapPins(){
+  const layer=document.getElementById('fe-map-pins-layer');
+  if(!layer)return;
+  const zone=feGetFirstFloorZone();
+  const remaining=zone.items.filter(e=>!feCheckState[e.id]).length;
+  const countEl=document.getElementById('fe-map-remaining-count');
+  if(countEl)countEl.textContent=remaining+' remaining';
+  layer.innerHTML=zone.items.filter(e=>typeof e.x==='number'&&typeof e.y==='number').map(e=>{
+    const chk=!!feCheckState[e.id];
+    return `<div class="fe-map-pin${chk?' fe-map-pin-checked':''}" data-id="${e.id}" style="left:${e.x}%;top:${e.y}%" title="${e.location}"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div>`;
+  }).join('');
+}
+function initFEMap(){
+  const viewport=document.getElementById('fe-map-viewport');
+  if(!viewport)return;
+  feMapZoom=1;feMapPanX=0;feMapPanY=0;feMapBaseZoom=1;
+  feMapPointers=new Map();
+  const img=document.getElementById('fe-map-img');
+  const applyBaseFit=()=>{
+    if(!img.naturalWidth)return;
+    feMapBaseZoom=Math.min(viewport.clientWidth/img.naturalWidth,1)||1;
+    feMapZoom=feMapBaseZoom;feMapPanX=0;feMapPanY=0;
+    feMapApplyTransform();
+  };
+  if(img.complete&&img.naturalWidth)applyBaseFit();else img.onload=applyBaseFit;
+  viewport.addEventListener('pointerdown',feMapOnPointerDown);
+  viewport.addEventListener('pointermove',feMapOnPointerMove);
+  viewport.addEventListener('pointerup',feMapOnPointerUp);
+  viewport.addEventListener('pointercancel',feMapOnPointerUp);
+  viewport.addEventListener('wheel',feMapOnWheel,{passive:false});
+  feRenderMapPins();
+}
+function feMapApplyTransform(){
+  const canvas=document.getElementById('fe-map-canvas');
+  if(!canvas)return;
+  canvas.style.transform=`translate(${feMapPanX}px,${feMapPanY}px) scale(${feMapZoom})`;
+  canvas.style.setProperty('--fe-zoom',feMapZoom);
+}
+function feMapFit(){
+  if(!feMapBaseZoom)return;
+  feMapZoom=feMapBaseZoom;feMapPanX=0;feMapPanY=0;
+  feMapApplyTransform();
+}
+function feMapSetZoomAtPoint(newZoom,clientX,clientY){
+  const viewport=document.getElementById('fe-map-viewport');
+  if(!viewport)return;
+  const vRect=viewport.getBoundingClientRect();
+  const localX=clientX-vRect.left,localY=clientY-vRect.top;
+  const layoutX=(localX-feMapPanX)/feMapZoom,layoutY=(localY-feMapPanY)/feMapZoom;
+  const minZoom=feMapBaseZoom||1;
+  newZoom=Math.max(minZoom,Math.min(newZoom,minZoom*6));
+  feMapPanX=localX-layoutX*newZoom;
+  feMapPanY=localY-layoutY*newZoom;
+  feMapZoom=newZoom;
+  feMapApplyTransform();
+}
+function feMapClientToPct(clientX,clientY){
+  const viewport=document.getElementById('fe-map-viewport');
+  const canvas=document.getElementById('fe-map-canvas');
+  const vRect=viewport.getBoundingClientRect();
+  const localX=clientX-vRect.left,localY=clientY-vRect.top;
+  const layoutX=(localX-feMapPanX)/feMapZoom,layoutY=(localY-feMapPanY)/feMapZoom;
+  const w=canvas.offsetWidth||1,h=canvas.offsetHeight||1;
+  return{x:Math.max(0,Math.min(100,layoutX/w*100)),y:Math.max(0,Math.min(100,layoutY/h*100))};
+}
+function feMapOnWheel(e){
+  e.preventDefault();
+  const factor=Math.pow(1.0015,-e.deltaY);
+  feMapSetZoomAtPoint(feMapZoom*factor,e.clientX,e.clientY);
+}
+function feMapOnPointerDown(e){
+  const viewport=document.getElementById('fe-map-viewport');
+  if(!viewport)return;
+  try{viewport.setPointerCapture(e.pointerId);}catch(err){}
+  feMapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const pinEl=e.target&&e.target.closest?e.target.closest('.fe-map-pin'):null;
+  if(feMapPointers.size===1){
+    feMapMoved=false;
+    feMapDragStart={x:e.clientX,y:e.clientY,panX:feMapPanX,panY:feMapPanY};
+    feMapDownPinId=pinEl?pinEl.dataset.id:null;
+    feMapDragPinEl=(pinEl&&feEditModeActive)?pinEl:null;
+    feMapDragPinStart=feMapDragPinEl?{x:parseFloat(feMapDragPinEl.style.left),y:parseFloat(feMapDragPinEl.style.top)}:null;
+  }else if(feMapPointers.size===2){
+    feMapDragPinEl=null;
+    const pts=[...feMapPointers.values()];
+    feMapPinchStartDist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)||1;
+    feMapPinchStartZoom=feMapZoom;
+  }
+}
+function feMapOnPointerMove(e){
+  if(!feMapPointers.has(e.pointerId))return;
+  feMapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(feMapPointers.size===2){
+    const pts=[...feMapPointers.values()];
+    const dist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)||1;
+    const midX=(pts[0].x+pts[1].x)/2,midY=(pts[0].y+pts[1].y)/2;
+    feMapSetZoomAtPoint(feMapPinchStartZoom*(dist/feMapPinchStartDist),midX,midY);
+    feMapMoved=true;
+    return;
+  }
+  if(feMapPointers.size!==1||!feMapDragStart)return;
+  const p=feMapPointers.get(e.pointerId);
+  const dx=p.x-feMapDragStart.x,dy=p.y-feMapDragStart.y;
+  if(Math.abs(dx)>4||Math.abs(dy)>4)feMapMoved=true;
+  if(feMapDragPinEl&&feEditModeActive){
+    const canvas=document.getElementById('fe-map-canvas');
+    const w=canvas.offsetWidth||1,h=canvas.offsetHeight||1;
+    const dxPct=dx/(w*feMapZoom)*100,dyPct=dy/(h*feMapZoom)*100;
+    const nx=Math.max(0,Math.min(100,feMapDragPinStart.x+dxPct));
+    const ny=Math.max(0,Math.min(100,feMapDragPinStart.y+dyPct));
+    feMapDragPinEl.style.left=nx+'%';feMapDragPinEl.style.top=ny+'%';
+    feMapDragPinEl.dataset.pendingX=nx;feMapDragPinEl.dataset.pendingY=ny;
+  }else if(!feMapDragPinEl){
+    feMapPanX=feMapDragStart.panX+dx;feMapPanY=feMapDragStart.panY+dy;
+    feMapApplyTransform();
+  }
+}
+function feMapOnPointerUp(e){
+  feMapPointers.delete(e.pointerId);
+  if(feMapPointers.size>0)return;
+  if(feMapDragPinEl&&feEditModeActive){
+    if(feMapMoved){
+      const id=feMapDragPinEl.dataset.id;
+      const nx=parseFloat(feMapDragPinEl.dataset.pendingX),ny=parseFloat(feMapDragPinEl.dataset.pendingY);
+      feMapCommitPinMove(id,nx,ny);
+    }else{
+      feMapDeleteExtinguisher(feMapDragPinEl.dataset.id);
+    }
+  }else if(!feMapMoved){
+    if(feMapDownPinId){
+      if(feEditModeActive)feMapDeleteExtinguisher(feMapDownPinId);
+      else feMapPinTap(feMapDownPinId);
+    }else if(feEditModeActive){
+      const pt=feMapClientToPct(e.clientX,e.clientY);
+      feMapAddExtinguisher(pt.x,pt.y);
+    }
+  }
+  feMapDragPinEl=null;feMapDragStart=null;feMapDownPinId=null;
+}
+
+// ── EDIT MODE MUTATIONS (add / delete / reposition) — sync to Supabase, fall back to local-only on error ──
+function feMapNextExtId(){
+  let max=0;
+  FE_DATA.C1.zones.forEach(z=>z.items.forEach(it=>{const m=/^EXT-C1-(\d+)$/.exec(it.id);if(m)max=Math.max(max,parseInt(m[1],10));}));
+  return 'EXT-C1-'+String(max+1).padStart(3,'0');
+}
+async function feMapAddExtinguisher(xPct,yPct){
+  const zone=feGetFirstFloorZone();
+  const id=feMapNextExtId();
+  const rec={id,building_id:'C1',zone:'First Floor',location:'New unit — rename in list view',type:'ABC',x:Math.round(xPct*10)/10,y:Math.round(yPct*10)/10};
+  zone.items.push({id:rec.id,location:rec.location,type:rec.type,x:rec.x,y:rec.y});
+  FE_DATA.C1.count++;
+  renderFEChecklist();
+  try{
+    const{error}=await window._supabase.from('extinguishers').insert(rec);
+    if(error){console.warn('extinguishers insert error:',error.message);showToast('fe-cl-toast','⚠ Added locally — sync failed');}
+    else showToast('fe-cl-toast','✓ Extinguisher added');
+  }catch(e){console.warn('extinguishers insert exception:',e.message);}
+}
+async function feMapDeleteExtinguisher(id){
+  const zone=feGetFirstFloorZone();
+  const idx=zone.items.findIndex(it=>it.id===id);
+  if(idx<0)return;
+  zone.items.splice(idx,1);
+  FE_DATA.C1.count--;
+  delete feCheckState[id];
+  try{localStorage.setItem('fe_progress_C1',JSON.stringify(feCheckState));}catch(e){}
+  renderFEChecklist();
+  try{
+    const{error}=await window._supabase.from('extinguishers').delete().eq('id',id);
+    if(error){console.warn('extinguishers delete error:',error.message);showToast('fe-cl-toast','⚠ Removed locally — sync failed');}
+    else showToast('fe-cl-toast','✓ Extinguisher removed');
+  }catch(e){console.warn('extinguishers delete exception:',e.message);}
+}
+async function feMapCommitPinMove(id,xPct,yPct){
+  const zone=feGetFirstFloorZone();
+  const item=zone.items.find(it=>it.id===id);
+  if(!item)return;
+  item.x=Math.round(xPct*10)/10;item.y=Math.round(yPct*10)/10;
+  try{
+    const{error}=await window._supabase.from('extinguishers').update({x:item.x,y:item.y}).eq('id',id);
+    if(error)console.warn('extinguishers move error:',error.message);
+  }catch(e){console.warn('extinguishers move exception:',e.message);}
+}
+// ══════════════════════════════════════════════════════════════════
+// END FE MAP VIEW MODULE
+// ══════════════════════════════════════════════════════════════════
+
 function openCancelSheet(){document.getElementById('cancel-sheet').classList.add('open');}
 function closeCancelSheet(){document.getElementById('cancel-sheet').classList.remove('open');}
 function confirmCancelFE(){closeCancelSheet();backToFESchedule();}
