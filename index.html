@@ -4225,7 +4225,7 @@ function _buildKeysOut(){
       <button class="keys-return-btn" onclick="openKeyReturnSheet('${e.keyId}',null)">Return</button>
     </div>`).join('');
     const contact=[b.company,b.phone].filter(Boolean).join(' · ');
-    const multiActions=b.keys.length>1?`<div style="display:flex;gap:8px"><button class="keys-return-all-btn" style="flex:1" onclick="openKeyReturnSheet(null,'${b.bid}')">Return all keys from this batch</button>${b.phone?`<button class="keys-return-btn" style="flex-shrink:0" onclick="textKeyContact(null,'${b.bid}')">Text</button>`:''}</div>`:'';
+    const multiActions=b.keys.length>1?`<div style="display:flex;gap:8px;align-items:center"><button class="keys-return-all-btn" style="flex:1" onclick="openKeyReturnSheet(null,'${b.bid}')">Return all keys from this batch</button>${b.phone?`<button class="keys-return-btn" style="flex-shrink:0" onclick="textKeyContact(null,'${b.bid}')">Text</button>`:''}</div>`:'';
     return`<div class="keys-batch-card">
       <div class="keys-batch-person">${_esc(b.person)}</div>
       ${contact?`<div class="keys-batch-company">${_esc(contact)}</div>`:''}
