@@ -534,6 +534,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .my-assignment,.light .rotation-card,.light .bldg-card,.light .preview-grid,
 .light .saved-dar-card,.light .pd-full-item,.light .fe-entry-card,.light .fe-zone-block,
 .light .admin-section,.light .admin-overlay{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .key-contact-suggestions{background:var(--bg-primary);border-color:var(--border-secondary)}
 .light .stat{background:var(--bg-secondary);border-color:var(--border-secondary)}
 .light .patrol-body,.light .zone-items,.light .fe-ext-drag-item{background:var(--bg-primary)}
 .light .fe-ext-drag-item:hover,.light .fe-zone-drag-hdr{background:var(--bg-secondary)}
@@ -674,6 +675,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .keys-return-btn{font-size:11px;font-family:inherit;font-weight:500;padding:5px 10px;border-radius:var(--radius-sm);background:none;border:0.5px solid var(--border-primary);cursor:pointer;color:var(--text-secondary);white-space:nowrap;flex-shrink:0}
 .keys-batch-meta{font-size:11px;color:var(--text-secondary);margin-bottom:8px}
 .keys-return-all-btn{width:100%;padding:9px;font-size:13px;font-family:inherit;font-weight:600;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-primary);text-align:center;margin-top:4px}
+.key-contact-suggestions{position:absolute;top:100%;left:0;right:0;z-index:5;background:var(--bg-primary);border:0.5px solid var(--border-primary);border-radius:var(--radius-md);margin-top:4px;max-height:180px;overflow-y:auto;display:none;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.key-contact-suggestions.show{display:block}
+.key-contact-suggestion-item{padding:9px 12px;font-size:13px;color:var(--text-primary);cursor:pointer;border-bottom:0.5px solid var(--border-secondary)}
+.key-contact-suggestion-item:last-child{border-bottom:none}
+.key-contact-suggestion-item:hover,.key-contact-suggestion-item:active{background:var(--bg-secondary)}
 .keys-log-row{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border-secondary);align-items:flex-start}
 .keys-log-row:last-child{border-bottom:none}
 .keys-log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
@@ -1841,8 +1847,8 @@ function _showMeterPreviewStatus(type, msg) {
       <button onclick="closeKeyCheckoutSheet()" style="width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:16px;flex-shrink:0">&#x2715;</button>
     </div>
     <div id="key-checkout-summary"></div>
-    <div class="form-group"><label>Person's name <span style="color:var(--text-danger)">*</span></label><input type="text" id="key-person-input" placeholder="Full name..." oninput="updateKeyCheckoutBtn()"></div>
-    <div class="form-group"><label>Company / Tenant</label><input type="text" id="key-company-input" placeholder="Company or tenant name..."></div>
+    <div class="form-group" style="position:relative"><label>Person's name <span style="color:var(--text-danger)">*</span></label><input type="text" id="key-person-input" placeholder="Full name..." autocomplete="off" oninput="updateKeyCheckoutBtn();onKeyContactInput('name')" onblur="hideKeyContactSuggestions('key-person-suggestions')"><div class="key-contact-suggestions" id="key-person-suggestions"></div></div>
+    <div class="form-group" style="position:relative"><label>Company / Tenant</label><input type="text" id="key-company-input" placeholder="Company or tenant name..." autocomplete="off" oninput="onKeyContactInput('company')" onblur="hideKeyContactSuggestions('key-company-suggestions')"><div class="key-contact-suggestions" id="key-company-suggestions"></div></div>
     <div class="form-group"><label>Phone number</label><input type="tel" id="key-phone-input" placeholder="e.g. (801) 555-0100"></div>
     <div class="form-group"><label>Notes</label><textarea id="key-notes-input" placeholder="Optional notes..." style="height:60px"></textarea></div>
     <button class="modal-primary-btn" id="key-checkout-confirm-btn" onclick="confirmKeyCheckout()" disabled>Check out keys</button>
@@ -4212,17 +4218,20 @@ function _buildKeysOut(){
     batches[bid].keys.push(e);
   });
   return Object.values(batches).map(b=>{
+    const singleTextBtn=(b.keys.length===1&&b.phone)?`<button class="keys-return-btn" onclick="textKeyContact('${b.keys[0].keyId}',null)">Text</button>`:'';
     const keyRows=b.keys.map(e=>`<div class="keys-key-row">
       <div style="flex:1"><div class="keys-out-label">${_esc(e.keyLabel)}</div><div class="keys-out-cat">${_esc(e.catLabel)}</div></div>
+      ${b.keys.length===1?singleTextBtn:''}
       <button class="keys-return-btn" onclick="openKeyReturnSheet('${e.keyId}',null)">Return</button>
     </div>`).join('');
     const contact=[b.company,b.phone].filter(Boolean).join(' · ');
+    const multiActions=b.keys.length>1?`<div style="display:flex;gap:8px"><button class="keys-return-all-btn" style="flex:1" onclick="openKeyReturnSheet(null,'${b.bid}')">Return all keys from this batch</button>${b.phone?`<button class="keys-return-btn" style="flex-shrink:0" onclick="textKeyContact(null,'${b.bid}')">Text</button>`:''}</div>`:'';
     return`<div class="keys-batch-card">
       <div class="keys-batch-person">${_esc(b.person)}</div>
       ${contact?`<div class="keys-batch-company">${_esc(contact)}</div>`:''}
       <div class="keys-batch-keys-list">${keyRows}</div>
       <div class="keys-batch-meta">Issued ${fmt(b.time)} by ${_esc(b.issuedBy)}</div>
-      ${b.keys.length>1?`<button class="keys-return-all-btn" onclick="openKeyReturnSheet(null,'${b.bid}')">Return all keys from this batch</button>`:''}
+      ${multiActions}
     </div>`;
   }).join('');
 }
@@ -4302,6 +4311,8 @@ function openKeyCheckoutSheet(){
   document.getElementById('key-company-input').value='';
   document.getElementById('key-phone-input').value='';
   document.getElementById('key-notes-input').value='';
+  document.getElementById('key-person-suggestions').classList.remove('show');
+  document.getElementById('key-company-suggestions').classList.remove('show');
   const btn=document.getElementById('key-checkout-confirm-btn');
   btn.disabled=true;
   btn.textContent='Check out '+keySelection.size+' key'+(keySelection.size!==1?'s':'');
@@ -4393,6 +4404,20 @@ async function confirmKeyCheckout(){
       }
     }
   }catch(e){console.warn('key_log insert exception:',e.message);}
+  // KEY CONTACT MEMORY — separate additive table, keyed on (name_normalized, company_normalized); does not replace key_log/key_checked_out_current above.
+  try{
+    if(window._supabase){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const nameNorm=person.toLowerCase().trim();
+        const companyNorm=company.toLowerCase().trim();
+        const{error}=await window._supabase
+          .from('key_contacts')
+          .upsert({name:person,name_normalized:nameNorm,company:company||'',company_normalized:companyNorm,phone,last_used_at:time},{onConflict:'name_normalized,company_normalized'});
+        if(error)console.warn('key_contacts upsert error:',error.message);
+      }
+    }
+  }catch(e){console.warn('key_contacts upsert exception:',e.message);}
   const darDetail=`Keys issued to ${person}${company?' ('+company+')':''}${phone?', '+phone:''}.${notes?' '+notes:''} Keys: ${keyLabels.join(', ')}.`;
   addEntry('key','Key checkout — '+(keyLabels.length===1?keyLabels[0]:keyLabels.length+' keys'),darDetail);
   keySelection.clear();
@@ -4400,6 +4425,63 @@ async function confirmKeyCheckout(){
   keysActiveTab='out';
   renderKeysPane();
   showToast('keys-toast','✓ '+keyLabels.length+' key'+(keyLabels.length!==1?'s':'')+' checked out to '+person);
+}
+
+// ── KEY CONTACT MEMORY (autocomplete on name/company, backed by the key_contacts table) ──
+let keyContactDebounceTimers={name:null,company:null};
+let keyContactResults={name:[],company:[]};
+function onKeyContactInput(field){
+  clearTimeout(keyContactDebounceTimers[field]);
+  keyContactDebounceTimers[field]=setTimeout(()=>runKeyContactSearch(field),250);
+}
+async function runKeyContactSearch(field){
+  const inputId=field==='name'?'key-person-input':'key-company-input';
+  const ddId=field==='name'?'key-person-suggestions':'key-company-suggestions';
+  const dd=document.getElementById(ddId);
+  const term=document.getElementById(inputId).value.trim().toLowerCase();
+  if(!term){dd.classList.remove('show');dd.innerHTML='';return;}
+  if(!window._supabase)return;
+  try{
+    const col=field==='name'?'name_normalized':'company_normalized';
+    const{data,error}=await window._supabase
+      .from('key_contacts')
+      .select('name,company,phone')
+      .ilike(col,'%'+term+'%')
+      .order('last_used_at',{ascending:false})
+      .limit(5);
+    if(error||!data||!data.length){dd.classList.remove('show');dd.innerHTML='';return;}
+    keyContactResults[field]=data;
+    dd.innerHTML=data.map((c,i)=>{
+      const label=c.company?`${_esc(c.name)} — ${_esc(c.company)}`:_esc(c.name);
+      return`<div class="key-contact-suggestion-item" onmousedown="event.preventDefault()" onclick="selectKeyContact('${field}',${i})">${label}</div>`;
+    }).join('');
+    dd.classList.add('show');
+  }catch(e){console.warn('key_contacts search exception:',e.message);}
+}
+function selectKeyContact(field,i){
+  const c=(keyContactResults[field]||[])[i];
+  if(!c)return;
+  document.getElementById('key-person-input').value=c.name||'';
+  document.getElementById('key-company-input').value=c.company||'';
+  document.getElementById('key-phone-input').value=c.phone||'';
+  document.getElementById('key-person-suggestions').classList.remove('show');
+  document.getElementById('key-company-suggestions').classList.remove('show');
+  updateKeyCheckoutBtn();
+}
+function hideKeyContactSuggestions(ddId){
+  setTimeout(()=>{const dd=document.getElementById(ddId);if(dd)dd.classList.remove('show');},200);
+}
+
+// ── TEXT REMINDER (client-side sms: link only, no backend dispatch) ──
+function textKeyContact(keyId,batchId){
+  let entry=keyId?keyCheckedOut[keyId]:null;
+  if(!entry&&batchId){entry=Object.values(keyCheckedOut).find(e=>(e.batchId||e.id)===batchId);}
+  if(!entry||!entry.phone)return;
+  const firstName=(entry.person||'').trim().split(/\s+/)[0]||entry.person||'';
+  const message=`Hi ${firstName}, this is Canopy Security — could you return the keys checked out earlier today? Thanks!`;
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const sep=isIOS?'&':'?';
+  window.location.href=`sms:${entry.phone}${sep}body=${encodeURIComponent(message)}`;
 }
 
 // ── RETURN SHEET ──
