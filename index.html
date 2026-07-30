@@ -262,6 +262,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .result-count{font-size:11px;color:var(--text-secondary);margin-bottom:8px}
 .add-note-row{display:flex;gap:8px}
 .add-note-row input{flex:1;padding:9px 10px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)}
+.home-note-textarea{flex:1;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary);resize:none;height:64px;line-height:1.4}
 .add-note-btn{padding:9px 12px;font-size:12px;font-family:inherit;font-weight:500;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary);white-space:nowrap}
 .mic-btn{width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-secondary);transition:all .15s;padding:0}
 .mic-btn.recording{background:rgba(226,75,74,.1);border-color:rgba(226,75,74,.5);color:var(--red);animation:mic-pulse 1s ease-in-out infinite}
@@ -1004,7 +1005,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       </div>
     </div>
     <!-- Add note row -->
-    <div class="add-note-row" style="margin-bottom:4px"><input type="text" id="note-input" placeholder="e.g. Escorted visitor to Canopy 3…"/><button class="mic-btn" id="mic-btn-home" onclick="toggleDictation('note-input','mic-btn-home')" title="Dictate note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button><button class="add-note-btn" onclick="addNote()">Add</button></div>
+    <div class="add-note-row" style="margin-bottom:4px;align-items:flex-end"><textarea class="home-note-textarea" id="note-input" placeholder="e.g. Escorted visitor to Canopy 3…"></textarea><button class="mic-btn" id="mic-btn-home" onclick="toggleDictation('note-input','mic-btn-home')" title="Dictate note" style="flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button><button class="add-note-btn" onclick="addNote()" style="flex-shrink:0">Add</button></div>
     <div class="lbl">Daily patrols</div>
     <div class="toast" id="datacenter-toast" style="margin-bottom:6px;border-radius:8px">Data center patrol logged to DAR</div>
     <button class="scan-patrol-btn" onclick="logDCPatrol()">
