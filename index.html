@@ -2076,7 +2076,7 @@ function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!docume
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
 function closeAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.remove('open');}
-function submitAddPassDown(){const text=document.getElementById('add-pd-textarea').value.trim();if(!text)return;passDowns.unshift({id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()});saveStorage();closeAddPassDownSheet();renderPassDownsPage();showToast('pd-page-toast','✓ Pass down saved');}
+async function submitAddPassDown(){const text=document.getElementById('add-pd-textarea').value.trim();if(!text)return;const time=new Date().toISOString();let pdId='pd-'+Date.now();try{if(window._supabase){const{data:{session}}=await window._supabase.auth.getSession();if(session){const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:text,created_at:time}).select('id').single();if(!error&&data)pdId=String(data.id);}}}catch(e){console.warn('submitAddPassDown error:',e.message);}passDowns.unshift({id:pdId,officer,text,time});saveStorage();closeAddPassDownSheet();renderPassDownsPage();showToast('pd-page-toast','✓ Pass down saved');}
 function openPassDownModal(){
   loadKeyState();
   const textarea=document.getElementById('pd-textarea');
@@ -2098,7 +2098,7 @@ function openPassDownModal(){
   document.getElementById('pd-modal').classList.add('open');
 }
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
-function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const pd={id:'pd-'+Date.now(),officer,text,time:new Date().toISOString()};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
+async function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const time=new Date().toISOString();let pdId='pd-'+Date.now();try{if(window._supabase){const{data:{session}}=await window._supabase.auth.getSession();if(session){const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:text,created_at:time}).select('id').single();if(!error&&data)pdId=String(data.id);}}}catch(e){console.warn('submitPassDown error:',e.message);}const pd={id:pdId,officer,text,time};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
 function skipPassDown(){closePassDownModal();finalizeShift();}
 function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
 function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
@@ -2711,7 +2711,33 @@ function removePhoto(){
   document.getElementById('photo-preview').style.display='none';
   document.getElementById('photo-area').style.display='block';
 }
-function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};if(nmPhotoData){try{localStorage.setItem('nm_photo_'+report.id,nmPhotoData);}catch(e){}}nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);addEntry('nearmiss','Near miss submitted – '+building,(activeCatsNM.length?activeCatsNM.join(', ')+'. ':'')+desc);stats.nm++;document.getElementById('nm-building').value='Select building...';document.getElementById('nm-desc').value='';nmPhotoData=null;removePhoto();activeCatsNM=[];document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');updateStats();renderNMList();showToast('nm-toast');autoCreateNearMissPassDown(report);renderNMComplianceBanner();updateHomeTiles();}
+function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};if(nmPhotoData){try{localStorage.setItem('nm_photo_'+report.id,nmPhotoData);}catch(e){}}nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);
+if (window._supabase) {
+  window._supabase.auth.getSession().then(function(result) {
+    var session = result.data && result.data.session;
+    if (!session) { console.warn('near-miss-alert: no session, skipping email'); return; }
+    fetch(REPORTS_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({
+        reportType: 'near-miss-alert',
+        report: {
+          officer: report.officer,
+          building: report.building,
+          categories: report.cats,
+          description: report.desc,
+          time: report.time
+        }
+      })
+    }).catch(function(err) {
+      console.warn('near-miss-alert fetch failed:', err.message);
+    });
+  });
+}
+addEntry('nearmiss','Near miss submitted – '+building,(activeCatsNM.length?activeCatsNM.join(', ')+'. ':'')+desc);stats.nm++;document.getElementById('nm-building').value='Select building...';document.getElementById('nm-desc').value='';nmPhotoData=null;removePhoto();activeCatsNM=[];document.querySelectorAll('.cat-pill').forEach(p=>p.className='cat-pill');updateStats();renderNMList();showToast('nm-toast');autoCreateNearMissPassDown(report);renderNMComplianceBanner();updateHomeTiles();}
 function renderNMList(){const camIcon='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';document.getElementById('nm-list').innerHTML=nmReports.slice(0,5).map(r=>`<div class="nm-item" onclick="openNMDetail('${r.id}')" style="cursor:pointer"><div class="nm-top"><div><div class="nm-title-text">${r.building}</div><div class="nm-meta">${r.officer} · ${fmt(r.time)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center">${r.cats.map(c=>`<span class="nm-tag nm-${c.toLowerCase()}">${c}</span>`).join('')}${r.photo?camIcon:''}</div></div><div style="font-size:12px;color:var(--text-secondary);margin-top:6px">${r.desc.length>120?r.desc.slice(0,120)+'…':r.desc}</div></div>`).join('')||'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No reports yet this shift.</div>';}
 function renderNMComplianceBanner(){const banner=document.getElementById('nm-compliance-banner');if(!banner)return;if(!officer){banner.style.display='none';return;}const c=getNMComplianceForOfficer(officer);if(c.met){banner.style.display='none';}else{banner.style.display='block';document.getElementById('nm-compliance-banner-text').textContent="⚠ You haven't submitted a near miss report this month.";}}
 function populateNMHistoryFilters(){const sel=document.getElementById('nm-hist-month');const months=[...new Set(nmHistory.map(r=>fmtMonthYear(r.time)))];const cur=sel.value;sel.innerHTML='<option value="">All time</option>'+months.map(m=>`<option value="${m}">${m}</option>`).join('');if(cur)sel.value=cur;}
@@ -3561,7 +3587,7 @@ async function autoCreateNearMissPassDown(report) {
       if(session){
         const{data,error}=await window._supabase
           .from('pass_downs')
-          .insert({user_id:session.user.id,officer_name:report.officer,text:pdText,created_at:report.time})
+          .insert({user_id:session.user.id,officer_name:report.officer,message:pdText,created_at:report.time})
           .select('id')
           .single();
         if(!error&&data)pdId=String(data.id);
