@@ -1937,6 +1937,7 @@ function showPane(id,btn){
   if(id==='passdowns')renderPassDownsPage();
   if(id==='fe-schedule')renderFESchedule();
 }
+function paneVisible(id){return document.getElementById('pane-'+id)?.classList.contains('act')||false;}
 function updateHomeTiles(){
   renderMSTBanner();
   const nmEl=document.getElementById('qa-nm-sub');
@@ -4630,7 +4631,7 @@ async function confirmKeyReturn(){
 
   // key_log insert
   try{
-    if(window._supabase&&_keyReturnChecked.size){
+    if(window._supabase&&_checkedIds.length){
       const{data:{session}}=await window._supabase.auth.getSession();
       if(session){
         const returnRows=_checkedIds.map(keyId=>{
