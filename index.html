@@ -373,7 +373,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .cl-footer{padding:14px;background:var(--bg-secondary);border-top:0.5px solid var(--border-secondary);position:sticky;bottom:0}
 .complete-btn{width:100%;padding:13px;font-size:14px;font-family:inherit;font-weight:600;background:var(--green);color:#fff;border:none;border-radius:var(--radius-md);cursor:pointer}
 .complete-btn:disabled{opacity:.35;cursor:not-allowed}
-/* ── FE MAP VIEW (Canopy 1 / First Floor only) ── */
+/* ── FE MAP VIEW (any building+zone with a FE_MAP_CONFIG entry) ── */
 .fe-map-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:var(--bg-primary);border-bottom:0.5px solid var(--border-secondary)}
 .fe-view-toggle{display:flex;background:var(--bg-secondary);border-radius:var(--radius-md);padding:2px;gap:2px}
 .fe-view-btn{font-size:11px;font-family:inherit;font-weight:600;padding:6px 11px;border:none;border-radius:8px;background:none;color:var(--text-secondary);cursor:pointer}
@@ -1281,7 +1281,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div class="lbl" style="margin-top:0">Submit near miss report</div>
       <div class="form-group"><label>Reported by</label><input type="text" id="nm-officer-display" readonly style="background:var(--bg-secondary);color:var(--text-secondary)"></div>
       <div class="form-group"><label>Building / Location</label><select id="nm-building"><option>Select building...</option><option>Canopy 1</option><option>Canopy 3</option><option>Canopy 4</option><option>Canopy 5</option><option>Campus grounds</option></select></div>
-      <div class="form-group"><label>Category</label><div class="cat-pills"><button class="cat-pill" onclick="toggleCat(this,'safety','active-safety')">Safety</button><button class="cat-pill" onclick="toggleCat(this,'security','active-security')">Security</button><button class="cat-pill" onclick="toggleCat(this,'facilities','active-facilities')">Facilities</button></div></div>
+      <div class="form-group"><label>Category <span style="color:var(--text-danger)">*</span></label><div class="cat-pills" id="nm-cat-pills"><button class="cat-pill" onclick="toggleCat(this,'safety','active-safety')">Safety</button><button class="cat-pill" onclick="toggleCat(this,'security','active-security')">Security</button><button class="cat-pill" onclick="toggleCat(this,'facilities','active-facilities')">Facilities</button></div><div id="nm-cat-error" style="display:none;font-size:11px;color:var(--text-danger);margin-top:5px">Select at least one category before submitting.</div></div>
       <div class="form-group"><label>Description</label>
         <div style="display:flex;gap:8px;align-items:flex-start">
           <textarea id="nm-desc" placeholder="Describe what was observed..." style="flex:1;padding:9px 10px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);height:72px;resize:vertical"></textarea>
@@ -1897,9 +1897,9 @@ let stats={patrols:0,nm:0,checks:0};
 let darkMode=true;
 let viewingRecord=null,darHistory=[],passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
-// FE MAP VIEW MODULE state — self-contained, only ever touched for C1 / First Floor.
-// feViewMode is the single toggle driving list-vs-map render switch (see renderFEChecklist).
-let feViewMode='list',feEditUnlocked=false,feEditModeActive=false,feFirstFloorSynced=false,feFirstFloorSyncing=false;
+// FE MAP VIEW MODULE state — self-contained, zone-agnostic (any building+zone with a FE_MAP_CONFIG entry).
+// feZoneViewMode/feZoneEditActive are keyed by zone index (zi) within the currently-open building, reset each time startFEChecklist runs.
+let feZoneViewMode={},feEditUnlocked=false,feZoneEditActive={},feZoneSyncStatus={},feZoneSyncing={},feEditPinPendingZi=null;
 const nowDate=new Date(),curMonth=nowDate.getMonth(),curYear=nowDate.getFullYear();
 const initials=n=>n.split(' ').map(p=>p[0]).join('');
 const officerSlug=n=>(n||'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-');
@@ -2677,7 +2677,7 @@ function openNMDetail(id){const r=nmHistory.find(x=>x.id===id)||nmReports.find(x
 const localPhoto=localStorage.getItem('nm_photo_'+id);const photoSrc=localPhoto||(r.photo&&r.photo!=='local_only'?r.photo:null);if(photoSrc){pi.src=photoSrc;pi.style.display='block';ph.style.display='none';pw.style.display='block';}else if(r.photo==='local_only'){pi.src='';pi.style.display='none';ph.style.display='block';pw.style.display='block';}else{pi.src='';pw.style.display='none';}document.getElementById('nm-detail-backdrop').style.display='block';}
 function closeNMDetail(){document.getElementById('nm-detail-backdrop').style.display='none';document.getElementById('nm-detail-photo').src='';}
 function showNMSub(id,btn){document.getElementById('nm-sub-submit').style.display=id==='submit'?'block':'none';document.getElementById('nm-sub-history').style.display=id==='history'?'block':'none';document.querySelectorAll('#pane-nearmiss .dar-tab').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history'){populateNMHistoryFilters();renderNMHistory();loadAllNearMissFromSupabase();}}
-function toggleCat(btn,cat,cls){const idx=activeCatsNM.indexOf(cat);if(idx>-1){activeCatsNM.splice(idx,1);btn.className='cat-pill';}else{activeCatsNM.push(cat);btn.className='cat-pill '+cls;}}
+function toggleCat(btn,cat,cls){const idx=activeCatsNM.indexOf(cat);if(idx>-1){activeCatsNM.splice(idx,1);btn.className='cat-pill';}else{activeCatsNM.push(cat);btn.className='cat-pill '+cls;}if(activeCatsNM.length>0){document.getElementById('nm-cat-error').style.display='none';}}
 let nmPhotoData=null;
 function openPhotoSheet(){
   document.getElementById('photo-sheet-backdrop').style.display='block';
@@ -2712,7 +2712,7 @@ function removePhoto(){
   document.getElementById('photo-preview').style.display='none';
   document.getElementById('photo-area').style.display='block';
 }
-function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};if(nmPhotoData){try{localStorage.setItem('nm_photo_'+report.id,nmPhotoData);}catch(e){}}nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);
+function submitNM(){const building=document.getElementById('nm-building').value;const desc=document.getElementById('nm-desc').value;if(building==='Select building...'||!desc)return;if(activeCatsNM.length===0){document.getElementById('nm-cat-error').style.display='block';document.getElementById('nm-cat-pills').scrollIntoView({behavior:'smooth',block:'center'});return;}const report={id:'nm-'+Date.now(),officer,building,cats:[...activeCatsNM],desc,photo:nmPhotoData||null,time:new Date().toISOString()};if(nmPhotoData){try{localStorage.setItem('nm_photo_'+report.id,nmPhotoData);}catch(e){}}nmReports.unshift(report);nmHistory.unshift(report);saveNMHistory();saveNearMissToSupabase(report);
 if (window._supabase) {
   window._supabase.auth.getSession().then(function(result) {
     var session = result.data && result.data.session;
@@ -2876,9 +2876,9 @@ document.getElementById('fe-bldg-status').innerHTML=FE_BLDGS.map(bldId=>{const b
 document.getElementById('fe-rotation-table').innerHTML=FE_OFFICERS.map((o,i)=>{const bldId=getAssignment(i,cycM);const bld=bldId?FE_DATA[bldId]:null;const isYou=o===officer;const done=bld&&feIsComplete(bldId);return`<div class="rotation-row${isYou?' you':''}${done?' comp-row':''}"><div class="rot-av">${initials(o)}</div><div style="flex:1"><div class="rot-name">${o}${isYou?'<span class="you-chip">you</span>':''}</div><div class="rot-building">${bld?bld.name:'Month off'}</div></div>${done?`<div class="complete-badge"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg><span>Done</span></div>`:`<span class="rot-tag ${bld?bld.color:'rt-off'}">${bld?bld.count+' units':'Off'}</span>`}</div>`;}).join('');
 const previewMonths=[];for(let offset=0;offset<5;offset++){let m=curMonth+offset,y=curYear;if(m>11){m-=12;y++;}previewMonths.push({m,y,label:MONTHS[m].slice(0,3)+" '"+String(y).slice(2),cycle:getCycleMonth(m,y),isCurrent:m===curMonth&&y===curYear});}
 const cols=`65px repeat(5,1fr)`;let grid=`<div class="pg-head" style="grid-template-columns:${cols}"><div></div>${previewMonths.map(p=>`<div class="pg-cell" style="${p.isCurrent?'color:var(--text-primary);font-weight:600':''}">${p.label}</div>`).join('')}</div>`;FE_OFFICERS.forEach((o,i)=>{const isYou=o===officer;grid+=`<div class="pg-row${isYou?' you-row':''}" style="grid-template-columns:${cols}"><div class="pg-name">${o.split(' ')[0]}</div>`;previewMonths.forEach(p=>{const bldId=getAssignment(i,p.cycle);const done=bldId&&p.isCurrent&&feIsComplete(bldId);if(done){grid+=`<div class="pg-cell"><span class="pg-done-pill"><svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>${bldId}</span></div>`;}else{grid+=`<div class="pg-cell">${bldId?`<span class="pg-pill">${bldId}</span>`:`<span class="pg-off">off</span>`}</div>`;}});grid+='</div>';});document.getElementById('fe-preview-grid').innerHTML=grid;}
-function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feViewMode='list';feEditModeActive=false;feEditUnlocked=false;const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);if(bldgId==='C1')feEnsureFirstFloorSynced().then(ok=>{if(ok&&feCurrentBldgId==='C1')renderFEChecklist();});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
+function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feZoneViewMode={};feZoneEditActive={};feEditUnlocked=false;feMapRuntime={};const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);bld.zones.forEach(z=>{if(FE_MAP_CONFIG[bldgId+'|'+z.zone])feEnsureZoneSynced(bldgId,z.zone).then(ok=>{if(ok&&feCurrentBldgId===bldgId)renderFEChecklist();});});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
 // list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE for the replacement
-function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const isFirstFloorMap=feCurrentBldgId==='C1'&&zone.zone==='First Floor';const bodyHtml=isFirstFloorMap?feRenderFirstFloorZoneBody(zone,zi):`<div class="zone-items${!allDone?' open':''}" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${!allDone?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');if(feCurrentBldgId==='C1'&&feViewMode==='map')setTimeout(initFEMap,0);}
+function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const hasMap=!!FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone];const bodyHtml=hasMap?feRenderZoneMapBody(feCurrentBldgId,zone,zi):`<div class="zone-items${!allDone?' open':''}" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${!allDone?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');setTimeout(()=>{bld.zones.forEach((zone,zi)=>{if(FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone]&&(feZoneViewMode[zi]||'list')==='map')initFEMap(feCurrentBldgId,zone,zi);});},0);}
 function feRenderZoneListItems(zone,zi){return zone.items.map(ext=>{const chk=!!feCheckState[ext.id];return`<div class="ext-item${chk?' checked':''}" onclick="toggleFEExt('${ext.id}',${zi})"><div class="ext-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div><div class="ext-info"><div class="ext-id">${ext.id}</div><div class="ext-location">${ext.location}</div></div><span class="type-badge type-${ext.type.toLowerCase()}">${ext.type}</span></div>`;}).join('');}
 function toggleFEZone(zi){document.getElementById('fezitems-'+zi).classList.toggle('open');document.getElementById('fezchev-'+zi).classList.toggle('open');}
 // Shared completion-tracking core — used by both the list item tap handler (toggleFEExt) and the map pin tap handler (feMapPinTap). Do not duplicate this logic per view.
@@ -2888,29 +2888,39 @@ function completeInspection(){const bld=FE_DATA[feCurrentBldgId];feMarkComplete(
 function backToFESchedule(){feCurrentBldgId=null;openFESchedule();}
 
 // ══════════════════════════════════════════════════════════════════
-// FE MAP VIEW MODULE (Canopy 1 / First Floor only) — self-contained.
-// Reads/writes the same FE_DATA.C1 "First Floor" zone.items array and
+// FE MAP VIEW MODULE — zone-agnostic. Any building+zone with a FE_MAP_CONFIG
+// entry gets a Map view; zones without one only ever render list view.
+// Reads/writes that zone's FE_DATA[bldgId].zones[].items array and the same
 // feCheckState / toggleExtinguisherChecked used by list view above.
 // Nothing here should need to change if list view is later deleted.
 // ══════════════════════════════════════════════════════════════════
-const FE_MAP_IMG_SRC='Canopy%20Maps/Canopy%201%20First%20Floor.jpg';
-let feMapZoom=1,feMapPanX=0,feMapPanY=0,feMapBaseZoom=1;
-let feMapPointers=new Map(),feMapMoved=false,feMapDragStart=null,feMapDragPinEl=null,feMapDragPinStart=null,feMapDownPinId=null;
-let feMapPinchStartDist=0,feMapPinchStartZoom=1;
+const FE_MAP_CONFIG={
+  'C1|First Floor':'Canopy%20Maps/Canopy%201%20First%20Floor.jpg',
+  'C1|Garage & Bunker':'Canopy%20Maps/Canopy%201%20Parking%20Bunker.jpg',
+  'C1|Second Floor':'Canopy%20Maps/Canopy%201%202nd%20Floor.jpg',
+  'C1|Third Floor':'Canopy%20Maps/Canopy%201%203rd%20Floor.jpg',
+  'C4|First Floor':'Canopy%20Maps/Canopy%204%201st%20Floor.jpg',
+  'C4|Second Floor':'Canopy%20Maps/Canopy%204%202nd%20Floor.jpg'
+};
+// Per-zone map runtime state (zoom/pan/pointers/etc), keyed by zi (zone index within the current building).
+let feMapRuntime={};
 
-function feGetFirstFloorZone(){return FE_DATA.C1.zones.find(z=>z.zone==='First Floor');}
-function feSetViewMode(mode){if(feViewMode===mode)return;feViewMode=mode;renderFEChecklist();}
+function feGetZone(bldgId,zoneName){return FE_DATA[bldgId].zones.find(z=>z.zone===zoneName);}
+function feSetViewMode(zi,mode){if((feZoneViewMode[zi]||'list')===mode)return;feZoneViewMode[zi]=mode;renderFEChecklist();}
 
-function feRenderFirstFloorZoneBody(zone,zi){
+function feRenderZoneMapBody(bldgId,zone,zi){
   const allDone=zone.items.length>0&&zone.items.every(e=>feCheckState[e.id]);
   const remaining=zone.items.filter(e=>!feCheckState[e.id]).length;
-  const toolbar=`<div class="fe-map-toolbar"><div class="fe-view-toggle"><button class="fe-view-btn${feViewMode==='list'?' act':''}" onclick="event.stopPropagation();feSetViewMode('list')">List view</button><button class="fe-view-btn${feViewMode==='map'?' act':''}" onclick="event.stopPropagation();feSetViewMode('map')">Map view</button></div><button class="fe-edit-toggle-btn${feEditModeActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick()">${feEditModeActive?'Editing…':'Edit'}</button></div>`;
+  const viewMode=feZoneViewMode[zi]||'list';
+  const editActive=!!feZoneEditActive[zi];
+  const toolbar=`<div class="fe-map-toolbar"><div class="fe-view-toggle"><button class="fe-view-btn${viewMode==='list'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'list')">List view</button><button class="fe-view-btn${viewMode==='map'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'map')">Map view</button></div><button class="fe-edit-toggle-btn${editActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick(${zi})">${editActive?'Editing…':'Edit'}</button></div>`;
   let content;
-  if(feViewMode==='map'){
-    if(!feFirstFloorSynced){
+  if(viewMode==='map'){
+    const key=bldgId+'|'+zone.zone;
+    if(!feZoneSyncStatus[key]){
       content=`<div class="fe-map-loading">Loading extinguisher positions…</div>`;
     }else{
-      content=`<div class="fe-map-sub"><span id="fe-map-remaining-count">${remaining} remaining</span>${feEditModeActive?'<span class="fe-map-editing-note">Tap empty space to add · tap a pin to delete · drag to reposition</span>':''}</div><div class="fe-map-wrap"><div class="fe-map-viewport${feEditModeActive?' fe-map-editing':''}" id="fe-map-viewport"><div class="fe-map-canvas" id="fe-map-canvas"><img class="fe-map-img" id="fe-map-img" src="${FE_MAP_IMG_SRC}" draggable="false" alt="Canopy 1 First Floor plan"/><div class="fe-map-pins-layer" id="fe-map-pins-layer"></div></div></div><button class="fe-map-fit-btn" onclick="event.stopPropagation();feMapFit()">Fit</button></div>`;
+      content=`<div class="fe-map-sub"><span id="fe-map-remaining-count-${zi}">${remaining} remaining</span>${editActive?'<span class="fe-map-editing-note">Tap empty space to add · tap a pin to delete · drag to reposition</span>':''}</div><div class="fe-map-wrap"><div class="fe-map-viewport${editActive?' fe-map-editing':''}" id="fe-map-viewport-${zi}"><div class="fe-map-canvas" id="fe-map-canvas-${zi}"><img class="fe-map-img" id="fe-map-img-${zi}" src="${FE_MAP_CONFIG[key]}" draggable="false" alt="${bldgId} ${zone.zone} plan"/><div class="fe-map-pins-layer" id="fe-map-pins-layer-${zi}"></div></div></div><button class="fe-map-fit-btn" onclick="event.stopPropagation();feMapFit(${zi})">Fit</button></div>`;
     }
   }else{
     content=feRenderZoneListItems(zone,zi);
@@ -2919,9 +2929,9 @@ function feRenderFirstFloorZoneBody(zone,zi){
 }
 
 // ── EDIT MODE (PIN gate reuses the existing adminPin variable/pattern from the Admin screen) ──
-function feHandleEditButtonClick(){
-  if(!feEditUnlocked){feOpenEditPinModal();return;}
-  feEditModeActive=!feEditModeActive;
+function feHandleEditButtonClick(zi){
+  if(!feEditUnlocked){feEditPinPendingZi=zi;feOpenEditPinModal();return;}
+  feZoneEditActive[zi]=!feZoneEditActive[zi];
   renderFEChecklist();
 }
 function feOpenEditPinModal(){const m=document.getElementById('fe-edit-pin-modal');if(!m)return;document.getElementById('fe-edit-pin-field').value='';document.getElementById('fe-edit-pin-err').classList.remove('show');m.classList.add('open');}
@@ -2930,7 +2940,8 @@ function feClearEditPinErr(){const e=document.getElementById('fe-edit-pin-err');
 function feTryEditPin(){
   const v=document.getElementById('fe-edit-pin-field').value;
   if(v===adminPin){
-    feEditUnlocked=true;feEditModeActive=true;
+    feEditUnlocked=true;
+    if(feEditPinPendingZi!=null)feZoneEditActive[feEditPinPendingZi]=true;
     feCloseEditPinModal();
     renderFEChecklist();
   }else{
@@ -2938,43 +2949,44 @@ function feTryEditPin(){
     document.getElementById('fe-edit-pin-field').value='';
   }
 }
-function feLockEditMode(){feEditUnlocked=false;feEditModeActive=false;}
+function feLockEditMode(){feEditUnlocked=false;feZoneEditActive={};}
 
 // ── SUPABASE SYNC ──
-async function feMapFetchRows(){
+async function feMapFetchRows(bldgId,zoneName){
   if(!window._supabase)return null;
   try{
-    const{data,error}=await window._supabase.from('extinguishers').select('*').eq('building_id','C1').eq('zone','First Floor').order('id');
+    const{data,error}=await window._supabase.from('extinguishers').select('*').eq('building_id',bldgId).eq('zone',zoneName).order('id');
     if(error){console.warn('extinguishers fetch error:',error.message);return null;}
     return data||[];
   }catch(e){console.warn('extinguishers fetch exception:',e.message);return null;}
 }
-async function feEnsureFirstFloorSynced(){
-  if(feFirstFloorSynced)return true;
-  if(feFirstFloorSyncing)return false;
-  feFirstFloorSyncing=true;
+async function feEnsureZoneSynced(bldgId,zoneName){
+  const key=bldgId+'|'+zoneName;
+  if(feZoneSyncStatus[key])return true;
+  if(feZoneSyncing[key])return false;
+  feZoneSyncing[key]=true;
   try{
-    let rows=await feMapFetchRows();
-    if(rows===null){feFirstFloorSyncing=false;return false;}
+    let rows=await feMapFetchRows(bldgId,zoneName);
+    if(rows===null){feZoneSyncing[key]=false;return false;}
     if(rows.length===0){
-      const seedZone=feGetFirstFloorZone();
-      const seed=seedZone.items.map((it,i)=>({id:it.id,building_id:'C1',zone:'First Floor',location:it.location,type:it.type,x:20+(i%3)*30,y:12+Math.floor(i/3)*22}));
+      const seedZone=feGetZone(bldgId,zoneName);
+      const seed=seedZone.items.map((it,i)=>({id:it.id,building_id:bldgId,zone:zoneName,location:it.location,type:it.type,x:20+(i%3)*30,y:12+Math.floor(i/3)*22}));
       try{
         const{data,error}=await window._supabase.from('extinguishers').insert(seed).select();
         if(error){console.warn('extinguishers seed error:',error.message);rows=seed;}
         else rows=(data&&data.length)?data:seed;
       }catch(e){console.warn('extinguishers seed exception:',e.message);rows=seed;}
     }
-    const zone=feGetFirstFloorZone();
+    const zone=feGetZone(bldgId,zoneName);
     zone.items=rows.map(r=>({id:r.id,location:r.location,type:r.type,x:r.x,y:r.y}));
-    feFirstFloorSynced=true;
-    feFirstFloorSyncing=false;
+    feZoneSyncStatus[key]=true;
+    feZoneSyncing[key]=false;
     return true;
-  }catch(e){console.warn('feEnsureFirstFloorSynced exception:',e.message);feFirstFloorSyncing=false;return false;}
+  }catch(e){console.warn('feEnsureZoneSynced exception:',e.message);feZoneSyncing[key]=false;return false;}
 }
 
 // ── SHARED CHECK-STATE REFRESH (map side only; avoids a full renderFEChecklist so pan/zoom survive a pin tap) ──
-function feRefreshFEChecklistChrome(){
+function feRefreshFEChecklistChrome(zi){
   const bld=FE_DATA[feCurrentBldgId];
   const total=bld.count,checked=feGetChecked(feCurrentBldgId);
   const pct=Math.round(checked/total*100);
@@ -2982,8 +2994,7 @@ function feRefreshFEChecklistChrome(){
   document.getElementById('cl-done-count').textContent=checked+' checked';
   document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';
   document.getElementById('complete-btn').disabled=checked<total;
-  const zi=bld.zones.findIndex(z=>z.zone==='First Floor');
-  if(zi<0)return;
+  if(zi<0||!bld.zones[zi])return;
   const zone=bld.zones[zi];
   const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;
   const allDone=zoneDone===zone.items.length&&zone.items.length>0;
@@ -2992,165 +3003,177 @@ function feRefreshFEChecklistChrome(){
   const doneLbl=document.getElementById('fe-zone-donelbl-'+zi);
   if(doneLbl)doneLbl.textContent=zoneDone+'/'+zone.items.length;
 }
-function feMapPinTap(id){
+function feMapPinTap(bldgId,zoneName,zi,id){
   toggleExtinguisherChecked(id);
-  feRefreshFEChecklistChrome();
-  feRenderMapPins();
+  feRefreshFEChecklistChrome(zi);
+  feRenderMapPins(zi);
 }
 
 // ── MAP RENDER / MOUNT (pan, zoom, pins) ──
-function feRenderMapPins(){
-  const layer=document.getElementById('fe-map-pins-layer');
-  if(!layer)return;
-  const zone=feGetFirstFloorZone();
+function feRenderMapPins(zi){
+  const layer=document.getElementById('fe-map-pins-layer-'+zi);
+  const st=feMapRuntime[zi];
+  if(!layer||!st)return;
+  const zone=feGetZone(st.bldgId,st.zoneName);
   const remaining=zone.items.filter(e=>!feCheckState[e.id]).length;
-  const countEl=document.getElementById('fe-map-remaining-count');
+  const countEl=document.getElementById('fe-map-remaining-count-'+zi);
   if(countEl)countEl.textContent=remaining+' remaining';
   layer.innerHTML=zone.items.filter(e=>typeof e.x==='number'&&typeof e.y==='number').map(e=>{
     const chk=!!feCheckState[e.id];
     return `<div class="fe-map-pin${chk?' fe-map-pin-checked':''}" data-id="${e.id}" style="left:${e.x}%;top:${e.y}%" title="${e.location}"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div>`;
   }).join('');
 }
-function initFEMap(){
-  const viewport=document.getElementById('fe-map-viewport');
+function initFEMap(bldgId,zone,zi){
+  const viewport=document.getElementById('fe-map-viewport-'+zi);
   if(!viewport)return;
-  feMapZoom=1;feMapPanX=0;feMapPanY=0;feMapBaseZoom=1;
-  feMapPointers=new Map();
-  const img=document.getElementById('fe-map-img');
+  const st={zoom:1,panX:0,panY:0,baseZoom:1,pointers:new Map(),moved:false,dragStart:null,dragPinEl:null,dragPinStart:null,downPinId:null,pinchStartDist:0,pinchStartZoom:1,bldgId,zoneName:zone.zone};
+  feMapRuntime[zi]=st;
+  const img=document.getElementById('fe-map-img-'+zi);
   const applyBaseFit=()=>{
     if(!img.naturalWidth)return;
-    feMapBaseZoom=Math.min(viewport.clientWidth/img.naturalWidth,1)||1;
-    feMapZoom=feMapBaseZoom;feMapPanX=0;feMapPanY=0;
-    feMapApplyTransform();
+    st.baseZoom=Math.min(viewport.clientWidth/img.naturalWidth,1)||1;
+    st.zoom=st.baseZoom;st.panX=0;st.panY=0;
+    feMapApplyTransform(zi);
   };
   if(img.complete&&img.naturalWidth)applyBaseFit();else img.onload=applyBaseFit;
-  viewport.addEventListener('pointerdown',feMapOnPointerDown);
-  viewport.addEventListener('pointermove',feMapOnPointerMove);
-  viewport.addEventListener('pointerup',feMapOnPointerUp);
-  viewport.addEventListener('pointercancel',feMapOnPointerUp);
-  viewport.addEventListener('wheel',feMapOnWheel,{passive:false});
-  feRenderMapPins();
+  viewport.addEventListener('pointerdown',e=>feMapOnPointerDown(e,zi));
+  viewport.addEventListener('pointermove',e=>feMapOnPointerMove(e,zi));
+  viewport.addEventListener('pointerup',e=>feMapOnPointerUp(e,zi));
+  viewport.addEventListener('pointercancel',e=>feMapOnPointerUp(e,zi));
+  viewport.addEventListener('wheel',e=>feMapOnWheel(e,zi),{passive:false});
+  feRenderMapPins(zi);
 }
-function feMapApplyTransform(){
-  const canvas=document.getElementById('fe-map-canvas');
-  if(!canvas)return;
-  canvas.style.transform=`translate(${feMapPanX}px,${feMapPanY}px) scale(${feMapZoom})`;
-  canvas.style.setProperty('--fe-zoom',feMapZoom);
+function feMapApplyTransform(zi){
+  const st=feMapRuntime[zi];
+  const canvas=document.getElementById('fe-map-canvas-'+zi);
+  if(!st||!canvas)return;
+  canvas.style.transform=`translate(${st.panX}px,${st.panY}px) scale(${st.zoom})`;
+  canvas.style.setProperty('--fe-zoom',st.zoom);
 }
-function feMapFit(){
-  if(!feMapBaseZoom)return;
-  feMapZoom=feMapBaseZoom;feMapPanX=0;feMapPanY=0;
-  feMapApplyTransform();
+function feMapFit(zi){
+  const st=feMapRuntime[zi];
+  if(!st||!st.baseZoom)return;
+  st.zoom=st.baseZoom;st.panX=0;st.panY=0;
+  feMapApplyTransform(zi);
 }
-function feMapSetZoomAtPoint(newZoom,clientX,clientY){
-  const viewport=document.getElementById('fe-map-viewport');
-  if(!viewport)return;
+function feMapSetZoomAtPoint(zi,newZoom,clientX,clientY){
+  const st=feMapRuntime[zi];
+  const viewport=document.getElementById('fe-map-viewport-'+zi);
+  if(!st||!viewport)return;
   const vRect=viewport.getBoundingClientRect();
   const localX=clientX-vRect.left,localY=clientY-vRect.top;
-  const layoutX=(localX-feMapPanX)/feMapZoom,layoutY=(localY-feMapPanY)/feMapZoom;
-  const minZoom=feMapBaseZoom||1;
+  const layoutX=(localX-st.panX)/st.zoom,layoutY=(localY-st.panY)/st.zoom;
+  const minZoom=st.baseZoom||1;
   newZoom=Math.max(minZoom,Math.min(newZoom,minZoom*6));
-  feMapPanX=localX-layoutX*newZoom;
-  feMapPanY=localY-layoutY*newZoom;
-  feMapZoom=newZoom;
-  feMapApplyTransform();
+  st.panX=localX-layoutX*newZoom;
+  st.panY=localY-layoutY*newZoom;
+  st.zoom=newZoom;
+  feMapApplyTransform(zi);
 }
-function feMapClientToPct(clientX,clientY){
-  const viewport=document.getElementById('fe-map-viewport');
-  const canvas=document.getElementById('fe-map-canvas');
+function feMapClientToPct(zi,clientX,clientY){
+  const st=feMapRuntime[zi];
+  const viewport=document.getElementById('fe-map-viewport-'+zi);
+  const canvas=document.getElementById('fe-map-canvas-'+zi);
   const vRect=viewport.getBoundingClientRect();
   const localX=clientX-vRect.left,localY=clientY-vRect.top;
-  const layoutX=(localX-feMapPanX)/feMapZoom,layoutY=(localY-feMapPanY)/feMapZoom;
+  const layoutX=(localX-st.panX)/st.zoom,layoutY=(localY-st.panY)/st.zoom;
   const w=canvas.offsetWidth||1,h=canvas.offsetHeight||1;
   return{x:Math.max(0,Math.min(100,layoutX/w*100)),y:Math.max(0,Math.min(100,layoutY/h*100))};
 }
-function feMapOnWheel(e){
+function feMapOnWheel(e,zi){
   e.preventDefault();
+  const st=feMapRuntime[zi];
+  if(!st)return;
   const factor=Math.pow(1.0015,-e.deltaY);
-  feMapSetZoomAtPoint(feMapZoom*factor,e.clientX,e.clientY);
+  feMapSetZoomAtPoint(zi,st.zoom*factor,e.clientX,e.clientY);
 }
-function feMapOnPointerDown(e){
-  const viewport=document.getElementById('fe-map-viewport');
-  if(!viewport)return;
+function feMapOnPointerDown(e,zi){
+  const st=feMapRuntime[zi];
+  const viewport=document.getElementById('fe-map-viewport-'+zi);
+  if(!st||!viewport)return;
   try{viewport.setPointerCapture(e.pointerId);}catch(err){}
-  feMapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  st.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   const pinEl=e.target&&e.target.closest?e.target.closest('.fe-map-pin'):null;
-  if(feMapPointers.size===1){
-    feMapMoved=false;
-    feMapDragStart={x:e.clientX,y:e.clientY,panX:feMapPanX,panY:feMapPanY};
-    feMapDownPinId=pinEl?pinEl.dataset.id:null;
-    feMapDragPinEl=(pinEl&&feEditModeActive)?pinEl:null;
-    feMapDragPinStart=feMapDragPinEl?{x:parseFloat(feMapDragPinEl.style.left),y:parseFloat(feMapDragPinEl.style.top)}:null;
-  }else if(feMapPointers.size===2){
-    feMapDragPinEl=null;
-    const pts=[...feMapPointers.values()];
-    feMapPinchStartDist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)||1;
-    feMapPinchStartZoom=feMapZoom;
+  if(st.pointers.size===1){
+    st.moved=false;
+    st.dragStart={x:e.clientX,y:e.clientY,panX:st.panX,panY:st.panY};
+    st.downPinId=pinEl?pinEl.dataset.id:null;
+    st.dragPinEl=(pinEl&&feZoneEditActive[zi])?pinEl:null;
+    st.dragPinStart=st.dragPinEl?{x:parseFloat(st.dragPinEl.style.left),y:parseFloat(st.dragPinEl.style.top)}:null;
+  }else if(st.pointers.size===2){
+    st.dragPinEl=null;
+    const pts=[...st.pointers.values()];
+    st.pinchStartDist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)||1;
+    st.pinchStartZoom=st.zoom;
   }
 }
-function feMapOnPointerMove(e){
-  if(!feMapPointers.has(e.pointerId))return;
-  feMapPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(feMapPointers.size===2){
-    const pts=[...feMapPointers.values()];
+function feMapOnPointerMove(e,zi){
+  const st=feMapRuntime[zi];
+  if(!st||!st.pointers.has(e.pointerId))return;
+  st.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(st.pointers.size===2){
+    const pts=[...st.pointers.values()];
     const dist=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)||1;
     const midX=(pts[0].x+pts[1].x)/2,midY=(pts[0].y+pts[1].y)/2;
-    feMapSetZoomAtPoint(feMapPinchStartZoom*(dist/feMapPinchStartDist),midX,midY);
-    feMapMoved=true;
+    feMapSetZoomAtPoint(zi,st.pinchStartZoom*(dist/st.pinchStartDist),midX,midY);
+    st.moved=true;
     return;
   }
-  if(feMapPointers.size!==1||!feMapDragStart)return;
-  const p=feMapPointers.get(e.pointerId);
-  const dx=p.x-feMapDragStart.x,dy=p.y-feMapDragStart.y;
-  if(Math.abs(dx)>4||Math.abs(dy)>4)feMapMoved=true;
-  if(feMapDragPinEl&&feEditModeActive){
-    const canvas=document.getElementById('fe-map-canvas');
+  if(st.pointers.size!==1||!st.dragStart)return;
+  const p=st.pointers.get(e.pointerId);
+  const dx=p.x-st.dragStart.x,dy=p.y-st.dragStart.y;
+  if(Math.abs(dx)>4||Math.abs(dy)>4)st.moved=true;
+  if(st.dragPinEl&&feZoneEditActive[zi]){
+    const canvas=document.getElementById('fe-map-canvas-'+zi);
     const w=canvas.offsetWidth||1,h=canvas.offsetHeight||1;
-    const dxPct=dx/(w*feMapZoom)*100,dyPct=dy/(h*feMapZoom)*100;
-    const nx=Math.max(0,Math.min(100,feMapDragPinStart.x+dxPct));
-    const ny=Math.max(0,Math.min(100,feMapDragPinStart.y+dyPct));
-    feMapDragPinEl.style.left=nx+'%';feMapDragPinEl.style.top=ny+'%';
-    feMapDragPinEl.dataset.pendingX=nx;feMapDragPinEl.dataset.pendingY=ny;
-  }else if(!feMapDragPinEl){
-    feMapPanX=feMapDragStart.panX+dx;feMapPanY=feMapDragStart.panY+dy;
-    feMapApplyTransform();
+    const dxPct=dx/(w*st.zoom)*100,dyPct=dy/(h*st.zoom)*100;
+    const nx=Math.max(0,Math.min(100,st.dragPinStart.x+dxPct));
+    const ny=Math.max(0,Math.min(100,st.dragPinStart.y+dyPct));
+    st.dragPinEl.style.left=nx+'%';st.dragPinEl.style.top=ny+'%';
+    st.dragPinEl.dataset.pendingX=nx;st.dragPinEl.dataset.pendingY=ny;
+  }else if(!st.dragPinEl){
+    st.panX=st.dragStart.panX+dx;st.panY=st.dragStart.panY+dy;
+    feMapApplyTransform(zi);
   }
 }
-function feMapOnPointerUp(e){
-  feMapPointers.delete(e.pointerId);
-  if(feMapPointers.size>0)return;
-  if(feMapDragPinEl&&feEditModeActive){
-    if(feMapMoved){
-      const id=feMapDragPinEl.dataset.id;
-      const nx=parseFloat(feMapDragPinEl.dataset.pendingX),ny=parseFloat(feMapDragPinEl.dataset.pendingY);
-      feMapCommitPinMove(id,nx,ny);
+function feMapOnPointerUp(e,zi){
+  const st=feMapRuntime[zi];
+  if(!st)return;
+  st.pointers.delete(e.pointerId);
+  if(st.pointers.size>0)return;
+  if(st.dragPinEl&&feZoneEditActive[zi]){
+    if(st.moved){
+      const id=st.dragPinEl.dataset.id;
+      const nx=parseFloat(st.dragPinEl.dataset.pendingX),ny=parseFloat(st.dragPinEl.dataset.pendingY);
+      feMapCommitPinMove(st.bldgId,st.zoneName,id,nx,ny);
     }else{
-      feMapDeleteExtinguisher(feMapDragPinEl.dataset.id);
+      feMapDeleteExtinguisher(st.bldgId,st.zoneName,st.dragPinEl.dataset.id);
     }
-  }else if(!feMapMoved){
-    if(feMapDownPinId){
-      if(feEditModeActive)feMapDeleteExtinguisher(feMapDownPinId);
-      else feMapPinTap(feMapDownPinId);
-    }else if(feEditModeActive){
-      const pt=feMapClientToPct(e.clientX,e.clientY);
-      feMapAddExtinguisher(pt.x,pt.y);
+  }else if(!st.moved){
+    if(st.downPinId){
+      if(feZoneEditActive[zi])feMapDeleteExtinguisher(st.bldgId,st.zoneName,st.downPinId);
+      else feMapPinTap(st.bldgId,st.zoneName,zi,st.downPinId);
+    }else if(feZoneEditActive[zi]){
+      const pt=feMapClientToPct(zi,e.clientX,e.clientY);
+      feMapAddExtinguisher(st.bldgId,st.zoneName,pt.x,pt.y);
     }
   }
-  feMapDragPinEl=null;feMapDragStart=null;feMapDownPinId=null;
+  st.dragPinEl=null;st.dragStart=null;st.downPinId=null;
 }
 
 // ── EDIT MODE MUTATIONS (add / delete / reposition) — sync to Supabase, fall back to local-only on error ──
-function feMapNextExtId(){
+function feMapNextExtId(bldgId){
   let max=0;
-  FE_DATA.C1.zones.forEach(z=>z.items.forEach(it=>{const m=/^EXT-C1-(\d+)$/.exec(it.id);if(m)max=Math.max(max,parseInt(m[1],10));}));
-  return 'EXT-C1-'+String(max+1).padStart(3,'0');
+  const re=new RegExp('^EXT-'+bldgId+'-(\\d+)$');
+  FE_DATA[bldgId].zones.forEach(z=>z.items.forEach(it=>{const m=re.exec(it.id);if(m)max=Math.max(max,parseInt(m[1],10));}));
+  return 'EXT-'+bldgId+'-'+String(max+1).padStart(3,'0');
 }
-async function feMapAddExtinguisher(xPct,yPct){
-  const zone=feGetFirstFloorZone();
-  const id=feMapNextExtId();
-  const rec={id,building_id:'C1',zone:'First Floor',location:'New unit — rename in list view',type:'ABC',x:Math.round(xPct*10)/10,y:Math.round(yPct*10)/10};
+async function feMapAddExtinguisher(bldgId,zoneName,xPct,yPct){
+  const zone=feGetZone(bldgId,zoneName);
+  const id=feMapNextExtId(bldgId);
+  const rec={id,building_id:bldgId,zone:zoneName,location:'New unit — rename in list view',type:'ABC',x:Math.round(xPct*10)/10,y:Math.round(yPct*10)/10};
   zone.items.push({id:rec.id,location:rec.location,type:rec.type,x:rec.x,y:rec.y});
-  FE_DATA.C1.count++;
+  FE_DATA[bldgId].count++;
   renderFEChecklist();
   try{
     const{error}=await window._supabase.from('extinguishers').insert(rec);
@@ -3158,14 +3181,14 @@ async function feMapAddExtinguisher(xPct,yPct){
     else showToast('fe-cl-toast','✓ Extinguisher added');
   }catch(e){console.warn('extinguishers insert exception:',e.message);}
 }
-async function feMapDeleteExtinguisher(id){
-  const zone=feGetFirstFloorZone();
+async function feMapDeleteExtinguisher(bldgId,zoneName,id){
+  const zone=feGetZone(bldgId,zoneName);
   const idx=zone.items.findIndex(it=>it.id===id);
   if(idx<0)return;
   zone.items.splice(idx,1);
-  FE_DATA.C1.count--;
+  FE_DATA[bldgId].count--;
   delete feCheckState[id];
-  try{localStorage.setItem('fe_progress_C1',JSON.stringify(feCheckState));}catch(e){}
+  try{localStorage.setItem('fe_progress_'+bldgId,JSON.stringify(feCheckState));}catch(e){}
   renderFEChecklist();
   try{
     const{error}=await window._supabase.from('extinguishers').delete().eq('id',id);
@@ -3173,8 +3196,8 @@ async function feMapDeleteExtinguisher(id){
     else showToast('fe-cl-toast','✓ Extinguisher removed');
   }catch(e){console.warn('extinguishers delete exception:',e.message);}
 }
-async function feMapCommitPinMove(id,xPct,yPct){
-  const zone=feGetFirstFloorZone();
+async function feMapCommitPinMove(bldgId,zoneName,id,xPct,yPct){
+  const zone=feGetZone(bldgId,zoneName);
   const item=zone.items.find(it=>it.id===id);
   if(!item)return;
   item.x=Math.round(xPct*10)/10;item.y=Math.round(yPct*10)/10;
