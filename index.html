@@ -2878,7 +2878,7 @@ const previewMonths=[];for(let offset=0;offset<5;offset++){let m=curMonth+offset
 const cols=`65px repeat(5,1fr)`;let grid=`<div class="pg-head" style="grid-template-columns:${cols}"><div></div>${previewMonths.map(p=>`<div class="pg-cell" style="${p.isCurrent?'color:var(--text-primary);font-weight:600':''}">${p.label}</div>`).join('')}</div>`;FE_OFFICERS.forEach((o,i)=>{const isYou=o===officer;grid+=`<div class="pg-row${isYou?' you-row':''}" style="grid-template-columns:${cols}"><div class="pg-name">${o.split(' ')[0]}</div>`;previewMonths.forEach(p=>{const bldId=getAssignment(i,p.cycle);const done=bldId&&p.isCurrent&&feIsComplete(bldId);if(done){grid+=`<div class="pg-cell"><span class="pg-done-pill"><svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>${bldId}</span></div>`;}else{grid+=`<div class="pg-cell">${bldId?`<span class="pg-pill">${bldId}</span>`:`<span class="pg-off">off</span>`}</div>`;}});grid+='</div>';});document.getElementById('fe-preview-grid').innerHTML=grid;}
 function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feZoneViewMode={};feZoneEditActive={};feEditUnlocked=false;feMapRuntime={};const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);bld.zones.forEach(z=>{if(FE_MAP_CONFIG[bldgId+'|'+z.zone])feEnsureZoneSynced(bldgId,z.zone).then(ok=>{if(ok&&feCurrentBldgId===bldgId)renderFEChecklist();});});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
 // list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE for the replacement
-function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const hasMap=!!FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone];const bodyHtml=hasMap?feRenderZoneMapBody(feCurrentBldgId,zone,zi):`<div class="zone-items${!allDone?' open':''}" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${!allDone?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');setTimeout(()=>{bld.zones.forEach((zone,zi)=>{if(FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone]&&(feZoneViewMode[zi]||'list')==='map')initFEMap(feCurrentBldgId,zone,zi);});},0);}
+function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const hasMap=!!FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone];const bodyHtml=hasMap?feRenderZoneMapBody(feCurrentBldgId,zone,zi):`<div class="zone-items" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');setTimeout(()=>{bld.zones.forEach((zone,zi)=>{if(FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone]&&(feZoneViewMode[zi]||'map')==='map')initFEMap(feCurrentBldgId,zone,zi);});},0);}
 function feRenderZoneListItems(zone,zi){return zone.items.map(ext=>{const chk=!!feCheckState[ext.id];return`<div class="ext-item${chk?' checked':''}" onclick="toggleFEExt('${ext.id}',${zi})"><div class="ext-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div><div class="ext-info"><div class="ext-id">${ext.id}</div><div class="ext-location">${ext.location}</div></div><span class="type-badge type-${ext.type.toLowerCase()}">${ext.type}</span></div>`;}).join('');}
 function toggleFEZone(zi){document.getElementById('fezitems-'+zi).classList.toggle('open');document.getElementById('fezchev-'+zi).classList.toggle('open');}
 // Shared completion-tracking core — used by both the list item tap handler (toggleFEExt) and the map pin tap handler (feMapPinTap). Do not duplicate this logic per view.
@@ -2912,14 +2912,13 @@ const FE_MAP_CONFIG={
 let feMapRuntime={};
 
 function feGetZone(bldgId,zoneName){return FE_DATA[bldgId].zones.find(z=>z.zone===zoneName);}
-function feSetViewMode(zi,mode){if((feZoneViewMode[zi]||'list')===mode)return;feZoneViewMode[zi]=mode;renderFEChecklist();}
+function feSetViewMode(zi,mode){if((feZoneViewMode[zi]||'map')===mode)return;feZoneViewMode[zi]=mode;renderFEChecklist();}
 
 function feRenderZoneMapBody(bldgId,zone,zi){
-  const allDone=zone.items.length>0&&zone.items.every(e=>feCheckState[e.id]);
   const remaining=zone.items.filter(e=>!feCheckState[e.id]).length;
-  const viewMode=feZoneViewMode[zi]||'list';
+  const viewMode=feZoneViewMode[zi]||'map';
   const editActive=!!feZoneEditActive[zi];
-  const toolbar=`<div class="fe-map-toolbar"><div class="fe-view-toggle"><button class="fe-view-btn${viewMode==='list'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'list')">List view</button><button class="fe-view-btn${viewMode==='map'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'map')">Map view</button></div><button class="fe-edit-toggle-btn${editActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick(${zi})">${editActive?'Editing…':'Edit'}</button></div>`;
+  const toolbar=`<div class="fe-map-toolbar"><div class="fe-view-toggle"><button class="fe-view-btn${viewMode==='map'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'map')">Map view</button><button class="fe-view-btn${viewMode==='list'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'list')">List view</button></div><button class="fe-edit-toggle-btn${editActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick(${zi})">${editActive?'Editing…':'Edit'}</button></div>`;
   let content;
   if(viewMode==='map'){
     const key=bldgId+'|'+zone.zone;
@@ -2931,7 +2930,7 @@ function feRenderZoneMapBody(bldgId,zone,zi){
   }else{
     content=feRenderZoneListItems(zone,zi);
   }
-  return `<div class="zone-items${allDone?'':' open'}" id="fezitems-${zi}">${toolbar}${content}</div>`;
+  return `<div class="zone-items" id="fezitems-${zi}">${toolbar}${content}</div>`;
 }
 
 // ── EDIT MODE (PIN gate reuses the existing adminPin variable/pattern from the Admin screen) ──
@@ -3036,12 +3035,16 @@ function initFEMap(bldgId,zone,zi){
   feMapRuntime[zi]=st;
   const img=document.getElementById('fe-map-img-'+zi);
   const applyBaseFit=()=>{
-    if(!img.naturalWidth)return;
+    if(!img.naturalWidth||!viewport.clientWidth)return;
     st.baseZoom=Math.min(viewport.clientWidth/img.naturalWidth,1)||1;
     st.zoom=st.baseZoom;st.panX=0;st.panY=0;
     feMapApplyTransform(zi);
   };
   if(img.complete&&img.naturalWidth)applyBaseFit();else img.onload=applyBaseFit;
+  if(!viewport.clientWidth&&typeof ResizeObserver!=='undefined'){
+    const ro=new ResizeObserver(()=>{if(viewport.clientWidth){applyBaseFit();ro.disconnect();}});
+    ro.observe(viewport);
+  }
   viewport.addEventListener('pointerdown',e=>feMapOnPointerDown(e,zi));
   viewport.addEventListener('pointermove',e=>feMapOnPointerMove(e,zi));
   viewport.addEventListener('pointerup',e=>feMapOnPointerUp(e,zi));
