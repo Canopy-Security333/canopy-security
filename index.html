@@ -1475,6 +1475,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     </div>
     <div class="cl-legend" id="cl-legend"></div>
     <div id="cl-body"></div>
+    <div style="padding:0 14px 4px">
+      <button class="scan-patrol-btn" id="aed-card-btn" onclick="openAEDCheckSheet()" style="margin-top:4px">
+        <div class="scan-patrol-icon" style="background:rgba(255,255,255,.06)">
+          <svg width="20" height="20" viewBox="0 0 24 24" id="aed-triangle-svg" fill="none" stroke="var(--text-secondary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 20h20L12 3z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="1" fill="var(--text-secondary)" stroke="none" id="aed-triangle-dot"/></svg>
+        </div>
+        <div class="scan-patrol-text">
+          <div class="scan-patrol-title">AED</div>
+          <div class="scan-patrol-sub" id="aed-card-sub">Tap to log indicator light check</div>
+        </div>
+      </button>
+      <div onclick="openAEDExpiryPinModal()" style="font-size:11px;color:var(--text-secondary);text-decoration:underline;text-align:center;padding:10px 0 2px;cursor:pointer">Set battery / pad expiration dates</div>
+    </div>
     <div class="cl-footer"><button class="complete-btn" id="complete-btn" disabled onclick="completeInspection()">Mark inspection complete</button></div>
   </div>
   <div class="modal-backdrop fe-edit-pin-modal" id="fe-edit-pin-modal">
@@ -1487,6 +1499,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <button class="unlock-btn" onclick="feTryEditPin()">Unlock</button>
       </div>
       <button class="modal-secondary-btn" style="margin-top:10px" onclick="feCloseEditPinModal()">Cancel</button>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="aed-check-modal">
+    <div class="modal">
+      <div class="modal-title">AED check — <span id="aed-check-modal-bldg"></span></div>
+      <div class="modal-sub">What does the indicator light show?</div>
+      <button class="modal-primary-btn" style="background:var(--green)" onclick="submitAEDCheck('green')">Green — blinking normally</button>
+      <button class="modal-primary-btn" style="background:var(--red)" onclick="submitAEDCheck('red')">Red — blinking</button>
+      <button class="modal-primary-btn" style="background:var(--orange)" onclick="submitAEDCheck('none')">Not blinking</button>
+      <button class="modal-secondary-btn" onclick="closeAEDCheckSheet()">Cancel</button>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="aed-expiry-pin-modal">
+    <div class="modal">
+      <div class="modal-title">AED expiration dates</div>
+      <div class="admin-overlay" style="margin-bottom:0">
+        <p>Enter admin PIN to set AED battery / pad expiration dates.</p>
+        <input class="pin-input" type="password" id="aed-expiry-pin-field" maxlength="4" placeholder="••••" oninput="aedClearExpiryPinErr()"/>
+        <div class="pin-err" id="aed-expiry-pin-err">Incorrect PIN. Try again.</div>
+        <button class="unlock-btn" onclick="aedTryExpiryPin()">Unlock</button>
+      </div>
+      <button class="modal-secondary-btn" style="margin-top:10px" onclick="closeAEDExpiryPinModal()">Cancel</button>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="aed-expiry-form-modal">
+    <div class="modal">
+      <div class="modal-title">AED expiration dates</div>
+      <div class="modal-sub" id="aed-expiry-form-bldg"></div>
+      <div class="admin-section">
+        <div class="lbl" style="margin-top:0">Battery expiration</div>
+        <input type="date" id="aed-battery-exp" style="width:100%;padding:9px 10px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)"/>
+        <div class="lbl">Pads expiration</div>
+        <input type="date" id="aed-pads-exp" style="width:100%;padding:9px 10px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary)"/>
+      </div>
+      <button class="modal-primary-btn" onclick="saveAEDExpiry()">Save</button>
+      <button class="modal-secondary-btn" onclick="closeAEDExpiryFormModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -1903,6 +1951,7 @@ let stats={patrols:0,nm:0,checks:0};
 let darkMode=true;
 let viewingRecord=null,passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
+let aedStatusCache={},aedDeviceCache={};
 // FE MAP VIEW MODULE state — self-contained, zone-agnostic (any building+zone with a FE_MAP_CONFIG entry).
 // feZoneViewMode/feZoneEditActive are keyed by zone index (zi) within the currently-open building, reset each time startFEChecklist runs.
 let feZoneViewMode={},feEditUnlocked=false,feZoneEditActive={},feZoneSyncStatus={},feZoneSyncing={},feEditPinPendingZi=null;
@@ -2722,7 +2771,7 @@ let badgePrinterCount=0;
 function renderBadgeRows(){
   const container=document.getElementById('badge-rows');
   if(!container)return;
-  container.innerHTML=badgeRows.map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><input type="text" id="badge-name-${i}" placeholder="Full name" style="flex:1;min-width:0;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)" oninput="badgeRows[${i}].name=this.value${i===0?';validateBadgeForm()':''}"><input type="text" id="badge-co-${i}" placeholder="Company" style="flex:1;min-width:0;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)" oninput="badgeRows[${i}].company=this.value">${i>0?`<button onclick="removeBadgeRow(${i})" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;color:var(--text-secondary);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`:'<div style="width:28px;flex-shrink:0"></div>'}</div>`).join('');
+  container.innerHTML=badgeRows.map((r,i)=>`<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><input type="text" id="badge-name-${i}" name="badge_full_name_field" autocomplete="off" placeholder="Full name" style="flex:1;min-width:0;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)" oninput="badgeRows[${i}].name=this.value${i===0?';validateBadgeForm()':''}"><input type="text" id="badge-co-${i}" name="badge_company_field" autocomplete="off" placeholder="Company" style="flex:1;min-width:0;padding:10px 12px;font-size:13px;font-family:inherit;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:var(--bg-secondary);color:var(--text-primary)" oninput="badgeRows[${i}].company=this.value">${i>0?`<button onclick="removeBadgeRow(${i})" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;color:var(--text-secondary);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">✕</button>`:'<div style="width:28px;flex-shrink:0"></div>'}</div>`).join('');
   badgeRows.forEach((r,i)=>{const n=document.getElementById('badge-name-'+i);const c=document.getElementById('badge-co-'+i);if(n)n.value=r.name;if(c)c.value=r.company;});
 }
 function validateBadgeForm(){
@@ -3015,7 +3064,7 @@ document.getElementById('fe-bldg-status').innerHTML=FE_BLDGS.map(bldId=>{const b
 document.getElementById('fe-rotation-table').innerHTML=FE_OFFICERS.map((o,i)=>{const bldId=getAssignment(i,cycM);const bld=bldId?FE_DATA[bldId]:null;const isYou=o===officer;const done=bld&&feIsComplete(bldId);return`<div class="rotation-row${isYou?' you':''}${done?' comp-row':''}"><div class="rot-av">${initials(o)}</div><div style="flex:1"><div class="rot-name">${o}${isYou?'<span class="you-chip">you</span>':''}</div><div class="rot-building">${bld?bld.name:'Month off'}</div></div>${done?`<div class="complete-badge"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg><span>Done</span></div>`:`<span class="rot-tag ${bld?bld.color:'rt-off'}">${bld?bld.count+' units':'Off'}</span>`}</div>`;}).join('');
 const previewMonths=[];for(let offset=0;offset<5;offset++){let m=curMonth+offset,y=curYear;if(m>11){m-=12;y++;}previewMonths.push({m,y,label:MONTHS[m].slice(0,3)+" '"+String(y).slice(2),cycle:getCycleMonth(m,y),isCurrent:m===curMonth&&y===curYear});}
 const cols=`65px repeat(5,1fr)`;let grid=`<div class="pg-head" style="grid-template-columns:${cols}"><div></div>${previewMonths.map(p=>`<div class="pg-cell" style="${p.isCurrent?'color:var(--text-primary);font-weight:600':''}">${p.label}</div>`).join('')}</div>`;FE_OFFICERS.forEach((o,i)=>{const isYou=o===officer;grid+=`<div class="pg-row${isYou?' you-row':''}" style="grid-template-columns:${cols}"><div class="pg-name">${o.split(' ')[0]}</div>`;previewMonths.forEach(p=>{const bldId=getAssignment(i,p.cycle);const done=bldId&&p.isCurrent&&feIsComplete(bldId);if(done){grid+=`<div class="pg-cell"><span class="pg-done-pill"><svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>${bldId}</span></div>`;}else{grid+=`<div class="pg-cell">${bldId?`<span class="pg-pill">${bldId}</span>`:`<span class="pg-off">off</span>`}</div>`;}});grid+='</div>';});document.getElementById('fe-preview-grid').innerHTML=grid;}
-function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feZoneViewMode={};feZoneEditActive={};feEditUnlocked=false;feMapRuntime={};feOpenZones=new Set();const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);bld.zones.forEach(z=>{if(FE_MAP_CONFIG[bldgId+'|'+z.zone])feEnsureZoneSynced(bldgId,z.zone).then(ok=>{if(ok&&feCurrentBldgId===bldgId)renderFEChecklist();});});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
+function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feZoneViewMode={};feZoneEditActive={};feEditUnlocked=false;feMapRuntime={};feOpenZones=new Set();const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);loadAEDStatus(bldgId);bld.zones.forEach(z=>{if(FE_MAP_CONFIG[bldgId+'|'+z.zone])feEnsureZoneSynced(bldgId,z.zone).then(ok=>{if(ok&&feCurrentBldgId===bldgId)renderFEChecklist();});});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
 // list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE for the replacement
 function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total;document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const hasMap=!!FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone];const isOpen=feOpenZones.has(zi);const bodyHtml=hasMap?feRenderZoneMapBody(feCurrentBldgId,zone,zi):`<div class="zone-items${isOpen?' open':''}" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${isOpen?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');setTimeout(()=>{bld.zones.forEach((zone,zi)=>{if(FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone]&&(feZoneViewMode[zi]||'map')==='map')initFEMap(feCurrentBldgId,zone,zi);});},0);}
 function feRenderZoneListItems(zone,zi){return zone.items.map(ext=>{const chk=!!feCheckState[ext.id];return`<div class="ext-item${chk?' checked':''}" onclick="toggleFEExt('${ext.id}',${zi})"><div class="ext-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div><div class="ext-info"><div class="ext-id">${ext.id}</div><div class="ext-location">${ext.location}</div></div><span class="type-badge type-${ext.type.toLowerCase()}">${ext.type}</span></div>`;}).join('');}
@@ -3101,6 +3150,140 @@ function feTryEditPin(){
   }
 }
 function feLockEditMode(){feEditUnlocked=false;feZoneEditActive={};}
+
+// ── AED CHECK (per-building card, open to any officer, additive to the FE checklist above) ──
+function _aedMonthKey(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function _aedTriangleColor(status){return status==='green'?'var(--green)':(status==='red'||status==='none')?'var(--red)':'var(--text-secondary)';}
+function renderAEDCard(status,checkedAt,officerName){
+  const svg=document.getElementById('aed-triangle-svg');
+  const dot=document.getElementById('aed-triangle-dot');
+  const sub=document.getElementById('aed-card-sub');
+  const color=_aedTriangleColor(status);
+  if(svg)svg.setAttribute('stroke',color);
+  if(dot)dot.setAttribute('fill',color);
+  if(sub)sub.textContent=status?('Checked '+fmtDate(checkedAt)+' · light '+(status==='none'?'not blinking':status)):'Tap to log indicator light check';
+}
+async function loadAEDStatus(bldgId){
+  renderAEDCard(null);
+  if(!window._supabase)return;
+  try{
+    const{data,error}=await window._supabase.from('aed_checks').select('*').eq('building_id',bldgId).eq('month',_aedMonthKey()).maybeSingle();
+    if(error||!data)return;
+    aedStatusCache[bldgId]=data;
+    if(feCurrentBldgId===bldgId)renderAEDCard(data.status,data.checked_at,data.officer_name);
+  }catch(e){console.warn('loadAEDStatus exception:',e.message);}
+}
+function openAEDCheckSheet(){
+  const bld=FE_DATA[feCurrentBldgId];
+  if(!bld)return;
+  document.getElementById('aed-check-modal-bldg').textContent=bld.name;
+  document.getElementById('aed-check-modal').classList.add('open');
+}
+function closeAEDCheckSheet(){document.getElementById('aed-check-modal').classList.remove('open');}
+async function submitAEDCheck(status){
+  const bldgId=feCurrentBldgId;
+  const bld=FE_DATA[bldgId];
+  if(!bld)return;
+  closeAEDCheckSheet();
+  const now=new Date();
+  const monthKey=_aedMonthKey(now);
+  const officerName=officer||'—';
+  const checkedAt=now.toISOString();
+  if(window._supabase){
+    try{
+      const{data:existing}=await window._supabase.from('aed_checks').select('id').eq('building_id',bldgId).eq('month',monthKey).maybeSingle();
+      if(existing&&existing.id){
+        const{error}=await window._supabase.from('aed_checks').update({status,officer_name:officerName,checked_at:checkedAt}).eq('id',existing.id);
+        if(error)console.warn('aed_checks update error:',error.message);
+      }else{
+        const{error}=await window._supabase.from('aed_checks').insert({building_id:bldgId,month:monthKey,status,officer_name:officerName,checked_at:checkedAt});
+        if(error)console.warn('aed_checks insert error:',error.message);
+      }
+    }catch(e){console.warn('aed_checks upsert exception:',e.message);}
+  }
+  aedStatusCache[bldgId]={building_id:bldgId,month:monthKey,status,officer_name:officerName,checked_at:checkedAt};
+  if(feCurrentBldgId===bldgId)renderAEDCard(status,checkedAt,officerName);
+  showToast('fe-cl-toast','✓ AED check logged');
+  if((status==='red'||status==='none')&&window._supabase){
+    window._supabase.auth.getSession().then(function(result){
+      var session=result.data&&result.data.session;
+      if(!session){console.warn('aed-alert: no session, skipping email');return;}
+      fetch(REPORTS_FUNCTION_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+        body:JSON.stringify({reportType:'aed-alert',building:bld.name,status,officer:officerName,time:checkedAt})
+      }).catch(function(err){console.warn('aed-alert fetch failed:',err.message);});
+    });
+  }
+}
+function openAEDExpiryPinModal(){
+  const m=document.getElementById('aed-expiry-pin-modal');
+  if(!m)return;
+  document.getElementById('aed-expiry-pin-field').value='';
+  document.getElementById('aed-expiry-pin-err').classList.remove('show');
+  m.classList.add('open');
+}
+function closeAEDExpiryPinModal(){document.getElementById('aed-expiry-pin-modal').classList.remove('open');}
+function aedClearExpiryPinErr(){document.getElementById('aed-expiry-pin-err').classList.remove('show');}
+function aedTryExpiryPin(){
+  const v=document.getElementById('aed-expiry-pin-field').value;
+  if(v===adminPin){
+    closeAEDExpiryPinModal();
+    openAEDExpiryFormModal();
+  }else{
+    document.getElementById('aed-expiry-pin-err').classList.add('show');
+    document.getElementById('aed-expiry-pin-field').value='';
+  }
+}
+async function openAEDExpiryFormModal(){
+  const bldgId=feCurrentBldgId;
+  const bld=FE_DATA[bldgId];
+  if(!bld)return;
+  document.getElementById('aed-expiry-form-bldg').textContent=bld.name;
+  document.getElementById('aed-battery-exp').value='';
+  document.getElementById('aed-pads-exp').value='';
+  document.getElementById('aed-expiry-form-modal').classList.add('open');
+  delete aedDeviceCache[bldgId];
+  let device=null;
+  if(window._supabase){
+    try{
+      const{data,error}=await window._supabase.from('aed_devices').select('*').eq('building_id',bldgId).maybeSingle();
+      if(!error&&data)device=data;
+    }catch(e){console.warn('aed_devices fetch exception:',e.message);}
+  }
+  if(device&&feCurrentBldgId===bldgId){
+    aedDeviceCache[bldgId]=device;
+    if(device.battery_expiration)document.getElementById('aed-battery-exp').value=device.battery_expiration;
+    if(device.pads_expiration)document.getElementById('aed-pads-exp').value=device.pads_expiration;
+  }
+}
+function closeAEDExpiryFormModal(){document.getElementById('aed-expiry-form-modal').classList.remove('open');}
+async function saveAEDExpiry(){
+  const bldgId=feCurrentBldgId;
+  const bld=FE_DATA[bldgId];
+  if(!bld)return;
+  const batteryVal=document.getElementById('aed-battery-exp').value||null;
+  const padsVal=document.getElementById('aed-pads-exp').value||null;
+  const existing=aedDeviceCache[bldgId]||{};
+  const payload={
+    building_id:bldgId,
+    battery_expiration:batteryVal,
+    pads_expiration:padsVal,
+    updated_by:officer||'—',
+    updated_at:new Date().toISOString(),
+    battery_reminder_sent_at:(existing.battery_expiration||null)!==batteryVal?null:(existing.battery_reminder_sent_at||null),
+    pads_reminder_sent_at:(existing.pads_expiration||null)!==padsVal?null:(existing.pads_reminder_sent_at||null)
+  };
+  if(window._supabase){
+    try{
+      const{error}=await window._supabase.from('aed_devices').upsert(payload,{onConflict:'building_id'});
+      if(error){console.warn('aed_devices upsert error:',error.message);showToast('fe-cl-toast','Failed to save — try again');return;}
+    }catch(e){console.warn('aed_devices upsert exception:',e.message);showToast('fe-cl-toast','Failed to save — try again');return;}
+  }
+  aedDeviceCache[bldgId]=payload;
+  closeAEDExpiryFormModal();
+  showToast('fe-cl-toast','✓ AED expiration dates saved');
+}
 
 // ── SUPABASE SYNC ──
 async function feMapFetchRows(bldgId,zoneName){
