@@ -1360,7 +1360,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div id="dar-sub-history" class="dar-sub" style="display:none">
       <div id="history-list-view">
         <div class="lbl" style="margin-top:0">Current DAR</div>
-        <div class="search-bar" style="margin-bottom:6px"><input type="date" id="hist-date-filter" onchange="applyHistoryDateFilter()"/><button class="mic-btn" onclick="clearHistoryDateFilter()" title="Clear date filter">✕</button></div>
+        <div class="search-bar" style="margin-bottom:6px"><input type="date" id="hist-date-filter" onchange="applyHistoryDateFilter()"/><button class="mic-btn" onclick="clearHistoryDateFilter()" title="Clear date filter">✕</button><select id="hist-officer-filter" onchange="applyHistoryOfficerFilter()"><option value="">All officers</option></select></div>
         <div class="result-count" id="history-current-count"></div>
         <div class="card" style="padding:8px 12px" id="history-current-entries"><div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div></div>
         <div class="export-row"><button class="export-btn-sm" onclick="copyCurrentMonthDAR()">Copy as text</button><button class="export-btn-sm primary" onclick="previewCurrentMonthDAR()">Preview &amp; export</button></div>
@@ -2362,12 +2362,15 @@ function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPa
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function renderEntries(entries,container,editable){container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${e.title}</div>${e.detail?`<div class="dar-detail">${e.detail}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
 function renderCurrentDAR(){const d=shiftStart||new Date();const el=document.getElementById('dar-date-lbl');if(el)el.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});const c=document.getElementById('dar-entries');if(c)renderEntries(currentShiftEntries(),c,true);}
-let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null;
+let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null;
 function _historyFilteredEntries(){
-  if(!historyDateFilter)return darLog;
   return darLog.filter(e=>{
-    const t=e.time instanceof Date?e.time:new Date(e.time);
-    return t.getFullYear()===historyDateFilter.getFullYear()&&t.getMonth()===historyDateFilter.getMonth()&&t.getDate()===historyDateFilter.getDate();
+    if(historyDateFilter){
+      const t=e.time instanceof Date?e.time:new Date(e.time);
+      if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
+    }
+    if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
+    return true;
   });
 }
 function applyHistoryDateFilter(){
@@ -2385,6 +2388,11 @@ function clearHistoryDateFilter(){
   historyDateFilter=null;
   renderHistoryCurrentEntries();
 }
+function applyHistoryOfficerFilter(){
+  historyOfficerFilter=document.getElementById('hist-officer-filter').value||null;
+  renderHistoryCurrentEntries();
+}
+function populateHistoryOfficerFilter(){const s=document.getElementById('hist-officer-filter');if(!s)return;const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
 function renderHistoryCurrentEntries(){
   const c=document.getElementById('history-current-entries');
   const entries=_historyFilteredEntries();
@@ -2402,6 +2410,7 @@ function renderHistory(){
     inp.min=toVal(first);
     inp.max=toVal(last);
   }
+  populateHistoryOfficerFilter();
   renderHistoryCurrentEntries();
   renderPreviousMonths();
 }
