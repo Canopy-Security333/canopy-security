@@ -355,18 +355,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .zone-chev.open{transform:rotate(90deg)}
 .zone-items{display:none;background:var(--bg-primary);border-bottom:0.5px solid var(--border-secondary)}
 .zone-items.open{display:block}
-.ext-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:0.5px solid var(--border-secondary);cursor:pointer;transition:background .1s}
-.ext-item:last-child{border-bottom:none}
-.ext-item:hover{background:var(--bg-secondary)}
-.ext-item.checked{background:rgba(29,158,117,.04)}
-.ext-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.ext-item.checked .ext-check{background:var(--green);border-color:var(--green)}
-.ext-check svg{display:none;width:12px;height:12px}
-.ext-item.checked .ext-check svg{display:block}
-.ext-info{flex:1;min-width:0}
-.ext-id{font-size:11px;color:var(--text-tertiary);margin-bottom:2px}
-.ext-location{font-size:13px;font-weight:500;color:var(--text-primary)}
-.ext-item.checked .ext-location{color:var(--text-secondary);text-decoration:line-through}
 .type-badge{font-size:10px;padding:3px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0;font-weight:600}
 .type-abc{background:rgba(55,138,221,.1);color:var(--blue);border:0.5px solid rgba(55,138,221,.18)}
 .type-h{background:rgba(186,117,23,.1);color:var(--orange);border:0.5px solid rgba(186,117,23,.18)}
@@ -375,9 +363,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .complete-btn:disabled{opacity:.35;cursor:not-allowed}
 /* ── FE MAP VIEW (any building+zone with a FE_MAP_CONFIG entry) ── */
 .fe-map-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:var(--bg-primary);border-bottom:0.5px solid var(--border-secondary)}
-.fe-view-toggle{display:flex;background:var(--bg-secondary);border-radius:var(--radius-md);padding:2px;gap:2px}
-.fe-view-btn{font-size:11px;font-family:inherit;font-weight:600;padding:6px 11px;border:none;border-radius:8px;background:none;color:var(--text-secondary);cursor:pointer}
-.fe-view-btn.act{background:var(--bg-primary);color:var(--text-primary);box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .fe-edit-toggle-btn{font-size:11px;font-family:inherit;font-weight:600;padding:7px 12px;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);background:none;color:var(--text-secondary);cursor:pointer}
 .fe-edit-toggle-btn.act{background:var(--text-danger);border-color:var(--text-danger);color:#fff}
 .fe-map-sub{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--bg-primary);border-bottom:0.5px solid var(--border-secondary);font-size:11px;color:var(--text-secondary)}
@@ -395,7 +380,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .fe-map-fit-btn{position:absolute;right:10px;bottom:10px;padding:8px 14px;font-size:12px;font-family:inherit;font-weight:600;background:var(--bg-primary);color:var(--text-primary);border:0.5px solid var(--border-primary);border-radius:999px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .fe-map-loading{padding:40px 20px;text-align:center;font-size:12px;color:var(--text-secondary)}
 .fe-edit-pin-modal .modal{text-align:center}
-/* list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE below for the replacement */
 /* ── EOS ── */
 .eos-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:36px 24px;text-align:center}
 .eos-icon{font-size:52px;margin-bottom:20px}
@@ -603,14 +587,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .light .tn-btn.cancel{color:var(--text-danger)}
 .light .tn-title{color:var(--text-primary)}
 .light .tn-divider{background:var(--border-secondary)}
-.light .cl-header,.light .cl-legend,.light .zone-hdr,.light .ext-item{background:var(--bg-primary);border-color:var(--border-secondary)}
+.light .cl-header,.light .cl-legend,.light .zone-hdr{background:var(--bg-primary);border-color:var(--border-secondary)}
 .light .fe-map-toolbar,.light .fe-map-sub{background:var(--bg-primary);border-color:var(--border-secondary)}
-.light .fe-view-toggle{background:var(--bg-secondary)}
-.light .fe-view-btn.act{background:var(--bg-primary)}
 .light .fe-map-wrap,.light .fe-map-viewport{background:var(--bg-secondary)}
 .light .cl-building{color:var(--text-primary)}
 .light .cl-meta{color:var(--text-secondary)}
-.light .ext-item:hover{background:var(--bg-secondary)}
 .light .zone-hdr:hover{background:var(--bg-secondary)}
 .light .zone-name{color:var(--text-primary)}
 .light .cl-footer{background:var(--bg-secondary);border-top-color:var(--border-secondary)}
@@ -1485,7 +1466,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
           <div class="scan-patrol-sub" id="aed-card-sub">Tap to log indicator light check</div>
         </div>
       </button>
-      <div onclick="openAEDExpiryPinModal()" style="font-size:11px;color:var(--text-secondary);text-decoration:underline;text-align:center;padding:10px 0 2px;cursor:pointer">Set battery / pad expiration dates</div>
+      <div id="aed-expiry-link" onclick="openAEDExpiryPinModal()" style="font-size:11px;color:var(--text-secondary);text-decoration:underline;text-align:center;padding:10px 0 2px;cursor:pointer">Set battery / pad expiration dates</div>
     </div>
     <div class="cl-footer"><button class="complete-btn" id="complete-btn" disabled onclick="completeInspection()">Mark inspection complete</button></div>
   </div>
@@ -1936,8 +1917,40 @@ const SEVEN_DAYS=7*24*60*60*1000;
 function getCycleMonth(m,y){const anchor={y:2026,m:5};const t=(y-anchor.y)*12+(m-anchor.m);return((t%5)+5)%5;}
 function getAssignment(oi,cm){const bi=ROTATION_MATRIX[cm][oi];return bi===-1?null:FE_BLDGS[bi];}
 function feIsComplete(bldgId){return localStorage.getItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldgId)==='1';}
-function feMarkComplete(bldgId){localStorage.setItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldgId,'1');}
+function feMarkComplete(bldgId){localStorage.setItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldgId,'1');feUpsertInspectionComplete(bldgId);}
 function feGetChecked(bldgId){return Object.keys(feCheckState).filter(k=>k.startsWith('EXT-'+bldgId+'-')&&feCheckState[k]).length;}
+function feCurrentPeriod(){return curYear+'-'+String(curMonth+1).padStart(2,'0');}
+// Fire-and-forget: records completion in Supabase so every officer's device sees it, without blocking the UI or the local completion flag above.
+async function feUpsertInspectionComplete(bldgId){
+  if(!window._supabase)return;
+  try{
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session){console.warn('fe_inspections upsert: no session, skipping');return;}
+    const period=feCurrentPeriod();
+    const{data:existing}=await window._supabase.from('fe_inspections').select('building_id').eq('building_id',bldgId).eq('period',period).maybeSingle();
+    if(existing)return;
+    const{error}=await window._supabase.from('fe_inspections').insert({building_id:bldgId,period,completed_by:officer||'—',completed_at:new Date().toISOString()});
+    if(error)console.warn('fe_inspections insert error:',error.message);
+  }catch(e){console.warn('fe_inspections insert exception:',e.message);}
+}
+// Refreshes the local fe_complete_ cache (read by feIsComplete above) from Supabase for every FE building this period — same read-through-cache pattern as key_log/active_shifts.
+async function feSyncCompletionFromSupabase(){
+  if(!window._supabase)return;
+  try{
+    const period=feCurrentPeriod();
+    const{data,error}=await window._supabase.from('fe_inspections').select('building_id').eq('period',period);
+    if(error||!data)return;
+    // Additive only: confirm completions Supabase knows about, but never clear an
+    // existing local flag just because this fetch didn't (yet) see a matching row —
+    // that fetch can legitimately race ahead of this device's own just-fired,
+    // fire-and-forget completion insert (feUpsertInspectionComplete) and would
+    // otherwise clobber a completion this device just recorded a moment earlier.
+    const completeSet=new Set(data.map(r=>r.building_id));
+    FE_BLDGS.forEach(bldId=>{
+      if(completeSet.has(bldId))localStorage.setItem('fe_complete_'+curYear+'_'+curMonth+'_'+bldId,'1');
+    });
+  }catch(e){console.warn('feSyncCompletionFromSupabase exception:',e.message);}
+}
 const TC={checkin:{dot:'dot-checkin',tag:'t-checkin',label:'Check-in'},patrol:{dot:'dot-patrol',tag:'t-patrol',label:'Patrol'},boiler:{dot:'dot-boiler',tag:'t-boiler',label:'Boiler check'},meter:{dot:'dot-meter',tag:'t-meter',label:'Meter reading'},nearmiss:{dot:'dot-nearmiss',tag:'t-nearmiss',label:'Near miss'},note:{dot:'dot-note',tag:'t-note',label:'Note'},fireext:{dot:'dot-fireext',tag:'t-fireext',label:'Fire ext. inspection'},checkout:{dot:'dot-checkout',tag:'t-checkout',label:'Sign-out'}};
 let officers=['Brian Davies','Chase Montrose','Jameson Richards','Matt Dalsing','Randy Lazenby','Tyler Schlegelmilch'];
 let patrolOrder=['boiler','meters-patrol','fe'];
@@ -1953,8 +1966,8 @@ let viewingRecord=null,passDowns=[];
 let feCheckState={},feCurrentBldgId=null;
 let aedStatusCache={},aedDeviceCache={};
 // FE MAP VIEW MODULE state — self-contained, zone-agnostic (any building+zone with a FE_MAP_CONFIG entry).
-// feZoneViewMode/feZoneEditActive are keyed by zone index (zi) within the currently-open building, reset each time startFEChecklist runs.
-let feZoneViewMode={},feEditUnlocked=false,feZoneEditActive={},feZoneSyncStatus={},feZoneSyncing={},feEditPinPendingZi=null;
+// feZoneEditActive is keyed by zone index (zi) within the currently-open building, reset each time startFEChecklist runs.
+let feEditUnlocked=false,feZoneEditActive={},feZoneSyncStatus={},feZoneSyncing={},feEditPinPendingZi=null;
 // feOpenZones tracks which zone indices are expanded, surviving the full cl-body re-renders that add/remove/drag/edit-mode toggles trigger.
 let feOpenZones=new Set();
 const nowDate=new Date(),curMonth=nowDate.getMonth(),curYear=nowDate.getFullYear();
@@ -3068,29 +3081,57 @@ function downloadNMReport(){const mF=document.getElementById('nm-hist-month').va
 
 
 function updateFEEntryCard(){const cycM=getCycleMonth(curMonth,curYear);const myIdx=FE_OFFICERS.indexOf(officer||'');const myBldId=myIdx>=0?getAssignment(myIdx,cycM):null;const meta=document.getElementById('fe-entry-meta');const bar=document.getElementById('fe-mini-bar');if(!myBldId){meta.textContent='No assignment this month · View schedule';bar.style.width='0%';}else{const bld=FE_DATA[myBldId];const done=feIsComplete(myBldId);const checked=done?bld.count:feGetChecked(myBldId);meta.textContent=done?'✓ '+bld.name+' complete this month':bld.name+' · '+checked+'/'+bld.count+' checked';bar.style.width=(done?100:Math.round(checked/bld.count*100))+'%';}}
-function openFESchedule(){showPane('fe-schedule',null);document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
+function openFESchedule(){showPane('fe-schedule',null);feSyncCompletionFromSupabase().then(()=>{if(paneVisible('fe-schedule'))renderFESchedule();});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
 function renderFESchedule(){const cycM=getCycleMonth(curMonth,curYear);const label=MONTHS[curMonth]+' '+curYear;document.getElementById('fe-month-badge').textContent=label;document.getElementById('fe-month-label').textContent=label;const myIdx=FE_OFFICERS.indexOf(officer||'');const myBldId=myIdx>=0?getAssignment(myIdx,cycM):null;const asgn=document.getElementById('fe-my-assignment');const offNote=!myBldId?'<div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">You have no assigned building this month, but you can complete checks for any building below.</div>':'';asgn.innerHTML=offNote+'<div style="display:flex;flex-direction:column;gap:8px">'+FE_BLDGS.map(bldId=>{const bld=FE_DATA[bldId];const done=feIsComplete(bldId);const checked=done?bld.count:feGetChecked(bldId);const pct=Math.round(checked/bld.count*100);const assignedIdx=ROTATION_MATRIX[cycM].findIndex(bi=>FE_BLDGS[bi]===bldId);const assignedName=assignedIdx>=0?FE_OFFICERS[assignedIdx].split(' ')[0]:'â€”';const isOfficerBld=bldId===myBldId;return'<div style="background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:10px 12px'+(isOfficerBld?';border-left:3px solid var(--text-info)':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:13px;font-weight:600;color:var(--text-primary)">'+bld.name+'</div>'+(done?'<div class="complete-badge"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg><span>Complete</span></div>':'')+'</div><div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">Assigned: '+assignedName+' \xB7 '+checked+'/'+bld.count+' checked</div><div class="ma-progress-track" style="margin-bottom:8px"><div class="ma-progress-fill" style="width:'+(done?100:pct)+'%"></div></div>'+(done?`<button class="start-btn" style="padding:8px;font-size:12px;background:none;border:0.5px solid var(--border-primary);color:var(--text-secondary)" onclick="startFEChecklist('${bldId}')">View inspection</button>`:`<button class="start-btn" style="padding:8px;font-size:12px" onclick="startFEChecklist('${bldId}')">`+(checked>0?'Continue':'Start')+' inspection</button>')+'</div>';}).join('')+'</div>';
 document.getElementById('fe-bldg-status').innerHTML=FE_BLDGS.map(bldId=>{const bld=FE_DATA[bldId];const done=feIsComplete(bldId);const assignedIdx=ROTATION_MATRIX[cycM].findIndex((bi,i)=>FE_BLDGS[bi]===bldId);const assignedName=assignedIdx>=0?FE_OFFICERS[assignedIdx].split(' ')[0]:'—';const checked=feGetChecked(bldId);return`<div class="bldg-card${done?' done':''}"><div class="bldg-name">${bld.name}</div><div class="bldg-count">${bld.count} units</div><div class="bldg-officer">${done?'✓ '+assignedName+' — done':assignedName}</div><div class="bldg-prog"><div class="bldg-prog-fill" style="width:${done?100:Math.round(checked/bld.count*100)}%"></div></div>${done?`<div class="bldg-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div>`:''}</div>`;}).join('');
 document.getElementById('fe-rotation-table').innerHTML=FE_OFFICERS.map((o,i)=>{const bldId=getAssignment(i,cycM);const bld=bldId?FE_DATA[bldId]:null;const isYou=o===officer;const done=bld&&feIsComplete(bldId);return`<div class="rotation-row${isYou?' you':''}${done?' comp-row':''}"><div class="rot-av">${initials(o)}</div><div style="flex:1"><div class="rot-name">${o}${isYou?'<span class="you-chip">you</span>':''}</div><div class="rot-building">${bld?bld.name:'Month off'}</div></div>${done?`<div class="complete-badge"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg><span>Done</span></div>`:`<span class="rot-tag ${bld?bld.color:'rt-off'}">${bld?bld.count+' units':'Off'}</span>`}</div>`;}).join('');
 const previewMonths=[];for(let offset=0;offset<5;offset++){let m=curMonth+offset,y=curYear;if(m>11){m-=12;y++;}previewMonths.push({m,y,label:MONTHS[m].slice(0,3)+" '"+String(y).slice(2),cycle:getCycleMonth(m,y),isCurrent:m===curMonth&&y===curYear});}
 const cols=`65px repeat(5,1fr)`;let grid=`<div class="pg-head" style="grid-template-columns:${cols}"><div></div>${previewMonths.map(p=>`<div class="pg-cell" style="${p.isCurrent?'color:var(--text-primary);font-weight:600':''}">${p.label}</div>`).join('')}</div>`;FE_OFFICERS.forEach((o,i)=>{const isYou=o===officer;grid+=`<div class="pg-row${isYou?' you-row':''}" style="grid-template-columns:${cols}"><div class="pg-name">${o.split(' ')[0]}</div>`;previewMonths.forEach(p=>{const bldId=getAssignment(i,p.cycle);const done=bldId&&p.isCurrent&&feIsComplete(bldId);if(done){grid+=`<div class="pg-cell"><span class="pg-done-pill"><svg viewBox="0 0 10 10" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5l2.5 2.5 4.5-4.5"/></svg>${bldId}</span></div>`;}else{grid+=`<div class="pg-cell">${bldId?`<span class="pg-pill">${bldId}</span>`:`<span class="pg-off">off</span>`}</div>`;}});grid+='</div>';});document.getElementById('fe-preview-grid').innerHTML=grid;}
-function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feZoneViewMode={};feZoneEditActive={};feEditUnlocked=false;feMapRuntime={};feOpenZones=new Set();const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);loadAEDStatus(bldgId);bld.zones.forEach(z=>{if(FE_MAP_CONFIG[bldgId+'|'+z.zone])feEnsureZoneSynced(bldgId,z.zone).then(ok=>{if(ok&&feCurrentBldgId===bldgId)renderFEChecklist();});});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
-// list view is a candidate for removal once all buildings have map coverage — see FE MAP VIEW MODULE for the replacement
-function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total||feIsComplete(feCurrentBldgId);document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const hasMap=!!FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone];const isOpen=feOpenZones.has(zi);const bodyHtml=hasMap?feRenderZoneMapBody(feCurrentBldgId,zone,zi):`<div class="zone-items${isOpen?' open':''}" id="fezitems-${zi}">${feRenderZoneListItems(zone,zi)}</div>`;return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${isOpen?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');setTimeout(()=>{bld.zones.forEach((zone,zi)=>{if(FE_MAP_CONFIG[feCurrentBldgId+'|'+zone.zone]&&(feZoneViewMode[zi]||'map')==='map')initFEMap(feCurrentBldgId,zone,zi);});},0);}
-function feRenderZoneListItems(zone,zi){return zone.items.map(ext=>{const chk=!!feCheckState[ext.id];return`<div class="ext-item${chk?' checked':''}" onclick="toggleFEExt('${ext.id}',${zi})"><div class="ext-check"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg></div><div class="ext-info"><div class="ext-id">${ext.id}</div><div class="ext-location">${ext.location}</div></div><span class="type-badge type-${ext.type.toLowerCase()}">${ext.type}</span></div>`;}).join('');}
+function startFEChecklist(bldgId){feCurrentBldgId=bldgId;feZoneEditActive={};feEditUnlocked=false;feMapRuntime={};feOpenZones=new Set();const bld=FE_DATA[bldgId];try{const s=localStorage.getItem('fe_progress_'+bldgId);if(s)feCheckState={...feCheckState,...JSON.parse(s)};}catch(e){}if(feIsComplete(bldgId)){bld.zones.forEach(z=>z.items.forEach(it=>{feCheckState[it.id]=true;}));}document.getElementById('cl-building-name').textContent=bld.name+' — Fire Extinguishers';document.getElementById('cl-meta').textContent=MONTHS[curMonth]+' '+curYear+' · '+bld.count+' units';document.getElementById('fe-cl-tn-title').textContent=bld.name;const hasH=bld.zones.some(z=>z.items.some(e=>e.type==='H'));document.getElementById('cl-legend').innerHTML=`<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-abc">ABC</span> Dry chemical</span>${hasH?'<span style="display:flex;align-items:center;gap:5px"><span class="type-badge type-h">H</span> Halotron / Clean agent</span>':''}`;renderFEChecklist();showPane('fe-checklist',null);loadAEDStatus(bldgId);loadAEDDeviceInfo(bldgId);Promise.all([feSyncCompletionFromSupabase(),feSyncItemsFromSupabase(bldgId)]).then(()=>{if(feIsComplete(bldgId))bld.zones.forEach(z=>z.items.forEach(it=>{feCheckState[it.id]=true;}));if(feCurrentBldgId===bldgId)renderFEChecklist();});bld.zones.forEach(z=>{feEnsureZoneSynced(bldgId,z.zone).then(ok=>{if(ok&&feCurrentBldgId===bldgId){if(feIsComplete(bldgId))z.items.forEach(it=>{feCheckState[it.id]=true;});renderFEChecklist();}});});document.querySelectorAll('.nav-row')[0].querySelectorAll('button')[1].classList.add('act');}
+function renderFEChecklist(){const bld=FE_DATA[feCurrentBldgId];const total=bld.count;const checked=feGetChecked(feCurrentBldgId);const pct=Math.round(checked/total*100);document.getElementById('cl-fill').style.width=pct+'%';document.getElementById('cl-done-count').textContent=checked+' checked';document.getElementById('cl-total-count').textContent=total+' total · '+pct+'%';document.getElementById('complete-btn').disabled=checked<total||feIsComplete(feCurrentBldgId);document.getElementById('cl-body').innerHTML=bld.zones.map((zone,zi)=>{const zoneDone=zone.items.filter(e=>feCheckState[e.id]).length;const allDone=zoneDone===zone.items.length;const isOpen=feOpenZones.has(zi);const bodyHtml=feRenderZoneMapBody(feCurrentBldgId,zone,zi);return`<div class="zone-section"><div class="zone-hdr" onclick="toggleFEZone(${zi})"><div class="zone-name" id="fe-zone-name-${zi}">${zone.zone}${allDone?' <span style="font-size:11px;color:var(--text-success);font-weight:500">✓ Complete</span>':''}</div><div style="display:flex;align-items:center;gap:8px"><span class="zone-done-lbl" id="fe-zone-donelbl-${zi}">${zoneDone}/${zone.items.length}</span><span class="zone-chev${isOpen?' open':''}" id="fezchev-${zi}">›</span></div></div>${bodyHtml}</div>`;}).join('');setTimeout(()=>{bld.zones.forEach((zone,zi)=>{initFEMap(feCurrentBldgId,zone,zi);});},0);}
 function toggleFEZone(zi){const isOpen=document.getElementById('fezitems-'+zi).classList.toggle('open');document.getElementById('fezchev-'+zi).classList.toggle('open');if(isOpen)feOpenZones.add(zi);else feOpenZones.delete(zi);}
-// Shared completion-tracking core — used by both the list item tap handler (toggleFEExt) and the map pin tap handler (feMapPinTap). Do not duplicate this logic per view.
-function toggleExtinguisherChecked(id){feCheckState[id]=!feCheckState[id];try{localStorage.setItem('fe_progress_'+feCurrentBldgId,JSON.stringify(feCheckState));}catch(e){}}
-function toggleFEExt(extId,zi){toggleExtinguisherChecked(extId);renderFEChecklist();const bld=FE_DATA[feCurrentBldgId];if(bld.zones[zi].items.every(e=>feCheckState[e.id])){feOpenZones.delete(zi);const itemsEl=document.getElementById('fezitems-'+zi);if(itemsEl)itemsEl.classList.remove('open');const chevEl=document.getElementById('fezchev-'+zi);if(chevEl)chevEl.classList.remove('open');}}
+// Shared completion-tracking core — used by the map pin tap handler (feMapPinTap). Do not duplicate this logic elsewhere.
+function toggleExtinguisherChecked(id){feCheckState[id]=!feCheckState[id];try{localStorage.setItem('fe_progress_'+feCurrentBldgId,JSON.stringify(feCheckState));}catch(e){}feUpsertInspectionItem(feCurrentBldgId,id,feCheckState[id]);}
+// Fire-and-forget: called by the map view (feMapPinTap) via toggleExtinguisherChecked above — do not add a second write path.
+async function feUpsertInspectionItem(bldgId,extId,checked){
+  if(!window._supabase)return;
+  try{
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session){console.warn('fe_inspection_items upsert: no session, skipping');return;}
+    const period=feCurrentPeriod();
+    const checkedAt=new Date().toISOString();
+    const checkedBy=officer||'—';
+    const{data:existing}=await window._supabase.from('fe_inspection_items').select('ext_id').eq('ext_id',extId).eq('building_id',bldgId).eq('period',period).maybeSingle();
+    if(existing){
+      const{error}=await window._supabase.from('fe_inspection_items').update({checked,checked_by:checkedBy,checked_at:checkedAt}).eq('ext_id',extId).eq('building_id',bldgId).eq('period',period);
+      if(error)console.warn('fe_inspection_items update error:',error.message);
+    }else{
+      const{error}=await window._supabase.from('fe_inspection_items').insert({ext_id:extId,building_id:bldgId,period,checked,checked_by:checkedBy,checked_at:checkedAt});
+      if(error)console.warn('fe_inspection_items insert error:',error.message);
+    }
+  }catch(e){console.warn('fe_inspection_items upsert exception:',e.message);}
+}
+// Refreshes feCheckState (and its localStorage mirror) for one building from Supabase — same read-through-cache pattern as key_log/active_shifts. Anything absent from the fetch is treated as unchecked.
+async function feSyncItemsFromSupabase(bldgId){
+  if(!window._supabase)return;
+  try{
+    const period=feCurrentPeriod();
+    const{data,error}=await window._supabase.from('fe_inspection_items').select('ext_id,checked').eq('building_id',bldgId).eq('period',period);
+    if(error||!data)return;
+    const checkedSet=new Set(data.filter(r=>r.checked).map(r=>r.ext_id));
+    const bld=FE_DATA[bldgId];
+    bld.zones.forEach(z=>z.items.forEach(it=>{feCheckState[it.id]=checkedSet.has(it.id);}));
+    try{localStorage.setItem('fe_progress_'+bldgId,JSON.stringify(feCheckState));}catch(e){}
+  }catch(e){console.warn('feSyncItemsFromSupabase exception:',e.message);}
+}
 function completeInspection(){const bld=FE_DATA[feCurrentBldgId];feMarkComplete(feCurrentBldgId);try{localStorage.removeItem('fe_progress_'+feCurrentBldgId);}catch(e){}addEntry('fireext','Fire extinguisher inspection complete',bld.name+' · All '+bld.count+' units inspected for '+MONTHS[curMonth]+'.');updateStats();backToFESchedule();showToast('cp-toast','✓ '+bld.name+' inspection complete!');}
 function backToFESchedule(){feCurrentBldgId=null;openFESchedule();}
 
 // ══════════════════════════════════════════════════════════════════
-// FE MAP VIEW MODULE — zone-agnostic. Any building+zone with a FE_MAP_CONFIG
-// entry gets a Map view; zones without one only ever render list view.
-// Reads/writes that zone's FE_DATA[bldgId].zones[].items array and the same
-// feCheckState / toggleExtinguisherChecked used by list view above.
-// Nothing here should need to change if list view is later deleted.
+// FE MAP VIEW MODULE — zone-agnostic. Every building+zone has a FE_MAP_CONFIG
+// entry; map view is the only way to conduct inspections.
+// Reads/writes that zone's FE_DATA[bldgId].zones[].items array and
+// feCheckState / toggleExtinguisherChecked.
 // ══════════════════════════════════════════════════════════════════
 const FE_MAP_CONFIG={
   'C1|First Floor':'Canopy%20Maps/Canopy%201%20First%20Floor.jpg',
@@ -3117,23 +3158,17 @@ const FE_MAP_CONFIG={
 let feMapRuntime={};
 
 function feGetZone(bldgId,zoneName){return FE_DATA[bldgId].zones.find(z=>z.zone===zoneName);}
-function feSetViewMode(zi,mode){if((feZoneViewMode[zi]||'map')===mode)return;feZoneViewMode[zi]=mode;renderFEChecklist();}
 
 function feRenderZoneMapBody(bldgId,zone,zi){
   const remaining=zone.items.filter(e=>!feCheckState[e.id]).length;
-  const viewMode=feZoneViewMode[zi]||'map';
   const editActive=!!feZoneEditActive[zi];
-  const toolbar=`<div class="fe-map-toolbar"><div class="fe-view-toggle"><button class="fe-view-btn${viewMode==='map'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'map')">Map view</button><button class="fe-view-btn${viewMode==='list'?' act':''}" onclick="event.stopPropagation();feSetViewMode(${zi},'list')">List view</button></div><button class="fe-edit-toggle-btn${editActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick(${zi})">${editActive?'Editing…':'Edit'}</button></div>`;
+  const toolbar=`<div class="fe-map-toolbar"><button class="fe-edit-toggle-btn${editActive?' act':''}" onclick="event.stopPropagation();feHandleEditButtonClick(${zi})">${editActive?'Editing…':'Edit'}</button></div>`;
+  const key=bldgId+'|'+zone.zone;
   let content;
-  if(viewMode==='map'){
-    const key=bldgId+'|'+zone.zone;
-    if(!feZoneSyncStatus[key]){
-      content=`<div class="fe-map-loading">Loading extinguisher positions…</div>`;
-    }else{
-      content=`<div class="fe-map-sub"><span id="fe-map-remaining-count-${zi}">${remaining} remaining</span>${editActive?'<span class="fe-map-editing-note">Tap empty space to add · tap a pin to delete · drag to reposition</span>':''}</div><div class="fe-map-wrap"><div class="fe-map-viewport${editActive?' fe-map-editing':''}" id="fe-map-viewport-${zi}"><div class="fe-map-canvas" id="fe-map-canvas-${zi}"><img class="fe-map-img" id="fe-map-img-${zi}" src="${FE_MAP_CONFIG[key]}" draggable="false" alt="${bldgId} ${zone.zone} plan"/><div class="fe-map-pins-layer" id="fe-map-pins-layer-${zi}"></div></div></div><button class="fe-map-fit-btn" onclick="event.stopPropagation();feMapFit(${zi})">Fit</button></div>`;
-    }
+  if(!feZoneSyncStatus[key]){
+    content=`<div class="fe-map-loading">Loading extinguisher positions…</div>`;
   }else{
-    content=feRenderZoneListItems(zone,zi);
+    content=`<div class="fe-map-sub"><span id="fe-map-remaining-count-${zi}">${remaining} remaining</span>${editActive?'<span class="fe-map-editing-note">Tap empty space to add · tap a pin to delete · drag to reposition</span>':''}</div><div class="fe-map-wrap"><div class="fe-map-viewport${editActive?' fe-map-editing':''}" id="fe-map-viewport-${zi}"><div class="fe-map-canvas" id="fe-map-canvas-${zi}"><img class="fe-map-img" id="fe-map-img-${zi}" src="${FE_MAP_CONFIG[key]}" draggable="false" alt="${bldgId} ${zone.zone} plan"/><div class="fe-map-pins-layer" id="fe-map-pins-layer-${zi}"></div></div></div><button class="fe-map-fit-btn" onclick="event.stopPropagation();feMapFit(${zi})">Fit</button></div>`;
   }
   return `<div class="zone-items${feOpenZones.has(zi)?' open':''}" id="fezitems-${zi}">${toolbar}${content}</div>`;
 }
@@ -3182,6 +3217,33 @@ async function loadAEDStatus(bldgId){
     aedStatusCache[bldgId]=data;
     if(feCurrentBldgId===bldgId)renderAEDCard(data.status,data.checked_at,data.officer_name);
   }catch(e){console.warn('loadAEDStatus exception:',e.message);}
+}
+// "YYYY-MM-DD" -> "Mon YYYY", parsed manually (not new Date(str)) to avoid UTC-vs-local month-boundary drift.
+function _aedFmtExpiry(dateStr){
+  if(!dateStr)return null;
+  const[y,m]=dateStr.split('-').map(Number);
+  return new Date(y,m-1,1).toLocaleDateString('en-US',{month:'short',year:'numeric'});
+}
+function renderAEDExpiryLink(device){
+  const el=document.getElementById('aed-expiry-link');
+  if(!el)return;
+  const batteryLabel=device?_aedFmtExpiry(device.battery_expiration):null;
+  const padsLabel=device?_aedFmtExpiry(device.pads_expiration):null;
+  if(!batteryLabel&&!padsLabel){el.textContent='Set battery / pad expiration dates';return;}
+  const parts=[];
+  if(batteryLabel)parts.push('Battery: '+batteryLabel);
+  if(padsLabel)parts.push('Pads: '+padsLabel);
+  el.textContent=parts.join(' · ')+' · Change';
+}
+async function loadAEDDeviceInfo(bldgId){
+  renderAEDExpiryLink(null);
+  if(!window._supabase)return;
+  try{
+    const{data,error}=await window._supabase.from('aed_devices').select('*').eq('building_id',bldgId).maybeSingle();
+    if(error)return;
+    aedDeviceCache[bldgId]=data||null;
+    if(feCurrentBldgId===bldgId)renderAEDExpiryLink(data);
+  }catch(e){console.warn('loadAEDDeviceInfo exception:',e.message);}
 }
 function openAEDCheckSheet(){
   const bld=FE_DATA[feCurrentBldgId];
@@ -3291,6 +3353,7 @@ async function saveAEDExpiry(){
     }catch(e){console.warn('aed_devices upsert exception:',e.message);showToast('fe-cl-toast','Failed to save — try again');return;}
   }
   aedDeviceCache[bldgId]=payload;
+  if(feCurrentBldgId===bldgId)renderAEDExpiryLink(payload);
   closeAEDExpiryFormModal();
   showToast('fe-cl-toast','✓ AED expiration dates saved');
 }
