@@ -43,7 +43,7 @@
   --text-info:#378ADD;--text-success:#1D9E75;--text-warning:#BA7517;--text-danger:#E24B4A;
   --border-primary:rgba(255,255,255,0.16);--border-secondary:rgba(255,255,255,0.09);
   --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
-  --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;
+  --green:#1D9E75;--blue:#378ADD;--orange:#BA7517;--red:#E24B4A;--purple:#7C5CFC;
   --btn-bg:#f2f2f7;--btn-color:#1c1c1e;
 }
 html{overscroll-behavior-y:contain}
@@ -641,6 +641,52 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .dot-key-out{background:var(--orange)}
 .dot-key-in{background:var(--green)}
 .keys-empty{text-align:center;padding:28px 20px;font-size:13px;color:var(--text-secondary)}
+/* ── BADGES SYSTEM ── */
+.t-badge{background:rgba(124,58,237,.08);color:var(--purple)}
+.dot-badge{background:var(--purple)}
+.badges-sel-bar{position:sticky;top:0;z-index:40;background:var(--bg-secondary);border:0.5px solid var(--border-primary);border-radius:var(--radius-lg);padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 2px 16px rgba(0,0,0,.22)}
+.badges-sel-count{font-size:13px;font-weight:600;color:var(--text-primary)}
+.badges-sel-btn{padding:9px 16px;font-size:13px;font-family:inherit;font-weight:600;background:var(--btn-bg);color:var(--btn-color);border:none;border-radius:var(--radius-md);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.badges-cat-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);margin-bottom:8px;overflow:hidden}
+.badges-cat-hdr{padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.badges-cat-hdr:active{background:var(--bg-secondary)}
+.badges-cat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.badges-cat-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.badges-cat-meta{font-size:11px;color:var(--text-secondary)}
+.badges-cat-chev{font-size:10px;color:var(--text-tertiary);transition:transform .2s;display:inline-block;flex-shrink:0}
+.badges-cat-chev.open{transform:rotate(90deg)}
+.badges-cat-body{border-top:0.5px solid var(--border-secondary);padding:10px 12px 12px;display:none;flex-wrap:wrap;gap:8px}
+.badges-cat-body.open{display:flex}
+.badge-chip{font-size:12px;font-family:inherit;font-weight:500;padding:7px 12px;border-radius:999px;border:0.5px solid var(--border-primary);background:none;cursor:pointer;color:var(--text-primary);transition:all .15s;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
+.badge-chip.selected{background:rgba(55,138,221,.15);border-color:rgba(55,138,221,.45);color:var(--text-info);font-weight:600}
+.badge-chip.checked-out{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.4);color:var(--purple)}
+.badges-tabs{display:flex;gap:0;margin-bottom:12px;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);overflow:hidden;flex-shrink:0}
+.badges-tab{flex:1;padding:8px 4px;font-size:12px;font-family:inherit;font-weight:500;background:none;border:none;cursor:pointer;color:var(--text-secondary);transition:background .1s}
+.badges-tab:not(:last-child){border-right:0.5px solid var(--border-primary)}
+.badges-tab.act{background:var(--btn-bg);color:var(--btn-color);font-weight:600}
+.badges-sub{display:none}.badges-sub.act{display:block}
+.badges-batch-card{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
+.badges-batch-person{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.badges-batch-company{font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+.badges-batch-keys-list{margin-bottom:10px}
+.badges-key-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border-secondary)}
+.badges-key-row:last-child{border-bottom:none}
+.badges-out-label{font-size:13px;color:var(--text-primary);flex:1}
+.badges-out-cat{font-size:10px;color:var(--text-secondary)}
+.badges-return-btn{font-size:11px;font-family:inherit;font-weight:500;padding:5px 10px;border-radius:var(--radius-sm);background:none;border:0.5px solid var(--border-primary);cursor:pointer;color:var(--text-secondary);white-space:nowrap;flex-shrink:0}
+.badges-batch-meta{font-size:11px;color:var(--text-secondary);margin-bottom:8px}
+.badges-return-all-btn{width:100%;padding:9px;font-size:13px;font-family:inherit;font-weight:600;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-primary);text-align:center;margin-top:4px}
+.badge-contact-suggestions{position:absolute;top:100%;left:0;right:0;z-index:5;background:var(--bg-primary);border:0.5px solid var(--border-primary);border-radius:var(--radius-md);margin-top:4px;max-height:180px;overflow-y:auto;display:none;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.badge-contact-suggestions.show{display:block}
+.badge-contact-suggestion-item{padding:9px 12px;font-size:13px;color:var(--text-primary);cursor:pointer;border-bottom:0.5px solid var(--border-secondary)}
+.badge-contact-suggestion-item:last-child{border-bottom:none}
+.badge-contact-suggestion-item:hover,.badge-contact-suggestion-item:active{background:var(--bg-secondary)}
+.badges-log-row{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border-secondary);align-items:flex-start}
+.badges-log-row:last-child{border-bottom:none}
+.badges-log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-badge-out{background:var(--purple)}
+.dot-badge-in{background:var(--green)}
+.badges-empty{text-align:center;padding:28px 20px;font-size:13px;color:var(--text-secondary)}
 
 @media print {
   body > * { display: none !important; }
@@ -1002,14 +1048,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="qa-tile-icon" style="background:rgba(226,75,74,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div><div class="qa-tile-label">Near miss</div><div class="qa-tile-sub" id="qa-nm-sub">0 reports this shift</div></div>
       </button>
-      <button class="qa-tile" onclick="showPane('reports',null)">
-        <div class="qa-tile-icon" style="background:rgba(29,158,117,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-        <div><div class="qa-tile-label">Reports</div><div class="qa-tile-sub" id="qa-reports-sub">DAR &amp; pass downs</div></div>
+      <button id="home-tile-badges" class="qa-tile" onclick="showPane('badges',null)">
+        <div class="qa-tile-icon" style="background:rgba(124,58,237,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C5CFC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><rect x="5" y="6" width="14" height="16" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M8 19h8"/></svg></div>
+        <div><div class="qa-tile-label">Badges</div><div class="qa-tile-sub" id="qa-badges-sub">Badge sign-out log</div></div>
       </button>
       <button id="home-tile-keys" class="qa-tile" onclick="showPane('keys',null)">
         <div class="qa-tile-icon" style="background:rgba(186,117,23,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
         <div><div class="qa-tile-label">Keys</div><div class="qa-tile-sub" id="qa-keys-sub">Key sign-out log</div></div>
       </button>
+    </div>
+
+    <div class="fe-entry-card" onclick="showPane('reports',null)" style="margin-top:8px">
+      <div class="fe-entry-inner">
+        <div class="fe-icon">📄</div>
+        <div class="fe-info"><div class="fe-title">Reports</div><div class="fe-meta" id="qa-reports-sub">DAR &amp; pass downs</div></div>
+        <div class="fe-chevron">›</div>
+      </div>
     </div>
 
     <div class="fe-section">
@@ -1185,6 +1239,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 
   <!-- KEYS PANE — rendered by renderKeysPane() -->
   <div id="pane-keys" class="pane" style="display:none"></div>
+
+  <!-- BADGES PANE — rendered by renderBadgesPane() -->
+  <div id="pane-badges" class="pane" style="display:none"></div>
 
   <!-- PATROLS PANE -->
   <div id="pane-patrols" class="pane" style="display:none">
@@ -1593,6 +1650,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer">
       <span class="report-name">Key Checkout History</span>
     </label>
+    <label class="report-row">
+      <input type="checkbox" class="report-checkbox" value="badge-checkouts" checked
+        style="width:16px;height:16px;accent-color:var(--purple);flex-shrink:0;cursor:pointer">
+      <span class="report-name">Badge Checkout History</span>
+    </label>
   </div>
 
   <!-- Select all / none -->
@@ -1880,6 +1942,38 @@ function _showMeterPreviewStatus(type, msg) {
   </div>
 </div>
 
+<!-- BADGE CHECKOUT SHEET -->
+<div class="modal-backdrop" id="badge-checkout-sheet">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin-bottom:0">Check out badges</div>
+      <button onclick="closeBadgeCheckoutSheet()" style="width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:16px;flex-shrink:0">&#x2715;</button>
+    </div>
+    <div id="badge-checkout-summary"></div>
+    <div class="form-group" style="position:relative"><label>Person's name <span style="color:var(--text-danger)">*</span></label><input type="text" id="badge-person-input" placeholder="Full name..." autocomplete="off" oninput="updateBadgeCheckoutBtn();onBadgeContactInput('name')" onblur="hideBadgeContactSuggestions('badge-person-suggestions')"><div class="badge-contact-suggestions" id="badge-person-suggestions"></div></div>
+    <div class="form-group" style="position:relative"><label>Company / Tenant</label><input type="text" id="badge-company-input" placeholder="Company or tenant name..." autocomplete="off" oninput="onBadgeContactInput('company')" onblur="hideBadgeContactSuggestions('badge-company-suggestions')"><div class="badge-contact-suggestions" id="badge-company-suggestions"></div></div>
+    <div class="form-group"><label>Phone number</label><input type="tel" id="badge-phone-input" placeholder="e.g. (801) 555-0100"></div>
+    <div class="form-group"><label>Notes</label><textarea id="badge-notes-input" placeholder="Optional notes..." style="height:60px"></textarea></div>
+    <button class="modal-primary-btn" id="badge-checkout-confirm-btn" onclick="confirmBadgeCheckout()" disabled>Check out badges</button>
+    <button class="modal-secondary-btn" onclick="closeBadgeCheckoutSheet()">Cancel</button>
+  </div>
+</div>
+
+<!-- BADGE RETURN SHEET -->
+<div class="modal-backdrop" id="badge-return-sheet">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin-bottom:0">Return badge</div>
+      <button onclick="closeBadgeReturnSheet()" style="width:30px;height:30px;border-radius:50%;border:0.5px solid var(--border-primary);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:16px;flex-shrink:0">&#x2715;</button>
+    </div>
+    <div id="badge-return-info"></div>
+    <div id="badge-return-batch-list"></div>
+    <div class="form-group"><label>Return notes (optional)</label><textarea id="badge-return-notes" placeholder="e.g. Returned &#8212; no issues noted" style="height:60px"></textarea></div>
+    <button class="modal-primary-btn" id="badge-return-confirm-btn" onclick="confirmBadgeReturn()">Confirm return</button>
+    <button class="modal-secondary-btn" onclick="closeBadgeReturnSheet()">Cancel</button>
+  </div>
+</div>
+
 <script>
 const FE_DATA={C1:{name:'Canopy 1',count:35,color:'rt-c1',zones:[{zone:'First Floor',items:[{id:'EXT-C1-001',location:'Security Office',type:'ABC'},{id:'EXT-C1-002',location:'Colo Customer Entrance',type:'H'},{id:'EXT-C1-003',location:'Data Center Cage 102',type:'H'},{id:'EXT-C1-004',location:'Data Center by Wiring Closet',type:'H'},{id:'EXT-C1-005',location:'Data Center South West Exit',type:'H'},{id:'EXT-C1-006',location:'West Stairwell Exit',type:'ABC'},{id:'EXT-C1-007',location:'South West Bamboo Suite',type:'ABC'},{id:'EXT-C1-008',location:'Bamboo HR Video Studio',type:'ABC'},{id:'EXT-C1-009',location:'Main Lobby Drinking Fountain',type:'ABC'},{id:'EXT-C1-010',location:'Elevated Grounds Café',type:'ABC'},{id:'EXT-C1-011',location:'North Stairwell Exit',type:'ABC'}]},{zone:'Garage & Bunker',items:[{id:'EXT-C1-012',location:'North Stairwell Door',type:'ABC'},{id:'EXT-C1-013',location:'North Tool Room',type:'ABC'},{id:'EXT-C1-014',location:'Elevator Equipment Room',type:'ABC'},{id:'EXT-C1-015',location:'Garage Elevator Electrical Room',type:'ABC'},{id:'EXT-C1-016',location:'Staging Area',type:'ABC'},{id:'EXT-C1-017',location:'West Stairwell Door',type:'ABC'},{id:'EXT-C1-018',location:'Main Hall by Battery Entry',type:'H'},{id:'EXT-C1-019',location:'Main Hall by UPS Entry',type:'H'},{id:'EXT-C1-020',location:'UPS Room SE by Generator',type:'ABC'},{id:'EXT-C1-021',location:'Main Hall Cage Area',type:'H'}]},{zone:'Second Floor',items:[{id:'EXT-C1-022',location:'West Stairwell Exit',type:'ABC'},{id:'EXT-C1-023',location:'South East Pillar',type:'ABC'},{id:'EXT-C1-024',location:'Wire Closet',type:'ABC'},{id:'EXT-C1-025',location:'2nd Floor Lobby Hallway',type:'ABC'},{id:'EXT-C1-026',location:'Bamboo HR S/E Suite Pillar',type:'ABC'},{id:'EXT-C1-027',location:'North Stairwell Exit',type:'ABC'}]},{zone:'Third Floor',items:[{id:'EXT-C1-028',location:'North Stairwell Exit',type:'ABC'},{id:'EXT-C1-029',location:'North Wall by Recording Room',type:'ABC'},{id:'EXT-C1-030',location:'Bamboo HR North Hall Entrance',type:'ABC'},{id:'EXT-C1-031',location:'Wiring Closet',type:'ABC'},{id:'EXT-C1-032',location:'South East Pillar',type:'ABC'},{id:'EXT-C1-033',location:'West Stairwell Exit',type:'ABC'},{id:'EXT-C1-034',location:'West Stairwell',type:'ABC'},{id:'EXT-C1-035',location:'Top of Stairs — Roof Access',type:'ABC'}]}]},C3:{name:'Canopy 3',count:35,color:'rt-c3',zones:[{zone:'First Floor South',items:[{id:'EXT-C3-001',location:'Staging Area',type:'ABC'},{id:'EXT-C3-002',location:'South East Stairwell Exit',type:'ABC'},{id:'EXT-C3-003',location:'ON Semi Break Room',type:'ABC'},{id:'EXT-C3-004',location:'ON Semi Suite Hallway',type:'ABC'},{id:'EXT-C3-005',location:'Elevator Equipment Room',type:'ABC'},{id:'EXT-C3-006',location:'Electrical Room',type:'ABC'},{id:'EXT-C3-007',location:'ON Semi Server Room',type:'H'},{id:'EXT-C3-008',location:'NexTrust South Suite',type:'ABC'},{id:'EXT-C3-009',location:'Elevator Lobby',type:'ABC'}]},{zone:'First Floor North',items:[{id:'EXT-C3-010',location:'North East Suite Exit',type:'ABC'},{id:'EXT-C3-011',location:'Suite Server Room',type:'H'},{id:'EXT-C3-012',location:'D-Mark Room',type:'H'},{id:'EXT-C3-013',location:'West Emergency Exit (Ramp Door)',type:'ABC'},{id:'EXT-C3-014',location:'North West Stairwell Exit',type:'ABC'}]},{zone:'Second Floor North',items:[{id:'EXT-C3-015',location:'North West Stairwell Exit',type:'ABC'},{id:'EXT-C3-016',location:'North East Suite Hallway',type:'ABC'},{id:'EXT-C3-017',location:'IT Storage Room',type:'H'}]},{zone:'Second Floor South',items:[{id:'EXT-C3-018',location:'Elevator Lobby',type:'ABC'},{id:'EXT-C3-019',location:'West Wall Suite',type:'ABC'},{id:'EXT-C3-020',location:'Central North Wall',type:'ABC'},{id:'EXT-C3-021',location:'IT Server Room',type:'H'},{id:'EXT-C3-022',location:'South Suite',type:'ABC'},{id:'EXT-C3-023',location:'South East Stairwell Exit',type:'ABC'}]},{zone:'Third Floor South',items:[{id:'EXT-C3-024',location:'South East Stairwell Exit',type:'ABC'},{id:'EXT-C3-025',location:'South West Suite Hallway',type:'ABC'},{id:'EXT-C3-026',location:'Video Room',type:'ABC'},{id:'EXT-C3-027',location:'Server Room',type:'H'},{id:'EXT-C3-028',location:'South Central Hallway',type:'ABC'},{id:'EXT-C3-029',location:'Electrical Room (Behind Storage)',type:'ABC'},{id:'EXT-C3-030',location:'South Suite Entrance (East Wall)',type:'ABC'},{id:'EXT-C3-031',location:'Elevator Lobby',type:'ABC'}]},{zone:'Penthouse',items:[{id:'EXT-C3-032',location:'Penthouse',type:'ABC'}]},{zone:'Third Floor North',items:[{id:'EXT-C3-033',location:'North Server Room',type:'H'},{id:'EXT-C3-034',location:'North Hallway by Server Room',type:'ABC'},{id:'EXT-C3-035',location:'North West Stairwell Exit',type:'ABC'}]}]},C4:{name:'Canopy 4',count:12,color:'rt-c4',zones:[{zone:'First Floor',items:[{id:'EXT-C4-001',location:'Main Lobby by Bathrooms',type:'ABC'},{id:'EXT-C4-002',location:'North West Exit',type:'ABC'},{id:'EXT-C4-003',location:'North East Exit',type:'ABC'},{id:'EXT-C4-004',location:'East Wall Center',type:'ABC'},{id:'EXT-C4-005',location:'South East Exit',type:'ABC'},{id:'EXT-C4-006',location:'South East Training Room',type:'ABC'},{id:'EXT-C4-007',location:'South West Exit',type:'ABC'}]},{zone:'Second Floor',items:[{id:'EXT-C4-008',location:'2nd Floor Lobby by Bathrooms',type:'ABC'},{id:'EXT-C4-009',location:'North West Office',type:'ABC'},{id:'EXT-C4-010',location:'North East Office',type:'ABC'},{id:'EXT-C4-011',location:'South East Breakroom',type:'ABC'},{id:'EXT-C4-012',location:'South West Office',type:'ABC'}]}]},C5:{name:'Canopy 5',count:25,color:'rt-c5',zones:[{zone:'First Floor South',items:[{id:'EXT-C5-001',location:'Staging Area',type:'ABC'},{id:'EXT-C5-002',location:'Bamboo North 150 East Door',type:'ABC'},{id:'EXT-C5-003',location:'South East Stairwell Exit (Showers)',type:'ABC'},{id:'EXT-C5-004',location:'South Electrical Room',type:'ABC'},{id:'EXT-C5-005',location:'South West Bamboo Suite',type:'ABC'},{id:'EXT-C5-006',location:'Elevator Equipment Room',type:'ABC'},{id:'EXT-C5-007',location:'Elevator Lobby',type:'ABC'}]},{zone:'First Floor North',items:[{id:'EXT-C5-008',location:'Main Electrical Room',type:'ABC'},{id:'EXT-C5-009',location:'North West Stairwell',type:'ABC'}]},{zone:'Second Floor North',items:[{id:'EXT-C5-010',location:'North West Stairwell Exit',type:'ABC'},{id:'EXT-C5-011',location:'North Electrical Room',type:'ABC'},{id:'EXT-C5-012',location:'Entrata Training Room Entrance',type:'ABC'}]},{zone:'Second Floor South',items:[{id:'EXT-C5-013',location:'Elevator Lobby',type:'ABC'},{id:'EXT-C5-014',location:'Central Hallway South Wall',type:'ABC'},{id:'EXT-C5-015',location:'South Electrical Room',type:'ABC'},{id:'EXT-C5-016',location:'South East Stairwell Exit',type:'ABC'}]},{zone:'Third Floor South',items:[{id:'EXT-C5-017',location:'South East Stairwell Exit',type:'ABC'},{id:'EXT-C5-018',location:'South Electrical Room',type:'ABC'},{id:'EXT-C5-019',location:'Central Hallway North Wall',type:'ABC'},{id:'EXT-C5-020',location:'Penthouse Stairs — Roof Access',type:'ABC'},{id:'EXT-C5-021',location:'Penthouse East Wall',type:'ABC'},{id:'EXT-C5-022',location:'Elevator Lobby',type:'ABC'}]},{zone:'Third Floor North',items:[{id:'EXT-C5-023',location:'Veracity Suite North Wall',type:'ABC'},{id:'EXT-C5-024',location:'North Electrical Room',type:'ABC'},{id:'EXT-C5-025',location:'North West Stairwell Exit',type:'ABC'}]}]}};
 const FE_OFFICERS=['Randy Lazenby','Tyler Schlegelmilch','Brian Davies','Chase Montrose','Matt Dalsing'];
@@ -1976,6 +2070,7 @@ function showPane(id,btn){
   if(id==='home-bp'){renderBP();renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='reports'){updateReportsTiles();}
   if(id==='keys'){loadKeyLogFromSupabase();renderKeysPane();}
+  if(id==='badges'){loadBadgeLogFromSupabase();renderBadgesPane();}
   if(id==='patrols'){renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='nearmiss'){renderNMList();renderNMComplianceBanner();}
   if(id==='passdowns')renderPassDownsPage();
@@ -2009,6 +2104,19 @@ function updateHomeTiles(){
     }else{
       keysTile.style.border='0.5px solid var(--border-secondary)';
       keysTile.style.boxShadow='';
+    }
+  }
+  const badgesEl=document.getElementById('qa-badges-sub');
+  if(badgesEl)badgesEl.textContent='Badge sign-out log';
+  const badgesTile=document.getElementById('home-tile-badges');
+  if(badgesTile){
+    const outCount=Object.keys(badgeCheckedOut).length;
+    if(outCount>0){
+      badgesTile.style.border='1.5px solid var(--purple)';
+      badgesTile.style.boxShadow='0 0 12px rgba(124,58,237,.25)';
+    }else{
+      badgesTile.style.border='0.5px solid var(--border-secondary)';
+      badgesTile.style.boxShadow='';
     }
   }
 }
@@ -3770,6 +3878,7 @@ async function _initApp(){
   if(!session){showScreen('login');return;}
   _supabaseUserId=session.user.id;
   await loadKeyCheckedOutFromSupabase();
+  await loadBadgeCheckedOutFromSupabase();
   loadMonthlySafetyTipFromSupabase();
   loadNearMissFromSupabase();
 
@@ -4204,6 +4313,29 @@ function _setupRealtimeListeners(){
       }catch(e){}
     })
 
+    /* ── badge_checked_out_current ───────────────────────────
+       Badge checkout / return syncs instantly to all devices */
+    .on('postgres_changes',{event:'*',schema:'public',table:'badge_checked_out_current',filter:'user_id=eq.'+_supabaseUserId},(payload)=>{
+      try{
+        if(payload.eventType==='INSERT'||payload.eventType==='UPDATE'){
+          const r=payload.new;
+          if(!r?.badge_id)return;
+          if(r.user_id&&r.user_id!==_supabaseUserId)return;
+          // Deduplicate: if data is identical skip re-render
+          const existing=badgeCheckedOut[r.badge_id];
+          if(existing&&existing.person===r.person&&String(existing.time)===String(new Date(r.checked_out_at)))return;
+          badgeCheckedOut[r.badge_id]={badgeId:r.badge_id,badgeLabel:r.badge_label||r.badge_id,catId:'',catLabel:r.cat_label||'',person:r.person||'',company:r.company||'',phone:r.phone||'',notes:r.notes||'',time:new Date(r.checked_out_at||Date.now()),issuedBy:r.issued_by||'',batchId:r.batch_id||''};
+        }else if(payload.eventType==='DELETE'){
+          const r=payload.old;
+          if(!r?.badge_id||!badgeCheckedOut[r.badge_id])return; // already gone locally
+          delete badgeCheckedOut[r.badge_id];
+        }
+        saveBadgeState();
+        updateHomeTiles();
+        if(paneVisible('badges')){renderBadgesPane();}
+      }catch(e){}
+    })
+
     /* ── pass_downs ─────────────────────────────────────────
        New pass down notes appear on all devices immediately */
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'pass_downs'},(payload)=>{
@@ -4299,6 +4431,11 @@ function _startCatchupRefresh(){
       saveKeyState();
       if(paneVisible('keys')){renderKeysPane();}
     }catch(e){console.warn('[Catch-up] Key refresh failed:',e.message);}
+    try{
+      await loadBadgeCheckedOutFromSupabase();
+      saveBadgeState();
+      if(paneVisible('badges')){renderBadgesPane();}
+    }catch(e){console.warn('[Catch-up] Badge refresh failed:',e.message);}
   },120000);
 }
 
@@ -5074,6 +5211,632 @@ async function confirmKeyReturn(){
   }catch(e){console.warn('key_log return insert exception:',e.message);}
 
   passDowns=passDowns.filter(p=>!(p.key_ids&&p.key_ids.length&&p.key_ids.every(kid=>!keyCheckedOut[kid])));
+  saveStorage();
+  renderPassDownsBanner();
+  if(paneVisible('passdowns'))renderPassDownsPage();
+}
+
+// ═══════════════════════════════════════════════════════
+//  BADGES SYSTEM
+// ═══════════════════════════════════════════════════════
+TC.badge={dot:'dot-badge',tag:'t-badge',label:'Badge sign-out'};
+
+const BADGE_ICON=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><rect x="5" y="6" width="14" height="16" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M8 19h8"/></svg>`;
+
+const BADGE_CATS=[
+  {id:'contractor',label:'Contractor Badges',bgColor:'rgba(124,58,237,.1)',icon:BADGE_ICON,
+   keys:Array.from({length:25},(_,i)=>'Contractor Badge '+(i+1))},
+  {id:'temporary',label:'Temporary Badges',bgColor:'rgba(124,58,237,.1)',icon:BADGE_ICON,
+   keys:Array.from({length:10},(_,i)=>'Temporary Badge '+(i+1))},
+  {id:'visitor',label:'Visitor Badges',bgColor:'rgba(124,58,237,.1)',icon:BADGE_ICON,
+   keys:Array.from({length:25},(_,i)=>'Visitor Badge '+(i+1))},
+  {id:'water_vendor',label:'Water Vendor Badge',bgColor:'rgba(124,58,237,.1)',icon:BADGE_ICON,
+   keys:['Water Vendor Badge']}
+];
+
+let badgeLog=[];
+let badgeCheckedOut={};
+let badgeSelection=new Set();
+let badgeCatOpen={};
+let badgesActiveTab='keys';
+let _badgeReturnChecked=new Set();
+let _badgeReturnPending=false;
+
+function loadBadgeState(){
+  try{const d=localStorage.getItem('badge_log');if(d)badgeLog=JSON.parse(d);}catch(e){badgeLog=[];}
+  try{const d=localStorage.getItem('badge_checked_out');if(d)badgeCheckedOut=JSON.parse(d);}catch(e){badgeCheckedOut={};}
+}
+async function loadBadgeLogFromSupabase(){
+  try{
+    if(!window._supabase)return;
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session)return;
+    const{data,error}=await window._supabase
+      .from('badge_log')
+      .select('*')
+      .eq('user_id',session.user.id)
+      .order('event_time',{ascending:false})
+      .limit(200);
+    if(error||!data)return;
+    badgeLog=data.map(r=>({
+      id:r.id,
+      batchId:r.batch_id||'',
+      badgeId:r.badge_id,
+      badgeLabel:r.badge_label||r.badge_id,
+      catId:r.cat_id||'',
+      catLabel:r.cat_label||'',
+      type:r.type,
+      person:r.person||'',
+      company:r.company||'',
+      phone:r.phone||'',
+      notes:r.notes||'',
+      issuedBy:r.issued_by||'',
+      returnedBy:r.returned_by||'',
+      time:r.event_time,
+      returnTime:r.type==='in'?r.event_time:null,
+      returnNotes:r.type==='in'?(r.notes||''):''
+    }));
+    saveBadgeState();
+  }catch(e){console.warn('loadBadgeLogFromSupabase exception:',e.message);}
+}
+async function loadBadgeCheckedOutFromSupabase(){
+  try{
+    if(!window._supabase||!_supabaseUserId)return;
+    const{data:{session}}=await window._supabase.auth.getSession();
+    if(!session)return;
+    const{data,error}=await window._supabase
+      .from('badge_checked_out_current')
+      .select('*')
+      .eq('user_id',_supabaseUserId);
+    if(error||!data)return;
+    const remoteBadgeIds=new Set(data.filter(r=>r?.badge_id).map(r=>r.badge_id));
+    data.forEach(r=>{
+      if(!r?.badge_id)return;
+      badgeCheckedOut[r.badge_id]={
+        badgeId:r.badge_id,
+        badgeLabel:r.badge_label||r.badge_id,
+        catId:'',
+        catLabel:r.cat_label||'',
+        person:r.person||'',
+        company:r.company||'',
+        phone:r.phone||'',
+        notes:r.notes||'',
+        time:new Date(r.checked_out_at||Date.now()),
+        issuedBy:r.issued_by||'',
+        batchId:r.batch_id||''
+      };
+    });
+    // Reconcile: drop any locally-held badge no longer present remotely (e.g. returned on
+    // another device while this one's Realtime channel was disconnected) — otherwise a
+    // stale "checked out" entry could linger here indefinitely.
+    Object.keys(badgeCheckedOut).forEach(badgeId=>{
+      if(!remoteBadgeIds.has(badgeId))delete badgeCheckedOut[badgeId];
+    });
+    saveBadgeState();
+    updateHomeTiles();
+  }catch(e){console.warn('loadBadgeCheckedOutFromSupabase exception:',e.message);}
+}
+function saveBadgeState(){
+  try{localStorage.setItem('badge_log',JSON.stringify(badgeLog));}catch(e){}
+  try{localStorage.setItem('badge_checked_out',JSON.stringify(badgeCheckedOut));}catch(e){}
+}
+function _badgeId(catId,idx){return catId+'_'+idx;}
+function _badgeInfo(badgeId){
+  const under=badgeId.lastIndexOf('_');
+  if(under<0)return null;
+  const catId=badgeId.slice(0,under);
+  const idx=parseInt(badgeId.slice(under+1));
+  const cat=BADGE_CATS.find(c=>c.id===catId);
+  if(!cat||isNaN(idx)||idx<0||idx>=cat.keys.length)return null;
+  return{cat,key:cat.keys[idx],badgeId,catId,idx};
+}
+
+function renderBadgesPane(){
+  if(!Object.keys(badgeCheckedOut).length) loadBadgeState();
+  const pane=document.getElementById('pane-badges');
+  if(!pane)return;
+  const selN=badgeSelection.size;
+  const outN=Object.keys(badgeCheckedOut).length;
+  let h='';
+
+  // Sticky selection bar
+  if(selN>0){
+    h+=`<div class="badges-sel-bar">
+      <span class="badges-sel-count">${selN} badge${selN!==1?'s':''} selected</span>
+      <div style="display:flex;gap:8px">
+        <button onclick="badgesClearSel()" style="font-size:12px;font-family:inherit;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);padding:8px 12px;cursor:pointer;color:var(--text-secondary)">Clear</button>
+        <button class="badges-sel-btn" onclick="openBadgeCheckoutSheet()">Check out ${selN} badge${selN!==1?'s':''}</button>
+      </div>
+    </div>`;
+  }
+
+  h+=`<div class="toast" id="badges-toast" style="margin-bottom:8px"></div>`;
+  h+=`<div class="lbl" style="margin-top:0">Badges</div>`;
+  h+=`<div class="badges-tabs">
+    <button class="badges-tab${badgesActiveTab==='keys'?' act':''}" onclick="badgesTab('keys',this)">Badge board</button>
+    <button class="badges-tab${badgesActiveTab==='out'?' act':''}" onclick="badgesTab('out',this)">Out${outN?' ('+outN+')':''}</button>
+    <button class="badges-tab${badgesActiveTab==='log'?' act':''}" onclick="badgesTab('log',this)">Full log</button>
+  </div>`;
+  h+=`<div id="badges-sub-keys" class="badges-sub${badgesActiveTab==='keys'?' act':''}">`;
+  h+=_buildBadgeCats();
+  h+=`</div>`;
+  h+=`<div id="badges-sub-out" class="badges-sub${badgesActiveTab==='out'?' act':''}">`;
+  h+=_buildBadgesOut();
+  h+=`</div>`;
+  h+=`<div id="badges-sub-log" class="badges-sub${badgesActiveTab==='log'?' act':''}">`;
+  h+=_buildBadgesLog();
+  h+=`</div>`;
+  h+=`<div class="bottom-nav">
+    <button class="home-pill" onclick="showPane('home',null)">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+      Home
+    </button>
+  </div>`;
+  pane.innerHTML=h;
+  updateHomeTiles();
+}
+
+function _buildBadgeCats(){
+  return BADGE_CATS.map(cat=>{
+    const open=!!badgeCatOpen[cat.id];
+    const outInCat=cat.keys.filter((_,i)=>!!badgeCheckedOut[_badgeId(cat.id,i)]).length;
+    const selInCat=cat.keys.filter((_,i)=>badgeSelection.has(_badgeId(cat.id,i))).length;
+    const metaParts=[];
+    if(outInCat)metaParts.push(outInCat+' out');
+    if(selInCat)metaParts.push(selInCat+' selected');
+    const meta=metaParts.join(' · ')||cat.keys.length+' badges';
+    const chips=cat.keys.map((k,i)=>{
+      const bid=_badgeId(cat.id,i);
+      const isOut=!!badgeCheckedOut[bid];
+      const isSel=badgeSelection.has(bid);
+      const checkSvg=`<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6l3 3 5-5"/></svg>`;
+      const clockSvg=`<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>`;
+      if(isOut){
+        const e=badgeCheckedOut[bid];
+        return`<button class="badge-chip checked-out" onclick="openBadgeReturnSheet('${bid}',null)" title="Out to ${_esc(e.person)}">${clockSvg}${_esc(k)}</button>`;
+      }
+      return`<button class="badge-chip${isSel?' selected':''}" onclick="badgesToggleSel('${bid}')">${isSel?checkSvg:''}${_esc(k)}</button>`;
+    }).join('');
+    return`<div class="badges-cat-card">
+      <div class="badges-cat-hdr" onclick="badgesToggleCat('${cat.id}')">
+        <div class="badges-cat-icon" style="background:${cat.bgColor}">${cat.icon}</div>
+        <div style="flex:1"><div class="badges-cat-title">${cat.label}</div><div class="badges-cat-meta">${meta}</div></div>
+        <span class="badges-cat-chev${open?' open':''}">&#x203a;</span>
+      </div>
+      <div class="badges-cat-body${open?' open':''}">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function _buildBadgesOut(){
+  const outEntries=Object.values(badgeCheckedOut);
+  if(!outEntries.length)return'<div class="badges-empty">No badges are currently checked out.</div>';
+  const batches={};
+  outEntries.forEach(e=>{
+    const bid=e.batchId||e.id;
+    if(!batches[bid])batches[bid]={bid,person:e.person,company:e.company,phone:e.phone,issuedBy:e.issuedBy,time:e.time,keys:[]};
+    batches[bid].keys.push(e);
+  });
+  return Object.values(batches).map(b=>{
+    const singleTextBtn=(b.keys.length===1&&b.phone)?`<button class="badges-return-btn" onclick="textBadgeContact('${b.keys[0].badgeId}',null)">Text</button>`:'';
+    const keyRows=b.keys.map(e=>`<div class="badges-key-row">
+      <div style="flex:1"><div class="badges-out-label">${_esc(e.badgeLabel)}</div><div class="badges-out-cat">${_esc(e.catLabel)}</div></div>
+      ${b.keys.length===1?singleTextBtn:''}
+      <button class="badges-return-btn" onclick="openBadgeReturnSheet('${e.badgeId}',null)">Return</button>
+    </div>`).join('');
+    const contact=[b.company,b.phone].filter(Boolean).join(' · ');
+    const multiActions=b.keys.length>1?`<div style="display:flex;gap:8px;align-items:center"><button class="badges-return-all-btn" style="flex:1" onclick="openBadgeReturnSheet(null,'${b.bid}')">Return all badges from this batch</button>${b.phone?`<button class="badges-return-btn" style="flex-shrink:0" onclick="textBadgeContact(null,'${b.bid}')">Text</button>`:''}</div>`:'';
+    return`<div class="badges-batch-card">
+      <div class="badges-batch-person">${_esc(b.person)}</div>
+      ${contact?`<div class="badges-batch-company">${_esc(contact)}</div>`:''}
+      <div class="badges-batch-keys-list">${keyRows}</div>
+      <div class="badges-batch-meta">Issued ${fmt(b.time)} by ${_esc(b.issuedBy)}</div>
+      ${multiActions}
+    </div>`;
+  }).join('');
+}
+
+function _buildBadgesLog(){
+  if(!badgeLog.length)return'<div class="badges-empty">No badge activity logged yet.</div>';
+  const seenBatches=new Set();
+  const rows=[];
+  [...badgeLog].reverse().forEach(e=>{
+    if(e.type==='out'){
+      const bid=e.batchId||e.id;
+      if(seenBatches.has(bid))return;
+      seenBatches.add(bid);
+      const batchKeys=badgeLog.filter(x=>(x.batchId||x.id)===bid&&x.type==='out').map(x=>x.badgeLabel);
+      rows.push({...e,_dk:batchKeys});
+    }else{
+      rows.push({...e,_dk:[e.badgeLabel]});
+    }
+  });
+  return`<div class="card" style="padding:8px 12px">${rows.map(e=>{
+    const isOut=e.type==='out';
+    const keyStr=e._dk.join(', ');
+    const timeStr=fmt(isOut?e.time:(e.returnTime||e.time));
+    return`<div class="badges-log-row">
+      <div class="badges-log-dot ${isOut?'dot-badge-out':'dot-badge-in'}"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500;color:var(--text-primary)">${isOut?'Checked out':'Returned'}: ${_esc(keyStr)}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${isOut
+          ?`To ${_esc(e.person)}${e.company?' ('+_esc(e.company)+')':''} · by ${_esc(e.issuedBy)}`
+          :`By ${_esc(e.person)}${e.returnedBy?' · logged by '+_esc(e.returnedBy):''}`}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);flex-shrink:0;margin-left:8px">${timeStr}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function badgesTab(tab,btn){
+  badgesActiveTab=tab;
+  document.querySelectorAll('.badges-tab').forEach(b=>b.classList.remove('act'));
+  if(btn)btn.classList.add('act');
+  document.querySelectorAll('.badges-sub').forEach(s=>{s.style.display='none';s.classList.remove('act');});
+  const sub=document.getElementById('badges-sub-'+tab);
+  if(sub){sub.style.display='block';sub.classList.add('act');}
+}
+
+function badgesToggleCat(catId){
+  badgeCatOpen[catId]=!badgeCatOpen[catId];
+  const sub=document.getElementById('badges-sub-keys');
+  if(sub)sub.innerHTML=_buildBadgeCats();
+}
+
+function badgesToggleSel(badgeId){
+  if(badgeCheckedOut[badgeId]){openBadgeReturnSheet(badgeId,null);return;}
+  if(badgeSelection.has(badgeId))badgeSelection.delete(badgeId);
+  else badgeSelection.add(badgeId);
+  renderBadgesPane();
+}
+
+function badgesClearSel(){
+  badgeSelection.clear();
+  renderBadgesPane();
+}
+
+// ── CHECKOUT SHEET ──
+function openBadgeCheckoutSheet(){
+  if(!badgeSelection.size)return;
+  const lines=[...badgeSelection].map(bid=>{
+    const info=_badgeInfo(bid);
+    return info?`<div style="font-size:12px;color:var(--text-primary);padding:2px 0">• ${_esc(info.cat.label)}: ${_esc(info.key)}</div>`:'';
+  }).join('');
+  document.getElementById('badge-checkout-summary').innerHTML=
+    `<div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">${badgeSelection.size} badge${badgeSelection.size!==1?'s':''} to check out</div>
+      ${lines}
+    </div>`;
+  document.getElementById('badge-person-input').value='';
+  document.getElementById('badge-company-input').value='';
+  document.getElementById('badge-phone-input').value='';
+  document.getElementById('badge-notes-input').value='';
+  document.getElementById('badge-person-suggestions').classList.remove('show');
+  document.getElementById('badge-company-suggestions').classList.remove('show');
+  const btn=document.getElementById('badge-checkout-confirm-btn');
+  btn.disabled=true;
+  btn.textContent='Check out '+badgeSelection.size+' badge'+(badgeSelection.size!==1?'s':'');
+  document.getElementById('badge-checkout-sheet').classList.add('open');
+}
+
+function closeBadgeCheckoutSheet(){
+  document.getElementById('badge-checkout-sheet').classList.remove('open');
+}
+
+function updateBadgeCheckoutBtn(){
+  const v=document.getElementById('badge-person-input').value.trim();
+  const btn=document.getElementById('badge-checkout-confirm-btn');
+  if(btn)btn.disabled=!v;
+}
+
+async function confirmBadgeCheckout(){
+  const person=document.getElementById('badge-person-input').value.trim();
+  if(!person)return;
+  const company=document.getElementById('badge-company-input').value.trim();
+  const phone=document.getElementById('badge-phone-input').value.trim();
+  const notes=document.getElementById('badge-notes-input').value.trim();
+  const batchId='batch_'+Date.now();
+  const time=new Date().toISOString();
+  const issuedBy=officer||'—';
+  const badgeLabels=[];
+  [...badgeSelection].forEach(badgeId=>{
+    const info=_badgeInfo(badgeId);
+    if(!info)return;
+    const entry={id:'blog_out_'+Date.now()+'_'+badgeId,batchId,badgeId,badgeLabel:info.key,catLabel:info.cat.label,type:'out',person,company,phone,notes,issuedBy,time};
+    badgeLog.push(entry);
+    badgeCheckedOut[badgeId]=entry;
+    badgeLabels.push(info.key);
+  });
+  saveBadgeState();
+  try{
+    if(window._supabase){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const rows=[...badgeSelection].map(badgeId=>{
+          const info=_badgeInfo(badgeId);
+          if(!info)return null;
+          return{
+            user_id:session.user.id,
+            badge_id:badgeId,
+            badge_label:info.key,
+            cat_label:info.cat.label,
+            person,company,phone,notes,
+            issued_by:issuedBy,
+            batch_id:batchId,
+            checked_out_at:time,
+            shift_id:shiftId
+          };
+        }).filter(Boolean);
+        if(rows.length){
+          const{error}=await window._supabase
+            .from('badge_checked_out_current')
+            .upsert(rows,{onConflict:'badge_id'});
+          if(error)console.warn('badge checkout supabase error:',error.message);
+        }
+      }
+    }
+  }catch(e){console.warn('badge checkout supabase exception:',e.message);}
+  try{
+    if(window._supabase){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const logRows=[...badgeSelection].map(badgeId=>{
+          const info=_badgeInfo(badgeId);
+          if(!info)return null;
+          return{
+            user_id:session.user.id,
+            badge_id:badgeId,
+            badge_label:info.key,
+            cat_label:info.cat.label,
+            type:'out',
+            person,company,phone,notes,
+            issued_by:issuedBy,
+            batch_id:batchId,
+            event_time:time
+          };
+        }).filter(Boolean);
+        if(logRows.length){
+          const{error}=await window._supabase
+            .from('badge_log')
+            .insert(logRows);
+          if(error)console.warn('badge_log insert error:',error.message);
+        }
+      }
+    }
+  }catch(e){console.warn('badge_log insert exception:',e.message);}
+  // BADGE CONTACT MEMORY — reuses the shared key_contacts table (keyed on name_normalized, company_normalized); does not replace badge_log/badge_checked_out_current above.
+  try{
+    if(window._supabase){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const nameNorm=person.toLowerCase().trim();
+        const companyNorm=company.toLowerCase().trim();
+        const{error}=await window._supabase
+          .from('key_contacts')
+          .upsert({name:person,name_normalized:nameNorm,company:company||'',company_normalized:companyNorm,phone,last_used_at:time},{onConflict:'name_normalized,company_normalized'});
+        if(error)console.warn('key_contacts upsert error:',error.message);
+      }
+    }
+  }catch(e){console.warn('key_contacts upsert exception:',e.message);}
+  const darDetail=`Badges issued to ${person}${company?' ('+company+')':''}${phone?', '+phone:''}.${notes?' '+notes:''} Badges: ${badgeLabels.join(', ')}.`;
+  addEntry('badge','Badge checkout — '+(badgeLabels.length===1?badgeLabels[0]:badgeLabels.length+' badges'),darDetail);
+  badgeSelection.clear();
+  closeBadgeCheckoutSheet();
+  badgesActiveTab='out';
+  renderBadgesPane();
+  showToast('badges-toast','✓ '+badgeLabels.length+' badge'+(badgeLabels.length!==1?'s':'')+' checked out to '+person);
+}
+
+// ── BADGE CONTACT MEMORY (autocomplete on name/company, backed by the shared key_contacts table) ──
+let badgeContactDebounceTimers={name:null,company:null};
+let badgeContactResults={name:[],company:[]};
+function onBadgeContactInput(field){
+  clearTimeout(badgeContactDebounceTimers[field]);
+  badgeContactDebounceTimers[field]=setTimeout(()=>runBadgeContactSearch(field),250);
+}
+async function runBadgeContactSearch(field){
+  const inputId=field==='name'?'badge-person-input':'badge-company-input';
+  const ddId=field==='name'?'badge-person-suggestions':'badge-company-suggestions';
+  const dd=document.getElementById(ddId);
+  const term=document.getElementById(inputId).value.trim().toLowerCase();
+  if(!term){dd.classList.remove('show');dd.innerHTML='';return;}
+  if(!window._supabase)return;
+  try{
+    const col=field==='name'?'name_normalized':'company_normalized';
+    const{data,error}=await window._supabase
+      .from('key_contacts')
+      .select('name,company,phone')
+      .ilike(col,'%'+term+'%')
+      .order('last_used_at',{ascending:false})
+      .limit(5);
+    if(error||!data||!data.length){dd.classList.remove('show');dd.innerHTML='';return;}
+    badgeContactResults[field]=data;
+    dd.innerHTML=data.map((c,i)=>{
+      const label=c.company?`${_esc(c.name)} — ${_esc(c.company)}`:_esc(c.name);
+      return`<div class="badge-contact-suggestion-item" onmousedown="event.preventDefault()" onclick="selectBadgeContact('${field}',${i})">${label}</div>`;
+    }).join('');
+    dd.classList.add('show');
+  }catch(e){console.warn('key_contacts search exception:',e.message);}
+}
+function selectBadgeContact(field,i){
+  const c=(badgeContactResults[field]||[])[i];
+  if(!c)return;
+  document.getElementById('badge-person-input').value=c.name||'';
+  document.getElementById('badge-company-input').value=c.company||'';
+  document.getElementById('badge-phone-input').value=c.phone||'';
+  document.getElementById('badge-person-suggestions').classList.remove('show');
+  document.getElementById('badge-company-suggestions').classList.remove('show');
+  updateBadgeCheckoutBtn();
+}
+function hideBadgeContactSuggestions(ddId){
+  setTimeout(()=>{const dd=document.getElementById(ddId);if(dd)dd.classList.remove('show');},200);
+}
+
+// ── TEXT REMINDER (client-side sms: link only, no backend dispatch) ──
+function textBadgeContact(badgeId,batchId){
+  let entry=badgeId?badgeCheckedOut[badgeId]:null;
+  if(!entry&&batchId){entry=Object.values(badgeCheckedOut).find(e=>(e.batchId||e.id)===batchId);}
+  if(!entry||!entry.phone)return;
+  const firstName=(entry.person||'').trim().split(/\s+/)[0]||entry.person||'';
+  const message=`Hi ${firstName}, this is Canopy Security — could you return the badge checked out earlier today? Thanks!`;
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const sep=isIOS?'&':'?';
+  window.location.href=`sms:${entry.phone}${sep}body=${encodeURIComponent(message)}`;
+}
+
+// ── RETURN SHEET ──
+function openBadgeReturnSheet(badgeId,batchId){
+  console.log('[ReturnSheet] opened with badgeId:', badgeId, 'batchId:', batchId, 'badgeCheckedOut keys:', Object.keys(badgeCheckedOut));
+  let entry=badgeId?badgeCheckedOut[badgeId]:null;
+  if(!entry&&batchId){entry=Object.values(badgeCheckedOut).find(e=>(e.batchId||e.id)===batchId);}
+  if(!entry)return;
+  const effectiveBatch=entry.batchId||entry.id;
+  const batchEntries=Object.values(badgeCheckedOut).filter(e=>(e.batchId||e.id)===effectiveBatch);
+  const isBatch=batchEntries.length>1;
+  if(badgeId&&isBatch){
+    _badgeReturnChecked=new Set([badgeId]);
+  }else{
+    _badgeReturnChecked=new Set(batchEntries.map(e=>e.badgeId));
+  }
+  const contact=[entry.company,entry.phone].filter(Boolean).join(' · ');
+  document.getElementById('badge-return-info').innerHTML=
+    `<div style="background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:3px">${_esc(entry.person)}</div>
+      ${contact?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">${_esc(contact)}</div>`:''}
+      <div style="font-size:11px;color:var(--text-tertiary)">Issued ${fmt(entry.time)} by ${_esc(entry.issuedBy)}</div>
+    </div>`;
+  const batchEl=document.getElementById('badge-return-batch-list');
+  if(isBatch){
+    batchEl.style.display='block';
+    batchEl.innerHTML=
+      `<div style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Select badges to return</div>`+
+      batchEntries.map(e=>`<label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border-secondary);cursor:pointer">
+        <input type="checkbox" value="${e.badgeId}" ${_badgeReturnChecked.has(e.badgeId)?'checked':''} onchange="badgesReturnToggle('${e.badgeId}',this.checked)" style="width:17px;height:17px;accent-color:var(--green);flex-shrink:0">
+        <div style="flex:1"><div style="font-size:13px;color:var(--text-primary)">${_esc(e.badgeLabel)}</div><div style="font-size:11px;color:var(--text-secondary)">${_esc(e.catLabel)}</div></div>
+      </label>`).join('')+
+      '<div style="margin-bottom:12px"></div>';
+  }else{
+    batchEl.style.display='none';
+    batchEl.innerHTML='';
+  }
+  document.getElementById('badge-return-notes').value='';
+  const retBtn=document.getElementById('badge-return-confirm-btn');
+  retBtn.disabled=false;
+  retBtn.textContent='Confirm return';
+  document.getElementById('badge-return-sheet').classList.add('open');
+}
+
+function badgesReturnToggle(badgeId,checked){
+  if(checked)_badgeReturnChecked.add(badgeId);
+  else _badgeReturnChecked.delete(badgeId);
+  const btn=document.getElementById('badge-return-confirm-btn');
+  if(btn){btn.disabled=_badgeReturnChecked.size===0;btn.textContent=_badgeReturnChecked.size===0?'Select at least one badge':'Confirm return';}
+}
+
+function closeBadgeReturnSheet(){
+  document.getElementById('badge-return-sheet').classList.remove('open');
+  _badgeReturnChecked=new Set();
+}
+
+async function confirmBadgeReturn(){
+  if(!_badgeReturnChecked.size)return;
+  const returnNotes=document.getElementById('badge-return-notes').value.trim();
+  const returnTime=new Date().toISOString();
+  const returnedBy=officer||'—';
+  const returned=[];
+  let samplePerson='—';
+
+  // Snapshot entries BEFORE deletion so Supabase blocks can use them
+  const _returnSnapshot={};
+  _badgeReturnChecked.forEach(bid=>{
+    if(badgeCheckedOut[bid])_returnSnapshot[bid]=badgeCheckedOut[bid];
+    else{
+      const found=[...badgeLog].reverse().find(e=>e.badgeId===bid&&e.type==='out');
+      if(found)_returnSnapshot[bid]=found;
+    }
+  });
+
+  // Build returned list and clean up local state
+  _badgeReturnChecked.forEach(badgeId=>{
+    const entry=_returnSnapshot[badgeId];
+    if(!entry)return;
+    if(samplePerson==='—')samplePerson=entry.person||'—';
+    badgeLog.push({...entry,id:'blog_in_'+Date.now()+'_'+badgeId,type:'in',returnTime,returnNotes,returnedBy});
+    delete badgeCheckedOut[badgeId];
+    returned.push(entry.badgeLabel||badgeId);
+  });
+  saveBadgeState();
+  _badgeReturnPending=true;
+  const _checkedIds=[..._badgeReturnChecked];
+
+  // DAR entry — use returned list if populated, otherwise use snapshot badges
+  const returnedLabels=returned.length
+    ? returned
+    : _checkedIds.map(bid=>_returnSnapshot[bid]?.badgeLabel||bid);
+  const person=samplePerson!=='—'
+    ? samplePerson
+    : _checkedIds.map(bid=>_returnSnapshot[bid]?.person).find(Boolean)||'—';
+  if(returnedLabels.length){
+    const darDetail=`${returnedLabels.join(', ')} returned by ${person}.${returnNotes?' '+returnNotes:''}`;
+    addEntry('badge','Badge return — '+(returnedLabels.length===1?returnedLabels[0]:returnedLabels.length+' badges'),darDetail);
+    showToast('badges-toast','✓ '+returnedLabels.length+' badge'+(returnedLabels.length!==1?'s':'')+' returned');
+  }else{
+    showToast('badges-toast','✓ Badge returned');
+  }
+
+  // Supabase delete — fires regardless of returned.length
+  try{
+    if(window._supabase&&_badgeReturnChecked.size){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const{error}=await window._supabase
+          .from('badge_checked_out_current')
+          .delete()
+          .in('badge_id',_checkedIds);
+        if(error)console.warn('badge return supabase error:',error.message);
+      }
+    }
+  }catch(e){console.warn('badge return supabase exception:',e.message);}
+  _badgeReturnPending=false;
+  closeBadgeReturnSheet();
+  renderBadgesPane();
+  updateHomeTiles();
+
+  // badge_log insert
+  try{
+    if(window._supabase&&_checkedIds.length){
+      const{data:{session}}=await window._supabase.auth.getSession();
+      if(session){
+        const returnRows=_checkedIds.map(badgeId=>{
+          const entry=_returnSnapshot[badgeId];
+          if(!entry)return null;
+          return{
+            user_id:session.user.id,
+            badge_id:badgeId,
+            badge_label:entry.badgeLabel||badgeId,
+            cat_label:entry.catLabel||entry.cat?.label||'',
+            type:'in',
+            person:entry.person||'—',
+            company:entry.company||'',
+            phone:entry.phone||'',
+            notes:returnNotes||'',
+            issued_by:entry.issuedBy||'',
+            returned_by:returnedBy,
+            batch_id:entry.batchId||'',
+            event_time:returnTime
+          };
+        }).filter(Boolean);
+        if(returnRows.length){
+          const{error}=await window._supabase
+            .from('badge_log')
+            .insert(returnRows);
+          if(error)console.warn('badge_log return insert error:',error.message);
+        }
+      }
+    }
+  }catch(e){console.warn('badge_log return insert exception:',e.message);}
+
+  passDowns=passDowns.filter(p=>!(p.badge_ids&&p.badge_ids.length&&p.badge_ids.every(bid=>!badgeCheckedOut[bid])));
   saveStorage();
   renderPassDownsBanner();
   if(paneVisible('passdowns'))renderPassDownsPage();
