@@ -2232,6 +2232,7 @@ function closeAddPassDownSheet(){document.getElementById('add-pd-sheet').classLi
 async function submitAddPassDown(){const text=document.getElementById('add-pd-textarea').value.trim();if(!text)return;const time=new Date().toISOString();let pdId='pd-'+Date.now();try{if(window._supabase){const{data:{session}}=await window._supabase.auth.getSession();if(session){const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:text,created_at:time}).select('id').single();if(!error&&data)pdId=String(data.id);}}}catch(e){console.warn('submitAddPassDown error:',e.message);}passDowns.unshift({id:pdId,officer,text,time});saveStorage();closeAddPassDownSheet();renderPassDownsPage();showToast('pd-page-toast','✓ Pass down saved');}
 function openPassDownModal(){
   loadKeyState();
+  loadBadgeState();
   const textarea=document.getElementById('pd-textarea');
   const outEntries=Object.values(keyCheckedOut);
   let prefix='';
@@ -2246,12 +2247,24 @@ function openPassDownModal(){
     });
     prefix+='\n';
   }
+  const badgeOutEntries=Object.values(badgeCheckedOut);
+  if(badgeOutEntries.length){
+    const byPerson={};
+    badgeOutEntries.forEach(e=>{if(!byPerson[e.person])byPerson[e.person]=[];byPerson[e.person].push(e);});
+    prefix+='🪪 BADGES STILL OUT:\n';
+    Object.entries(byPerson).forEach(([person,entries])=>{
+      const badges=entries.map(e=>e.badgeLabel).join(', ');
+      const s=entries[0];
+      prefix+=`- ${badges} — out to ${person}${s.company?' ('+s.company+')':''}${s.phone?', '+s.phone:''}. Issued ${fmt(s.time)} by ${s.issuedBy}.\n`;
+    });
+    prefix+='\n';
+  }
   textarea.value=prefix;
   document.getElementById('pd-submit-btn').disabled=!textarea.value.trim();
   document.getElementById('pd-modal').classList.add('open');
 }
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
-async function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const time=new Date().toISOString();let pdId='pd-'+Date.now();try{if(window._supabase){const{data:{session}}=await window._supabase.auth.getSession();if(session){const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:text,created_at:time}).select('id').single();if(!error&&data)pdId=String(data.id);}}}catch(e){console.warn('submitPassDown error:',e.message);}const pd={id:pdId,officer,text,time};if(text.startsWith('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
+async function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const time=new Date().toISOString();let pdId='pd-'+Date.now();try{if(window._supabase){const{data:{session}}=await window._supabase.auth.getSession();if(session){const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:text,created_at:time}).select('id').single();if(!error&&data)pdId=String(data.id);}}}catch(e){console.warn('submitPassDown error:',e.message);}const pd={id:pdId,officer,text,time};if(text.includes('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}if(text.includes('🪪 BADGES STILL OUT:')){pd.badge_ids=Object.keys(badgeCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
 function skipPassDown(){closePassDownModal();finalizeShift();}
 function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
 function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
