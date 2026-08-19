@@ -2045,6 +2045,7 @@ const fmtFull=d=>new Date(d).toLocaleString('en-US',{month:'short',day:'numeric'
 const fmtDate=d=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 const fmtMonthYear=d=>new Date(d).toLocaleDateString('en-US',{month:'long',year:'numeric'});
 const fmtDayLong=d=>new Date(d).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+const fmtShortDate=d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});
 const fmtRelative=iso=>{const h=Math.floor((Date.now()-new Date(iso))/3600000);if(h<1)return'Just now';if(h<24)return h+'h ago';const d=Math.floor(h/24);return d===1?'Yesterday':d+'d ago';};
 const daysUntilExpiry=iso=>Math.ceil((SEVEN_DAYS-(Date.now()-new Date(iso)))/86400000);
 function showToast(id,msg){const t=document.getElementById(id);if(!t)return;if(msg)t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
@@ -2467,7 +2468,7 @@ function saveDAREdit(idx){const ta=document.getElementById('dar-edit-ta-'+idx);i
 function updateStats(){document.getElementById('stat-patrols').textContent=stats.patrols;document.getElementById('stat-nm').textContent=stats.nm;document.getElementById('stat-checks').textContent=stats.checks;document.getElementById('stat-entries').textContent=currentShiftEntries().length;updateHomePatrolCounts();saveActiveShift();}
 function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPatrol.scans.length:0;const dcC=document.getElementById('datacenter-count');if(dcC)dcC.textContent=dcN>0?dcN+' round'+(dcN!==1?'s':''):'';const bkN=(typeof bkrPatrol!=='undefined')?bkrPatrol.scans.length:0;const bkC=document.getElementById('bunker-count');if(bkC)bkC.textContent=bkN>0?bkN+' round'+(bkN!==1?'s':''):'';}
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
-function renderEntries(entries,container,editable){container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${e.title}</div>${e.detail?`<div class="dar-detail">${e.detail}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
+function renderEntries(entries,container,editable,showDate){container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';const dateLine=showDate?`<div style="font-size:10px;color:var(--text-tertiary)">${fmtShortDate(e.time)}</div>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${dateLine}${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${e.title}</div>${e.detail?`<div class="dar-detail">${e.detail}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
 function renderCurrentDAR(){const d=shiftStart||new Date();const el=document.getElementById('dar-date-lbl');if(el)el.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});const c=document.getElementById('dar-entries');if(c)renderEntries(currentShiftEntries(),c,true);}
 let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null;
 function _historyFilteredEntries(){
@@ -2503,7 +2504,7 @@ function populateHistoryOfficerFilter(){const s=document.getElementById('hist-of
 function renderHistoryCurrentEntries(){
   const c=document.getElementById('history-current-entries');
   const entries=_historyFilteredEntries();
-  if(c)renderEntries(entries,c,false);
+  if(c)renderEntries(entries,c,false,true);
   const countEl=document.getElementById('history-current-count');
   if(countEl)countEl.textContent=entries.length+' entr'+(entries.length!==1?'ies':'y')+(historyDateFilter?' on '+fmtDayLong(historyDateFilter):' this month');
 }
