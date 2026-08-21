@@ -2470,9 +2470,9 @@ function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPa
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function renderEntries(entries,container,editable,showDate){container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';const dateLine=showDate?`<div style="font-size:10px;color:var(--text-tertiary)">${fmtShortDate(e.time)}</div>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${dateLine}${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${e.title}</div>${e.detail?`<div class="dar-detail">${e.detail}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
 function renderCurrentDAR(){const d=shiftStart||new Date();const el=document.getElementById('dar-date-lbl');if(el)el.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});const c=document.getElementById('dar-entries');if(c)renderEntries(currentShiftEntries(),c,true);}
-let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null;
+let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null,historyEntriesCache=null;
 function _historyFilteredEntries(){
-  return darLog.filter(e=>{
+  return (historyEntriesCache||[]).filter(e=>{
     if(historyDateFilter){
       const t=e.time instanceof Date?e.time:new Date(e.time);
       if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
@@ -2481,6 +2481,16 @@ function _historyFilteredEntries(){
     return true;
   });
 }
+// Fresh Supabase load each time — mirrors ensureSearchCache()'s reliability but never
+// trusts a stale cache, since History must reflect Supabase even if darLog fell behind.
+async function _refreshHistoryEntries(){
+  const c=document.getElementById('history-current-entries');
+  const countEl=document.getElementById('history-current-count');
+  if(c&&historyEntriesCache===null)c.innerHTML='<div class="no-results">Loading…</div>';
+  if(countEl&&historyEntriesCache===null)countEl.textContent='Loading…';
+  historyEntriesCache=await _loadDarEntriesForMonth();
+  renderHistoryCurrentEntries();
+}
 function applyHistoryDateFilter(){
   const v=document.getElementById('hist-date-filter').value;
   if(!v){historyDateFilter=null;}
@@ -2488,17 +2498,17 @@ function applyHistoryDateFilter(){
     const[y,m,d]=v.split('-').map(Number);
     historyDateFilter=new Date(y,m-1,d);
   }
-  renderHistoryCurrentEntries();
+  _refreshHistoryEntries();
 }
 function clearHistoryDateFilter(){
   const inp=document.getElementById('hist-date-filter');
   if(inp)inp.value='';
   historyDateFilter=null;
-  renderHistoryCurrentEntries();
+  _refreshHistoryEntries();
 }
 function applyHistoryOfficerFilter(){
   historyOfficerFilter=document.getElementById('hist-officer-filter').value||null;
-  renderHistoryCurrentEntries();
+  _refreshHistoryEntries();
 }
 function populateHistoryOfficerFilter(){const s=document.getElementById('hist-officer-filter');if(!s)return;const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
 function renderHistoryCurrentEntries(){
@@ -2519,7 +2529,7 @@ function renderHistory(){
     inp.max=toVal(last);
   }
   populateHistoryOfficerFilter();
-  renderHistoryCurrentEntries();
+  _refreshHistoryEntries();
   renderPreviousMonths();
 }
 async function _fetchPreviousMonths(){
