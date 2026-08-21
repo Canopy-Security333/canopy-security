@@ -4066,14 +4066,25 @@ async function _loadDarEntriesForMonth(){
     const now=new Date();
     const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
     const nextMonthStart=new Date(now.getFullYear(),now.getMonth()+1,1);
-    const{data,error}=await window._supabase
-      .from('dar_entries')
-      .select('*')
-      .gte('created_at',monthStart.toISOString())
-      .lt('created_at',nextMonthStart.toISOString())
-      .order('created_at',{ascending:true});
-    if(error||!data)return [];
-    return data.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at),officer:e.officer||''}));
+    // Paginate past Supabase/PostgREST's default 1000-row cap — a busy month can exceed
+    // that in one page, which silently truncated later days (e.g. History showing
+    // "0 entries" on a day that in fact has entries sitting past row 1000).
+    const pageSize=1000;
+    let all=[],from=0;
+    while(true){
+      const{data,error}=await window._supabase
+        .from('dar_entries')
+        .select('*')
+        .gte('created_at',monthStart.toISOString())
+        .lt('created_at',nextMonthStart.toISOString())
+        .order('created_at',{ascending:true})
+        .range(from,from+pageSize-1);
+      if(error||!data)break;
+      all=all.concat(data);
+      if(data.length<pageSize)break;
+      from+=pageSize;
+    }
+    return all.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at),officer:e.officer||''}));
   }catch(e){console.warn('_loadDarEntriesForMonth exception:',e.message);return [];}
 }
 async function clearShiftFromSupabase(officerName){
