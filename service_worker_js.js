@@ -4,7 +4,7 @@
 // Bump VERSION with every deployment. Changing it
 // invalidates the old cache and triggers the
 // "App updated — tap to reload" banner on all devices.
-const VERSION = '1.0.2';
+const VERSION = '1.0.3';
 const CACHE_NAME = 'canopy-v' + VERSION;
 
 // App shell — everything needed to render the UI offline.
