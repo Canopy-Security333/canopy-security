@@ -1374,7 +1374,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="lbl" style="margin-top:0">Current DAR</div>
         <div class="search-bar" style="margin-bottom:6px"><input type="date" id="hist-date-filter" onchange="applyHistoryDateFilter()"/><button class="mic-btn" onclick="clearHistoryDateFilter()" title="Clear date filter">✕</button><select id="hist-officer-filter" onchange="applyHistoryOfficerFilter()"><option value="">All officers</option></select></div>
         <div class="result-count" id="history-current-count"></div>
-        <div class="search-bar"><input type="text" id="history-search-input" placeholder="Search DAR entries…" oninput="renderHistoryCurrentEntries()"/><button class="mic-btn" id="mic-btn-history-search" onclick="toggleDictation('history-search-input','mic-btn-history-search')" title="Dictate search" style="flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button></div>
+        <div class="search-bar"><input type="text" id="history-search-input" placeholder="Search DAR entries…" oninput="onHistorySearchInput('history-search-input')"/><button class="mic-btn" id="mic-btn-history-search" onclick="toggleDictation('history-search-input','mic-btn-history-search')" title="Dictate search" style="flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button></div>
         <div id="history-current-entries"><div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div></div>
         <div class="export-row"><button class="export-btn-sm" onclick="copyCurrentMonthDAR()">Copy as text</button><button class="export-btn-sm primary" onclick="previewCurrentMonthDAR()">Preview &amp; export</button></div>
         <div id="history-current-preview-area" style="margin-top:10px"></div>
@@ -1385,6 +1385,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div id="history-detail-view" style="display:none">
         <div class="detail-back" onclick="closeDetail()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4l-4 4 4 4"/></svg>Back to history</div>
         <div style="margin-bottom:12px"><div style="font-size:16px;font-weight:600;color:var(--text-primary)" id="detail-title"></div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px" id="detail-sub"></div></div>
+        <div class="search-bar" style="margin-bottom:6px"><input type="date" id="detail-date-filter" onchange="applyHistoryDateFilter('detail-date-filter')"/><button class="mic-btn" onclick="clearHistoryDateFilter('detail-date-filter')" title="Clear date filter">✕</button><select id="detail-officer-filter" onchange="applyHistoryOfficerFilter('detail-officer-filter')"><option value="">All officers</option></select></div>
+        <div class="search-bar"><input type="text" id="detail-search-input" placeholder="Search DAR entries…" oninput="onHistorySearchInput('detail-search-input')"/><button class="mic-btn" id="mic-btn-detail-search" onclick="toggleDictation('detail-search-input','mic-btn-detail-search')" title="Dictate search" style="flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button></div>
         <div class="card" style="padding:8px 12px" id="detail-entries"></div>
         <div class="export-row"><button class="export-btn-sm" onclick="copyDetailDAR()">Copy as text</button><button class="export-btn-sm primary" onclick="previewDetailDAR()">Preview &amp; export</button></div>
         <div id="detail-preview-area" style="margin-top:10px"></div>
@@ -2446,7 +2448,7 @@ function toggleDictation(inputId,btnId){
   recognition.onend=()=>{
     btn.classList.remove('recording');
     btn.title='Dictate note';
-    const placeholders={'note-input':'e.g. Escorted visitor to Canopy 3…','dar-note-input':'Add a note to this DAR…','nm-desc':'Describe what was observed...','pd-textarea':'e.g. North parking lot light is out — facilities notified…','add-pd-textarea':'e.g. Badge reader at Canopy 3 side entrance is intermittent…','history-search-input':'Search DAR entries…'};
+    const placeholders={'note-input':'e.g. Escorted visitor to Canopy 3…','dar-note-input':'Add a note to this DAR…','nm-desc':'Describe what was observed...','pd-textarea':'e.g. North parking lot light is out — facilities notified…','add-pd-textarea':'e.g. Badge reader at Canopy 3 side entrance is intermittent…','history-search-input':'Search DAR entries…','detail-search-input':'Search DAR entries…'};
     inp.placeholder=placeholders[inputId]||'';
     activeDictation=null;
     inp.focus();
@@ -2466,7 +2468,7 @@ function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPa
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function renderEntries(entries,container,editable,showDate){container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';const dateLine=showDate?`<div style="font-size:10px;color:var(--text-tertiary)">${fmtShortDate(e.time)}</div>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${dateLine}${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${e.title}</div>${e.detail?`<div class="dar-detail">${e.detail}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
 function renderCurrentDAR(){const d=shiftStart||new Date();const el=document.getElementById('dar-date-lbl');if(el)el.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});const c=document.getElementById('dar-entries');if(c)renderEntries(currentShiftEntries(),c,true);}
-let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null,historyEntriesCache=null;
+let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null,historyEntriesCache=null,historySearchQueryRaw='',viewingMonthKey=null,viewingMonthLabel='';
 function _historyFilteredEntries(){
   return (historyEntriesCache||[]).filter(e=>{
     if(historyDateFilter){
@@ -2476,6 +2478,34 @@ function _historyFilteredEntries(){
     if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
     return true;
   });
+}
+// Same date/officer/text filtering as _historyFilteredEntries(), plus search text — used by
+// the detail view to narrow a single month's already-in-memory entries (monthDetailCache),
+// no Supabase round trip needed since the full month is already cached.
+function _applyStateFilters(entries){
+  const q=_historySearchQuery();
+  return entries.filter(e=>{
+    if(historyDateFilter){
+      const t=e.time instanceof Date?e.time:new Date(e.time);
+      if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
+    }
+    if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
+    if(q){
+      const hay=(e.title+' '+(e.detail||'')).toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+}
+// Single shared filter state (historyDateFilter/historyOfficerFilter/historySearchQueryRaw) is
+// read by both the History list view and the detail view — this keeps their two sets of
+// controls (list: hist-*/history-search-input, detail: detail-*) mirroring each other instead
+// of drifting out of sync.
+function _syncFilterInputsFromState(){
+  const dateVal=historyDateFilter?(historyDateFilter.getFullYear()+'-'+String(historyDateFilter.getMonth()+1).padStart(2,'0')+'-'+String(historyDateFilter.getDate()).padStart(2,'0')):'';
+  ['hist-date-filter','detail-date-filter'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==dateVal)el.value=dateVal;});
+  ['hist-officer-filter','detail-officer-filter'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=historyOfficerFilter||'';});
+  ['history-search-input','detail-search-input'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==historySearchQueryRaw)el.value=historySearchQueryRaw;});
 }
 // Fresh Supabase load each time — mirrors ensureSearchCache()'s reliability but never
 // trusts a stale cache, since History must reflect Supabase even if darLog fell behind.
@@ -2487,27 +2517,41 @@ async function _refreshHistoryEntries(){
   historyEntriesCache=await _loadDarEntriesForMonth();
   renderHistoryCurrentEntries();
 }
-function applyHistoryDateFilter(){
-  const v=document.getElementById('hist-date-filter').value;
+function applyHistoryDateFilter(sourceId){
+  sourceId=sourceId||'hist-date-filter';
+  const v=document.getElementById(sourceId).value;
   if(!v){historyDateFilter=null;}
   else{
     const[y,m,d]=v.split('-').map(Number);
     historyDateFilter=new Date(y,m-1,d);
   }
-  _refreshHistoryEntries();
+  _syncFilterInputsFromState();
+  if(sourceId==='detail-date-filter')_renderDetailEntries();
+  else _refreshHistoryEntries();
 }
-function clearHistoryDateFilter(){
-  const inp=document.getElementById('hist-date-filter');
-  if(inp)inp.value='';
+function clearHistoryDateFilter(sourceId){
+  sourceId=sourceId||'hist-date-filter';
   historyDateFilter=null;
-  _refreshHistoryEntries();
+  _syncFilterInputsFromState();
+  if(sourceId==='detail-date-filter')_renderDetailEntries();
+  else _refreshHistoryEntries();
 }
-function applyHistoryOfficerFilter(){
-  historyOfficerFilter=document.getElementById('hist-officer-filter').value||null;
-  _refreshHistoryEntries();
+function applyHistoryOfficerFilter(sourceId){
+  sourceId=sourceId||'hist-officer-filter';
+  historyOfficerFilter=document.getElementById(sourceId).value||null;
+  _syncFilterInputsFromState();
+  if(sourceId==='detail-officer-filter')_renderDetailEntries();
+  else _refreshHistoryEntries();
 }
-function populateHistoryOfficerFilter(){const s=document.getElementById('hist-officer-filter');if(!s)return;const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
-function _historySearchQuery(){const el=document.getElementById('history-search-input');return el?el.value.trim().toLowerCase():'';}
+function onHistorySearchInput(sourceId){
+  const el=document.getElementById(sourceId);
+  historySearchQueryRaw=el?el.value:'';
+  _syncFilterInputsFromState();
+  if(sourceId==='detail-search-input')_renderDetailEntries();
+  else renderHistoryCurrentEntries();
+}
+function populateHistoryOfficerFilter(selectId){selectId=selectId||'hist-officer-filter';const s=document.getElementById(selectId);if(!s)return;const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
+function _historySearchQuery(){return historySearchQueryRaw.trim().toLowerCase();}
 // What Copy/Preview/the inline list should export right now: search results (searched across
 // all months, like the old dedicated Search tab) when a query is typed, otherwise the
 // current month narrowed by the date/officer filters — same scope the collapsed card shows.
@@ -2528,8 +2572,7 @@ function _historyCurrentScopeLabel(){
   const q=_historySearchQuery();
   const dateLbl=historyDateFilter?fmtDayLong(historyDateFilter):fmtMonthYear(new Date());
   if(!q)return dateLbl;
-  const raw=document.getElementById('history-search-input').value.trim();
-  return'Search "'+raw+'"'+(historyDateFilter?' on '+dateLbl:'');
+  return'Search "'+historySearchQueryRaw.trim()+'"'+(historyDateFilter?' on '+dateLbl:'');
 }
 function renderHistoryCurrentEntries(){
   const q=_historySearchQuery();
@@ -2566,7 +2609,8 @@ function renderHistory(){
     inp.min=toVal(first);
     inp.max=toVal(last);
   }
-  populateHistoryOfficerFilter();
+  populateHistoryOfficerFilter('hist-officer-filter');
+  _syncFilterInputsFromState();
   _refreshHistoryEntries();
   ensureSearchCache();
   renderPreviousMonths();
@@ -2631,43 +2675,60 @@ async function _fetchMonthEntries(year,month){
 async function viewMonthRecord(year,month){
   document.getElementById('history-list-view').style.display='none';
   document.getElementById('history-detail-view').style.display='block';
-  const label=fmtMonthYear(new Date(year,month,1));
-  document.getElementById('detail-title').textContent=label;
+  viewingMonthKey=year+'-'+month;
+  viewingMonthLabel=fmtMonthYear(new Date(year,month,1));
+  document.getElementById('detail-title').textContent=viewingMonthLabel;
   document.getElementById('detail-sub').textContent='Loading…';
   document.getElementById('detail-entries').innerHTML='';
   document.getElementById('detail-preview-area').innerHTML='';
-  const key=year+'-'+month;
+  // A date filter carried over from History only makes sense if it falls within this month —
+  // otherwise every month but the one it was set on would render as empty, which reads as a
+  // bug rather than an inherited filter. Officer/search filters remain meaningful for any month.
+  if(historyDateFilter&&(historyDateFilter.getFullYear()!==year||historyDateFilter.getMonth()!==month)){
+    historyDateFilter=null;
+  }
+  const dInp=document.getElementById('detail-date-filter');
+  if(dInp){
+    const first=new Date(year,month,1),last=new Date(year,month+1,0);
+    const toVal=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    dInp.min=toVal(first);dInp.max=toVal(last);
+  }
+  populateHistoryOfficerFilter('detail-officer-filter');
+  _syncFilterInputsFromState();
+  const key=viewingMonthKey;
   let entries=monthDetailCache[key];
   if(!entries){entries=await _fetchMonthEntries(year,month);monthDetailCache[key]=entries;}
-  viewingRecord={dateLabel:label,entries};
-  document.getElementById('detail-sub').textContent=entries.length+' entr'+(entries.length!==1?'ies':'y');
-  renderEntries(entries,document.getElementById('detail-entries'),false);
+  _renderDetailEntries();
 }
-function closeDetail(){document.getElementById('history-list-view').style.display='block';document.getElementById('history-detail-view').style.display='none';viewingRecord=null;}
+// Re-renders whatever month is currently open in the detail view, applying the shared
+// date/officer/search state client-side against the already-cached full month — called on
+// open and whenever any filter/search control (list or detail) changes while it's visible.
+function _renderDetailEntries(){
+  if(viewingMonthKey===null)return;
+  const all=monthDetailCache[viewingMonthKey]||[];
+  const filtered=_applyStateFilters(all);
+  const label=historyDateFilter?fmtDayLong(historyDateFilter):viewingMonthLabel;
+  document.getElementById('detail-title').textContent=label;
+  document.getElementById('detail-sub').textContent=filtered.length+' entr'+(filtered.length!==1?'ies':'y');
+  renderEntries(filtered,document.getElementById('detail-entries'),false);
+  viewingRecord={dateLabel:label,entries:filtered};
+}
+function closeDetail(){
+  document.getElementById('history-list-view').style.display='block';
+  document.getElementById('history-detail-view').style.display='none';
+  viewingRecord=null;viewingMonthKey=null;
+  _syncFilterInputsFromState();
+  renderHistoryCurrentEntries();
+}
 // Tapping the collapsed current-month card — reuses viewMonthRecord()'s fetch/cache/render
-// flow (so Previous DARs cards stay byte-for-byte unchanged), then layers the active
-// date/officer filter on top without touching monthDetailCache. The current month is still
-// being written to all shift long, so its cache entry is force-invalidated first — unlike
-// closed previous months, it can never be trusted to stay fresh for the rest of the session.
+// flow (so Previous DARs cards stay byte-for-byte unchanged); the active date/officer/search
+// state is applied automatically by _renderDetailEntries(). The current month is still being
+// written to all shift long, so its cache entry is force-invalidated first — unlike closed
+// previous months, it can never be trusted to stay fresh for the rest of the session.
 async function openCurrentMonthDetail(){
   const now=new Date();
   delete monthDetailCache[now.getFullYear()+'-'+now.getMonth()];
   await viewMonthRecord(now.getFullYear(),now.getMonth());
-  if(historyDateFilter||historyOfficerFilter){
-    const filtered=viewingRecord.entries.filter(e=>{
-      if(historyDateFilter){
-        const t=e.time instanceof Date?e.time:new Date(e.time);
-        if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
-      }
-      if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
-      return true;
-    });
-    const label=historyDateFilter?fmtDayLong(historyDateFilter):viewingRecord.dateLabel;
-    viewingRecord={dateLabel:label,entries:filtered};
-    document.getElementById('detail-title').textContent=label;
-    document.getElementById('detail-sub').textContent=filtered.length+' entr'+(filtered.length!==1?'ies':'y');
-    renderEntries(filtered,document.getElementById('detail-entries'),false);
-  }
 }
 function copyCurrentMonthDAR(){const entries=_historyCurrentScopeEntries();const dateLabel=_historyCurrentScopeLabel();const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
 function previewCurrentMonthDAR(){const entries=_historyCurrentScopeEntries();const dateLabel=_historyCurrentScopeLabel();const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};document.getElementById('history-current-preview-area').innerHTML=buildPreviewHTML(r);}
