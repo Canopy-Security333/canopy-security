@@ -1360,7 +1360,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
   <!-- DAR PANE -->
   <div id="pane-dar" class="pane" style="display:none">
     <div class="toast" id="copy-toast">Copied to clipboard!</div>
-    <div class="dar-tabs"><button class="dar-tab act" onclick="showDarSub('current',this)">Current shift</button><button class="dar-tab" onclick="showDarSub('history',this)">History</button><button class="dar-tab" onclick="showDarSub('search',this)">Search</button></div>
+    <div class="dar-tabs"><button class="dar-tab act" onclick="showDarSub('current',this)">Current shift</button><button class="dar-tab" onclick="showDarSub('history',this)">History</button></div>
     <div id="dar-sub-current" class="dar-sub act">
       <div class="toast" id="dar-note-toast" style="margin-bottom:8px">Note added to DAR</div>
       <div class="lbl" id="dar-date-lbl" style="margin-top:0"></div>
@@ -1374,7 +1374,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="lbl" style="margin-top:0">Current DAR</div>
         <div class="search-bar" style="margin-bottom:6px"><input type="date" id="hist-date-filter" onchange="applyHistoryDateFilter()"/><button class="mic-btn" onclick="clearHistoryDateFilter()" title="Clear date filter">✕</button><select id="hist-officer-filter" onchange="applyHistoryOfficerFilter()"><option value="">All officers</option></select></div>
         <div class="result-count" id="history-current-count"></div>
-        <div class="card" style="padding:8px 12px" id="history-current-entries"><div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div></div>
+        <div class="search-bar"><input type="text" id="history-search-input" placeholder="Search DAR entries…" oninput="renderHistoryCurrentEntries()"/><button class="mic-btn" id="mic-btn-history-search" onclick="toggleDictation('history-search-input','mic-btn-history-search')" title="Dictate search" style="flex-shrink:0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="9" y1="22" x2="15" y2="22"/></svg></button></div>
+        <div id="history-current-entries"><div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div></div>
         <div class="export-row"><button class="export-btn-sm" onclick="copyCurrentMonthDAR()">Copy as text</button><button class="export-btn-sm primary" onclick="previewCurrentMonthDAR()">Preview &amp; export</button></div>
         <div id="history-current-preview-area" style="margin-top:10px"></div>
         <div class="lbl">Previous DARs</div>
@@ -1388,11 +1389,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
         <div class="export-row"><button class="export-btn-sm" onclick="copyDetailDAR()">Copy as text</button><button class="export-btn-sm primary" onclick="previewDetailDAR()">Preview &amp; export</button></div>
         <div id="detail-preview-area" style="margin-top:10px"></div>
       </div>
-    </div>
-    <div id="dar-sub-search" class="dar-sub" style="display:none">
-      <div class="search-bar"><input type="text" id="search-input" placeholder="Search DAR entries…" oninput="runSearch()"/><select id="search-officer" onchange="runSearch()"><option value="">All officers</option></select></div>
-      <div class="result-count" id="search-count"></div>
-      <div id="search-results"></div>
     </div>
 
     <div class="bottom-nav" style="gap:12px">
@@ -2066,7 +2062,7 @@ function showPane(id,btn){
   const p=document.getElementById('pane-'+id);
   if(id==='home'){p.style.display='flex';}else{p.style.display='block';}
   p.classList.add('act');
-  if(id==='dar'){renderCurrentDAR();renderHistory();populateSearchOfficers();}
+  if(id==='dar'){renderCurrentDAR();renderHistory();}
   if(id==='home'){renderBP();renderDCPatrol();renderBunkerPatrol();updateHomePatrolCounts();updateHomeTiles();updateFEEntryCard();}
   if(id==='home-bp'){renderBP();renderBoiler();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='reports'){updateReportsTiles();}
@@ -2128,7 +2124,7 @@ function updateReportsTiles(){
   const active=passDowns.filter(p=>Date.now()-new Date(p.time)<SEVEN_DAYS);
   if(pdSub)pdSub.textContent=active.length===0?'No active notes':active.length+' active note'+(active.length!==1?'s':'');
 }
-function showDarSub(id,btn){document.querySelectorAll('.dar-sub').forEach(s=>{s.style.display='none';s.classList.remove('act')});const s=document.getElementById('dar-sub-'+id);s.style.display='block';s.classList.add('act');document.querySelectorAll('.dar-tab').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history')renderHistory();if(id==='search'){populateSearchOfficers();ensureSearchCache();}}
+function showDarSub(id,btn){document.querySelectorAll('.dar-sub').forEach(s=>{s.style.display='none';s.classList.remove('act')});const s=document.getElementById('dar-sub-'+id);s.style.display='block';s.classList.add('act');document.querySelectorAll('.dar-tab').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');if(id==='history')renderHistory();}
 function toggleMenu(){const btn=document.getElementById('hamburger-btn'),drawer=document.getElementById('menu-drawer'),overlay=document.getElementById('menu-overlay');const open=drawer.classList.contains('open');btn.classList.toggle('open',!open);drawer.classList.toggle('open',!open);overlay.classList.toggle('open',!open);}
 function closeMenu(){document.getElementById('hamburger-btn').classList.remove('open');document.getElementById('menu-drawer').classList.remove('open');document.getElementById('menu-overlay').classList.remove('open');}
 function menuAdmin(){closeMenu();prevScreen='main';showScreen('admin');}
@@ -2450,7 +2446,7 @@ function toggleDictation(inputId,btnId){
   recognition.onend=()=>{
     btn.classList.remove('recording');
     btn.title='Dictate note';
-    const placeholders={'note-input':'e.g. Escorted visitor to Canopy 3…','dar-note-input':'Add a note to this DAR…','nm-desc':'Describe what was observed...','pd-textarea':'e.g. North parking lot light is out — facilities notified…','add-pd-textarea':'e.g. Badge reader at Canopy 3 side entrance is intermittent…'};
+    const placeholders={'note-input':'e.g. Escorted visitor to Canopy 3…','dar-note-input':'Add a note to this DAR…','nm-desc':'Describe what was observed...','pd-textarea':'e.g. North parking lot light is out — facilities notified…','add-pd-textarea':'e.g. Badge reader at Canopy 3 side entrance is intermittent…','history-search-input':'Search DAR entries…'};
     inp.placeholder=placeholders[inputId]||'';
     activeDictation=null;
     inp.focus();
@@ -2511,12 +2507,54 @@ function applyHistoryOfficerFilter(){
   _refreshHistoryEntries();
 }
 function populateHistoryOfficerFilter(){const s=document.getElementById('hist-officer-filter');if(!s)return;const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
+function _historySearchQuery(){const el=document.getElementById('history-search-input');return el?el.value.trim().toLowerCase():'';}
+// What Copy/Preview/the inline list should export right now: search results (searched across
+// all months, like the old dedicated Search tab) when a query is typed, otherwise the
+// current month narrowed by the date/officer filters — same scope the collapsed card shows.
+function _historyCurrentScopeEntries(){
+  const q=_historySearchQuery();
+  if(!q)return _historyFilteredEntries();
+  return (searchEntriesCache||[]).filter(e=>{
+    if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
+    if(historyDateFilter){
+      const t=e.time instanceof Date?e.time:new Date(e.time);
+      if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
+    }
+    const hay=(e.title+' '+(e.detail||'')).toLowerCase();
+    return hay.includes(q);
+  });
+}
+function _historyCurrentScopeLabel(){
+  const q=_historySearchQuery();
+  const dateLbl=historyDateFilter?fmtDayLong(historyDateFilter):fmtMonthYear(new Date());
+  if(!q)return dateLbl;
+  const raw=document.getElementById('history-search-input').value.trim();
+  return'Search "'+raw+'"'+(historyDateFilter?' on '+dateLbl:'');
+}
 function renderHistoryCurrentEntries(){
+  const q=_historySearchQuery();
   const c=document.getElementById('history-current-entries');
-  const entries=_historyFilteredEntries();
-  if(c)renderEntries(entries,c,false,true);
   const countEl=document.getElementById('history-current-count');
-  if(countEl)countEl.textContent=entries.length+' entr'+(entries.length!==1?'ies':'y')+(historyDateFilter?' on '+fmtDayLong(historyDateFilter):' this month');
+  if(!c)return;
+  if(q){
+    // Inline search mode — mirrors the old dedicated Search tab, now living inside History.
+    if(searchEntriesCache===null){
+      if(countEl)countEl.textContent='Loading…';
+      c.innerHTML='<div class="no-results">Loading…</div>';
+      return;
+    }
+    const results=_historyCurrentScopeEntries();
+    if(countEl)countEl.textContent=results.length+' result'+(results.length!==1?'s':'');
+    c.innerHTML=results.length?results.map(entry=>{const tc=TC[entry.type]||TC.note;const hl=t=>t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="search-highlight">$1</span>');return`<div class="nm-item" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:600;color:var(--text-primary)">${entry.officer||'—'}</span><span style="font-size:11px;color:var(--text-secondary)">${fmtFull(entry.time)}</span></div><div style="font-size:13px;color:var(--text-primary)">${hl(entry.title)}</div>${entry.detail?`<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${hl(entry.detail)}</div>`:''}<span class="dtag ${tc.tag}" style="margin-top:4px">${tc.label}</span></div>`;}).join(''):'<div class="no-results">No matching entries found.</div>';
+  }else{
+    // Collapsed summary card — same style/tap-through as the Previous DARs month cards below,
+    // counted fresh from historyEntriesCache (Supabase, reloaded on open/filter change) — never darLog.
+    const entries=_historyFilteredEntries();
+    if(countEl)countEl.textContent=entries.length+' entr'+(entries.length!==1?'ies':'y')+(historyDateFilter?' on '+fmtDayLong(historyDateFilter):' this month');
+    const nmCount=entries.filter(e=>e.type==='nearmiss').length;
+    const label=historyDateFilter?fmtDayLong(historyDateFilter):fmtMonthYear(new Date());
+    c.innerHTML=`<div class="saved-dar-card" onclick="openCurrentMonthDetail()"><div class="sdc-top"><div class="sdc-name">${label}</div></div><div class="sdc-meta"><span>${entries.length} entr${entries.length!==1?'ies':'y'}</span><span class="sdc-badge">${nmCount} near miss</span></div></div>`;
+  }
 }
 function renderHistory(){
   const inp=document.getElementById('hist-date-filter');
@@ -2530,6 +2568,7 @@ function renderHistory(){
   }
   populateHistoryOfficerFilter();
   _refreshHistoryEntries();
+  ensureSearchCache();
   renderPreviousMonths();
 }
 async function _fetchPreviousMonths(){
@@ -2537,8 +2576,18 @@ async function _fetchPreviousMonths(){
   try{
     const now=new Date();
     const monthStart=new Date(now.getFullYear(),now.getMonth(),1);
-    const{data,error}=await window._supabase.from('dar_entries').select('created_at,type').lt('created_at',monthStart.toISOString()).order('created_at',{ascending:false});
-    if(error||!data)return [];
+    // Paginate past PostgREST's default 1000-row cap — same fix as _loadDarEntriesForMonth().
+    // Cumulative across ALL previous months, so this can exceed the cap even sooner than a
+    // single month's query would.
+    const pageSize=1000;
+    let data=[],from=0;
+    while(true){
+      const{data:page,error}=await window._supabase.from('dar_entries').select('created_at,type').lt('created_at',monthStart.toISOString()).order('created_at',{ascending:false}).range(from,from+pageSize-1);
+      if(error||!page)break;
+      data=data.concat(page);
+      if(page.length<pageSize)break;
+      from+=pageSize;
+    }
     const groups={};
     data.forEach(r=>{
       const d=new Date(r.created_at);
@@ -2566,9 +2615,17 @@ async function _fetchMonthEntries(year,month){
   try{
     const start=new Date(year,month,1);
     const end=new Date(year,month+1,1);
-    const{data,error}=await window._supabase.from('dar_entries').select('*').gte('created_at',start.toISOString()).lt('created_at',end.toISOString()).order('created_at',{ascending:true});
-    if(error||!data)return [];
-    return data.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at),officer:e.officer||''}));
+    // Paginate past PostgREST's default 1000-row cap — same fix as _loadDarEntriesForMonth().
+    const pageSize=1000;
+    let all=[],from=0;
+    while(true){
+      const{data,error}=await window._supabase.from('dar_entries').select('*').gte('created_at',start.toISOString()).lt('created_at',end.toISOString()).order('created_at',{ascending:true}).range(from,from+pageSize-1);
+      if(error||!data)break;
+      all=all.concat(data);
+      if(data.length<pageSize)break;
+      from+=pageSize;
+    }
+    return all.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at),officer:e.officer||''}));
   }catch(e){console.warn('_fetchMonthEntries exception:',e.message);return [];}
 }
 async function viewMonthRecord(year,month){
@@ -2587,9 +2644,33 @@ async function viewMonthRecord(year,month){
   renderEntries(entries,document.getElementById('detail-entries'),false);
 }
 function closeDetail(){document.getElementById('history-list-view').style.display='block';document.getElementById('history-detail-view').style.display='none';viewingRecord=null;}
-function copyCurrentMonthDAR(){const entries=_historyFilteredEntries();const dateLabel=historyDateFilter?fmtDayLong(historyDateFilter):fmtMonthYear(new Date());const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
-function previewCurrentMonthDAR(){const entries=_historyFilteredEntries();const dateLabel=historyDateFilter?fmtDayLong(historyDateFilter):fmtMonthYear(new Date());const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};document.getElementById('history-current-preview-area').innerHTML=buildPreviewHTML(r);}
-function populateSearchOfficers(){const s=document.getElementById('search-officer');const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
+// Tapping the collapsed current-month card — reuses viewMonthRecord()'s fetch/cache/render
+// flow (so Previous DARs cards stay byte-for-byte unchanged), then layers the active
+// date/officer filter on top without touching monthDetailCache. The current month is still
+// being written to all shift long, so its cache entry is force-invalidated first — unlike
+// closed previous months, it can never be trusted to stay fresh for the rest of the session.
+async function openCurrentMonthDetail(){
+  const now=new Date();
+  delete monthDetailCache[now.getFullYear()+'-'+now.getMonth()];
+  await viewMonthRecord(now.getFullYear(),now.getMonth());
+  if(historyDateFilter||historyOfficerFilter){
+    const filtered=viewingRecord.entries.filter(e=>{
+      if(historyDateFilter){
+        const t=e.time instanceof Date?e.time:new Date(e.time);
+        if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
+      }
+      if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
+      return true;
+    });
+    const label=historyDateFilter?fmtDayLong(historyDateFilter):viewingRecord.dateLabel;
+    viewingRecord={dateLabel:label,entries:filtered};
+    document.getElementById('detail-title').textContent=label;
+    document.getElementById('detail-sub').textContent=filtered.length+' entr'+(filtered.length!==1?'ies':'y');
+    renderEntries(filtered,document.getElementById('detail-entries'),false);
+  }
+}
+function copyCurrentMonthDAR(){const entries=_historyCurrentScopeEntries();const dateLabel=_historyCurrentScopeLabel();const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
+function previewCurrentMonthDAR(){const entries=_historyCurrentScopeEntries();const dateLabel=_historyCurrentScopeLabel();const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};document.getElementById('history-current-preview-area').innerHTML=buildPreviewHTML(r);}
 let searchEntriesCache=null;
 async function _loadSearchCache(){
   if(!window._supabase)return [];
@@ -2602,22 +2683,7 @@ async function _loadSearchCache(){
 async function ensureSearchCache(){
   if(searchEntriesCache!==null)return;
   searchEntriesCache=await _loadSearchCache();
-  runSearch();
-}
-function runSearch(){
-  const q=document.getElementById('search-input').value.trim().toLowerCase();
-  const oF=document.getElementById('search-officer').value;
-  const countEl=document.getElementById('search-count');
-  const resultsEl=document.getElementById('search-results');
-  if(searchEntriesCache===null){countEl.textContent='Loading…';resultsEl.innerHTML='';return;}
-  if(!q&&!oF){resultsEl.innerHTML='';countEl.textContent='';return;}
-  const results=searchEntriesCache.filter(e=>{
-    if(oF&&e.officer!==oF)return false;
-    const hay=(e.title+' '+(e.detail||'')).toLowerCase();
-    return !q||hay.includes(q);
-  });
-  countEl.textContent=results.length+' result'+(results.length!==1?'s':'');
-  resultsEl.innerHTML=results.length?results.map(entry=>{const c=TC[entry.type]||TC.note;const hl=(t,q)=>q?t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="search-highlight">$1</span>'):t;return`<div class="nm-item" style="margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;font-weight:600;color:var(--text-primary)">${entry.officer||'—'}</span><span style="font-size:11px;color:var(--text-secondary)">${fmtFull(entry.time)}</span></div><div style="font-size:13px;color:var(--text-primary)">${hl(entry.title,q)}</div>${entry.detail?`<div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${hl(entry.detail,q)}</div>`:''}<span class="dtag ${c.tag}" style="margin-top:4px">${c.label}</span></div>`;}).join(''):'<div class="no-results">No matching entries found.</div>';
+  renderHistoryCurrentEntries();
 }
 function buildDARText(record){let t='DAILY ACTIVITY REPORT (DAR)\n================================\n';t+=`Site:      Canopy Campus\nPeriod:    ${record.dateLabel}\nEntries:   ${record.entries.length}\n================================\n\n`;record.entries.forEach(e=>{t+=`${fmt(e.time)}  ${e.officer||'—'}  [${(TC[e.type]||TC.note).label.toUpperCase()}]  ${e.title}${e.detail?' — '+e.detail:''}\n`;});t+=`\n================================\nEnd of report · Generated ${fmtFull(new Date())}`;return t;}
 function buildPreviewHTML(record){return`<div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:14px;margin-top:4px"><div style="font-size:13px;font-weight:600;color:var(--text-primary);border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px;margin-bottom:10px">Daily Activity Report (DAR)</div><div style="font-size:11px;color:var(--text-secondary);line-height:1.8;margin-bottom:10px;border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px">Site: Canopy Campus<br>Period: ${record.dateLabel}<br>Entries: ${record.entries.length}</div>${record.entries.map(e=>`<div style="display:flex;gap:8px;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border-secondary);color:var(--text-primary)"><span style="min-width:50px;color:var(--text-secondary);flex-shrink:0">${fmt(e.time)}</span><span style="min-width:80px;color:var(--text-tertiary);flex-shrink:0">${e.officer||'—'}</span><span>${e.title}${e.detail?' — '+e.detail:''}</span></div>`).join('')}</div>`;}
