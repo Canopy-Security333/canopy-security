@@ -2468,7 +2468,7 @@ function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPa
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function renderEntries(entries,container,editable,showDate,highlightQuery){const hl=highlightQuery?(t=>t.replace(new RegExp('('+highlightQuery.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="search-highlight">$1</span>')):(t=>t);container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';const dateLine=showDate?`<div style="font-size:10px;color:var(--text-tertiary)">${fmtShortDate(e.time)}</div>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${dateLine}${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${hl(e.title)}</div>${e.detail?`<div class="dar-detail">${hl(e.detail)}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
 function renderCurrentDAR(){const d=shiftStart||new Date();const el=document.getElementById('dar-date-lbl');if(el)el.textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});const c=document.getElementById('dar-entries');if(c)renderEntries(currentShiftEntries(),c,true);}
-let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null,historyEntriesCache=null,historySearchQueryRaw='',viewingMonthKey=null,viewingMonthLabel='';
+let prevMonthsCache=null,monthDetailCache={},historyDateFilter=null,historyOfficerFilter=null,historyEntriesCache=null,historySearchQueryRaw='',viewingMonthKey=null,viewingMonthLabel='',historySearchDebounceTimer=null,historySearchResults=[];
 function _historyFilteredEntries(){
   return (historyEntriesCache||[]).filter(e=>{
     if(historyDateFilter){
@@ -2507,15 +2507,17 @@ function _syncFilterInputsFromState(){
   ['hist-officer-filter','detail-officer-filter'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=historyOfficerFilter||'';});
   ['history-search-input','detail-search-input'].forEach(id=>{const el=document.getElementById(id);if(el&&el.value!==historySearchQueryRaw)el.value=historySearchQueryRaw;});
 }
-// Fresh Supabase load each time — mirrors ensureSearchCache()'s reliability but never
-// trusts a stale cache, since History must reflect Supabase even if darLog fell behind.
+// Fresh Supabase load each time — never trusts a stale cache, since History must reflect
+// Supabase even if darLog fell behind. Only backs the collapsed current-month card; an active
+// search re-queries separately via _runHistorySupabaseSearch() below.
 async function _refreshHistoryEntries(){
   const c=document.getElementById('history-current-entries');
   const countEl=document.getElementById('history-current-count');
   if(c&&historyEntriesCache===null)c.innerHTML='<div class="no-results">Loading…</div>';
   if(countEl&&historyEntriesCache===null)countEl.textContent='Loading…';
   historyEntriesCache=await _loadDarEntriesForMonth();
-  renderHistoryCurrentEntries();
+  if(_historySearchQuery())_runHistorySupabaseSearch();
+  else renderHistoryCurrentEntries();
 }
 function applyHistoryDateFilter(sourceId){
   sourceId=sourceId||'hist-date-filter';
@@ -2547,26 +2549,77 @@ function onHistorySearchInput(sourceId){
   const el=document.getElementById(sourceId);
   historySearchQueryRaw=el?el.value:'';
   _syncFilterInputsFromState();
-  if(sourceId==='detail-search-input')_renderDetailEntries();
-  else renderHistoryCurrentEntries();
+  if(sourceId==='detail-search-input'){
+    // The detail view is already scoped to one month fully loaded in memory
+    // (monthDetailCache) — filtering it client-side is correct and instant, no query needed.
+    _renderDetailEntries();
+    return;
+  }
+  // The list view's search is a different problem: it must search every month on file, not
+  // just what's cached for the current month, so debounce then hit Supabase directly.
+  clearTimeout(historySearchDebounceTimer);
+  if(!_historySearchQuery()){
+    historySearchResults=[];
+    renderHistoryCurrentEntries();
+    return;
+  }
+  historySearchDebounceTimer=setTimeout(_runHistorySupabaseSearch,300);
 }
 function populateHistoryOfficerFilter(selectId){selectId=selectId||'hist-officer-filter';const s=document.getElementById(selectId);if(!s)return;const cur=s.value;s.innerHTML='<option value="">All officers</option>'+officers.map(o=>`<option value="${o}">${o}</option>`).join('');if(cur)s.value=cur;}
 function _historySearchQuery(){return historySearchQueryRaw.trim().toLowerCase();}
-// What Copy/Preview/the inline list should export right now: search results (searched across
-// all months, like the old dedicated Search tab) when a query is typed, otherwise the
-// current month narrowed by the date/officer filters — same scope the collapsed card shows.
-function _historyCurrentScopeEntries(){
-  const q=_historySearchQuery();
-  if(!q)return _historyFilteredEntries();
-  return (searchEntriesCache||[]).filter(e=>{
-    if(historyOfficerFilter&&e.officer!==historyOfficerFilter)return false;
-    if(historyDateFilter){
-      const t=e.time instanceof Date?e.time:new Date(e.time);
-      if(t.getFullYear()!==historyDateFilter.getFullYear()||t.getMonth()!==historyDateFilter.getMonth()||t.getDate()!==historyDateFilter.getDate())return false;
+function _historyEscapeForIlike(s){return s.replace(/[\\%_]/g,'\\$&');}
+function _historyPgQuote(s){return'"'+s.replace(/"/g,'\\"')+'"';}
+// Live server-side search across the ENTIRE dar_entries table — every officer, every month,
+// not just the current-month cache (historyEntriesCache) that backs the summary card. A
+// client-side array capped at some row count would silently miss older matches once history
+// grows past that cap, so this queries Supabase directly instead, scoped only by whatever
+// date/officer filters are explicitly set.
+async function _runHistorySupabaseSearch(){
+  const raw=historySearchQueryRaw.trim();
+  const c=document.getElementById('history-current-entries');
+  const countEl=document.getElementById('history-current-count');
+  if(!raw){historySearchResults=[];renderHistoryCurrentEntries();return;}
+  if(countEl)countEl.textContent='Searching…';
+  if(c)c.innerHTML='<div class="no-results">Searching…</div>';
+  if(!window._supabase){historySearchResults=[];renderHistoryCurrentEntries();return;}
+  try{
+    const pattern='%'+_historyEscapeForIlike(raw)+'%';
+    const orExpr=`title.ilike.${_historyPgQuote(pattern)},detail.ilike.${_historyPgQuote(pattern)}`;
+    // Paginate past PostgREST's default 1000-row cap — a common keyword can legitimately
+    // match more than that once history spans enough months; a hard ceiling far above any
+    // realistic match count is just a backstop against a runaway loop, not a silent truncation.
+    const pageSize=1000,hardCeiling=50000;
+    let all=[],from=0;
+    while(from<hardCeiling){
+      let q=window._supabase.from('dar_entries').select('*').or(orExpr).order('created_at',{ascending:false});
+      if(historyOfficerFilter)q=q.eq('officer',historyOfficerFilter);
+      if(historyDateFilter){
+        const start=new Date(historyDateFilter.getFullYear(),historyDateFilter.getMonth(),historyDateFilter.getDate());
+        const end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+1);
+        q=q.gte('created_at',start.toISOString()).lt('created_at',end.toISOString());
+      }
+      const{data,error}=await q.range(from,from+pageSize-1);
+      if(error){console.warn('History search error:',error.message);break;}
+      if(!data)break;
+      all=all.concat(data);
+      if(data.length<pageSize)break;
+      from+=pageSize;
     }
-    const hay=(e.title+' '+(e.detail||'')).toLowerCase();
-    return hay.includes(q);
-  });
+    // A newer keystroke may have superseded this in-flight search — don't let a slow older
+    // request clobber a faster, more recent one's results.
+    if(raw.toLowerCase()!==_historySearchQuery())return;
+    historySearchResults=all.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at),officer:e.officer||''}));
+  }catch(e){
+    console.warn('_runHistorySupabaseSearch exception:',e.message);
+    if(raw.toLowerCase()===_historySearchQuery())historySearchResults=[];
+  }
+  renderHistoryCurrentEntries();
+}
+// What Copy/Preview should export right now: the live search results (already scoped by
+// date/officer server-side) when a query is typed, otherwise the current month narrowed by
+// the date/officer filters — same scope the collapsed card shows.
+function _historyCurrentScopeEntries(){
+  return _historySearchQuery()?historySearchResults:_historyFilteredEntries();
 }
 function _historyCurrentScopeLabel(){
   const q=_historySearchQuery();
@@ -2580,13 +2633,9 @@ function renderHistoryCurrentEntries(){
   const countEl=document.getElementById('history-current-count');
   if(!c)return;
   if(q){
-    // Inline search mode — mirrors the old dedicated Search tab, now living inside History.
-    if(searchEntriesCache===null){
-      if(countEl)countEl.textContent='Loading…';
-      c.innerHTML='<div class="no-results">Loading…</div>';
-      return;
-    }
-    const results=_historyCurrentScopeEntries();
+    // Inline search mode — results come from _runHistorySupabaseSearch()'s live Supabase
+    // query (all months on file), not a locally cached array.
+    const results=historySearchResults;
     if(countEl)countEl.textContent=results.length+' result'+(results.length!==1?'s':'');
     // Shares renderEntries() (showDate=true, highlightQuery=q) with the month detail view and
     // Current shift, instead of a separate hand-built template — keeps the date-above-time
@@ -2616,7 +2665,6 @@ function renderHistory(){
   populateHistoryOfficerFilter('hist-officer-filter');
   _syncFilterInputsFromState();
   _refreshHistoryEntries();
-  ensureSearchCache();
   renderPreviousMonths();
 }
 async function _fetchPreviousMonths(){
@@ -2736,20 +2784,6 @@ async function openCurrentMonthDetail(){
 }
 function copyCurrentMonthDAR(){const entries=_historyCurrentScopeEntries();const dateLabel=_historyCurrentScopeLabel();const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
 function previewCurrentMonthDAR(){const entries=_historyCurrentScopeEntries();const dateLabel=_historyCurrentScopeLabel();const r={dateLabel,entries:entries.map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};document.getElementById('history-current-preview-area').innerHTML=buildPreviewHTML(r);}
-let searchEntriesCache=null;
-async function _loadSearchCache(){
-  if(!window._supabase)return [];
-  try{
-    const{data,error}=await window._supabase.from('dar_entries').select('*').order('created_at',{ascending:false}).limit(5000);
-    if(error||!data)return [];
-    return data.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at),officer:e.officer||''}));
-  }catch(e){console.warn('_loadSearchCache exception:',e.message);return [];}
-}
-async function ensureSearchCache(){
-  if(searchEntriesCache!==null)return;
-  searchEntriesCache=await _loadSearchCache();
-  renderHistoryCurrentEntries();
-}
 function buildDARText(record){let t='DAILY ACTIVITY REPORT (DAR)\n================================\n';t+=`Site:      Canopy Campus\nPeriod:    ${record.dateLabel}\nEntries:   ${record.entries.length}\n================================\n\n`;record.entries.forEach(e=>{t+=`${fmt(e.time)}  ${e.officer||'—'}  [${(TC[e.type]||TC.note).label.toUpperCase()}]  ${e.title}${e.detail?' — '+e.detail:''}\n`;});t+=`\n================================\nEnd of report · Generated ${fmtFull(new Date())}`;return t;}
 function buildPreviewHTML(record){return`<div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:14px;margin-top:4px"><div style="font-size:13px;font-weight:600;color:var(--text-primary);border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px;margin-bottom:10px">Daily Activity Report (DAR)</div><div style="font-size:11px;color:var(--text-secondary);line-height:1.8;margin-bottom:10px;border-bottom:0.5px solid var(--border-secondary);padding-bottom:8px">Site: Canopy Campus<br>Period: ${record.dateLabel}<br>Entries: ${record.entries.length}</div>${record.entries.map(e=>`<div style="display:flex;gap:8px;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border-secondary);color:var(--text-primary)"><span style="min-width:50px;color:var(--text-secondary);flex-shrink:0">${fmt(e.time)}</span><span style="min-width:80px;color:var(--text-tertiary);flex-shrink:0">${e.officer||'—'}</span><span>${e.title}${e.detail?' — '+e.detail:''}</span></div>`).join('')}</div>`;}
 function copyDAR(){const r={officer:officer||'—',dateLabel:shiftStart?fmtDate(shiftStart):'—',entries:currentShiftEntries().map(e=>({...e,time:e.time instanceof Date?e.time.toISOString():e.time}))};navigator.clipboard.writeText(buildDARText(r)).catch(()=>{});showToast('copy-toast');}
