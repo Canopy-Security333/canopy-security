@@ -4814,6 +4814,7 @@ let keyCatOpen={};
 let keysActiveTab='keys';
 let _keyReturnChecked=new Set();
 let _keyReturnPending=false;
+let keysLogCatFilter=null,keysLogSearchQuery='',keysLogSearchDebounceTimer=null;
 
 function loadKeyState(){
   try{const d=localStorage.getItem('key_log');if(d)keyLog=JSON.parse(d);}catch(e){keyLog=[];}
@@ -5010,8 +5011,14 @@ function _buildKeysOut(){
   }).join('');
 }
 
-function _buildKeysLog(){
+// keyLog is loaded via loadKeyLogFromSupabase() with .limit(200) — filtering/search here only
+// covers whatever's in that already-loaded window, so a high-turnover key's older history
+// could already be pushed out even though "no matches" looks like a clean, correct result.
+// Revisit if that 200-row cap needs to grow or paginate.
+function _buildKeysLogRows(){
   if(!keyLog.length)return'<div class="keys-empty">No key activity logged yet.</div>';
+  const catFilter=keysLogCatFilter;
+  const q=keysLogSearchQuery.trim().toLowerCase();
   const seenBatches=new Set();
   const rows=[];
   [...keyLog].reverse().forEach(e=>{
@@ -5019,16 +5026,25 @@ function _buildKeysLog(){
       const bid=e.batchId||e.id;
       if(seenBatches.has(bid))return;
       seenBatches.add(bid);
-      const batchKeys=keyLog.filter(x=>(x.batchId||x.id)===bid&&x.type==='out').map(x=>x.keyLabel);
-      rows.push({...e,_dk:batchKeys});
+      const batchEvents=keyLog.filter(x=>(x.batchId||x.id)===bid&&x.type==='out');
+      // A batch matches if ANY key within it matches the active category/search filter —
+      // show the whole batch (every key in it) rather than splitting out just the matches.
+      const matches=batchEvents.some(x=>(!catFilter||x.catLabel===catFilter)&&(!q||(x.keyLabel||'').toLowerCase().includes(q)));
+      if(!matches)return;
+      rows.push({...e,_dk:batchEvents.map(x=>x.keyLabel)});
     }else{
+      const matches=(!catFilter||e.catLabel===catFilter)&&(!q||(e.keyLabel||'').toLowerCase().includes(q));
+      if(!matches)return;
       rows.push({...e,_dk:[e.keyLabel]});
     }
   });
+  if(!rows.length)return'<div class="keys-empty">No matching key activity.</div>';
   return`<div class="card" style="padding:8px 12px">${rows.map(e=>{
     const isOut=e.type==='out';
     const keyStr=e._dk.join(', ');
-    const timeStr=fmt(isOut?e.time:(e.returnTime||e.time));
+    const evTime=isOut?e.time:(e.returnTime||e.time);
+    const timeStr=fmt(evTime);
+    const dateStr=fmtShortDate(evTime);
     return`<div class="keys-log-row">
       <div class="keys-log-dot ${isOut?'dot-key-out':'dot-key-in'}"></div>
       <div style="flex:1;min-width:0">
@@ -5037,9 +5053,33 @@ function _buildKeysLog(){
           ?`To ${_esc(e.person)}${e.company?' ('+_esc(e.company)+')':''} · by ${_esc(e.issuedBy)}`
           :`By ${_esc(e.person)}${e.returnedBy?' · logged by '+_esc(e.returnedBy):''}`}</div>
       </div>
-      <div style="font-size:11px;color:var(--text-secondary);flex-shrink:0;margin-left:8px">${timeStr}</div>
+      <div style="font-size:11px;color:var(--text-secondary);flex-shrink:0;margin-left:8px;text-align:right"><div style="font-size:10px;color:var(--text-tertiary)">${dateStr}</div>${timeStr}</div>
     </div>`;
   }).join('')}</div>`;
+}
+function _buildKeysLog(){
+  const catChips=`<button class="key-chip${!keysLogCatFilter?' selected':''}" onclick="setKeysLogCatFilter(null)">All</button>`+
+    KEY_CATS.map(cat=>`<button class="key-chip${keysLogCatFilter===cat.label?' selected':''}" onclick="setKeysLogCatFilter('${cat.label}')">${cat.label}</button>`).join('');
+  return`<div class="lbl" style="margin-top:0">Filter by category</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${catChips}</div>
+    <div class="search-bar" style="margin-bottom:10px"><input type="text" id="keys-log-search-input" placeholder="Search by key name…" value="${_esc(keysLogSearchQuery)}" oninput="onKeysLogSearchInput()"/></div>
+    <div id="keys-log-results">${_buildKeysLogRows()}</div>`;
+}
+function setKeysLogCatFilter(label){
+  keysLogCatFilter=label;
+  const sub=document.getElementById('keys-sub-log');
+  if(sub)sub.innerHTML=_buildKeysLog();
+}
+function onKeysLogSearchInput(){
+  const el=document.getElementById('keys-log-search-input');
+  keysLogSearchQuery=el?el.value:'';
+  clearTimeout(keysLogSearchDebounceTimer);
+  // Targeted update of just the results — never re-injects the search input itself, so it
+  // never loses focus/cursor position mid-typing the way a full #keys-sub-log replace would.
+  keysLogSearchDebounceTimer=setTimeout(()=>{
+    const results=document.getElementById('keys-log-results');
+    if(results)results.innerHTML=_buildKeysLogRows();
+  },250);
 }
 
 function keysTab(tab,btn){
@@ -5441,6 +5481,7 @@ let badgeCatOpen={};
 let badgesActiveTab='keys';
 let _badgeReturnChecked=new Set();
 let _badgeReturnPending=false;
+let badgesLogCatFilter=null,badgesLogSearchQuery='',badgesLogSearchDebounceTimer=null;
 
 function loadBadgeState(){
   try{const d=localStorage.getItem('badge_log');if(d)badgeLog=JSON.parse(d);}catch(e){badgeLog=[];}
@@ -5636,8 +5677,14 @@ function _buildBadgesOut(){
   }).join('');
 }
 
-function _buildBadgesLog(){
+// badgeLog is loaded via loadBadgeLogFromSupabase() with .limit(200) — filtering/search here
+// only covers whatever's in that already-loaded window, so a high-turnover badge's older
+// history could already be pushed out even though "no matches" looks like a clean result.
+// Revisit if that 200-row cap needs to grow or paginate.
+function _buildBadgesLogRows(){
   if(!badgeLog.length)return'<div class="badges-empty">No badge activity logged yet.</div>';
+  const catFilter=badgesLogCatFilter;
+  const q=badgesLogSearchQuery.trim().toLowerCase();
   const seenBatches=new Set();
   const rows=[];
   [...badgeLog].reverse().forEach(e=>{
@@ -5645,16 +5692,25 @@ function _buildBadgesLog(){
       const bid=e.batchId||e.id;
       if(seenBatches.has(bid))return;
       seenBatches.add(bid);
-      const batchKeys=badgeLog.filter(x=>(x.batchId||x.id)===bid&&x.type==='out').map(x=>x.badgeLabel);
-      rows.push({...e,_dk:batchKeys});
+      const batchEvents=badgeLog.filter(x=>(x.batchId||x.id)===bid&&x.type==='out');
+      // A batch matches if ANY badge within it matches the active category/search filter —
+      // show the whole batch (every badge in it) rather than splitting out just the matches.
+      const matches=batchEvents.some(x=>(!catFilter||x.catLabel===catFilter)&&(!q||(x.badgeLabel||'').toLowerCase().includes(q)));
+      if(!matches)return;
+      rows.push({...e,_dk:batchEvents.map(x=>x.badgeLabel)});
     }else{
+      const matches=(!catFilter||e.catLabel===catFilter)&&(!q||(e.badgeLabel||'').toLowerCase().includes(q));
+      if(!matches)return;
       rows.push({...e,_dk:[e.badgeLabel]});
     }
   });
+  if(!rows.length)return'<div class="badges-empty">No matching badge activity.</div>';
   return`<div class="card" style="padding:8px 12px">${rows.map(e=>{
     const isOut=e.type==='out';
     const keyStr=e._dk.join(', ');
-    const timeStr=fmt(isOut?e.time:(e.returnTime||e.time));
+    const evTime=isOut?e.time:(e.returnTime||e.time);
+    const timeStr=fmt(evTime);
+    const dateStr=fmtShortDate(evTime);
     return`<div class="badges-log-row">
       <div class="badges-log-dot ${isOut?'dot-badge-out':'dot-badge-in'}"></div>
       <div style="flex:1;min-width:0">
@@ -5663,9 +5719,33 @@ function _buildBadgesLog(){
           ?`To ${_esc(e.person)}${e.company?' ('+_esc(e.company)+')':''} · by ${_esc(e.issuedBy)}`
           :`By ${_esc(e.person)}${e.returnedBy?' · logged by '+_esc(e.returnedBy):''}`}</div>
       </div>
-      <div style="font-size:11px;color:var(--text-secondary);flex-shrink:0;margin-left:8px">${timeStr}</div>
+      <div style="font-size:11px;color:var(--text-secondary);flex-shrink:0;margin-left:8px;text-align:right"><div style="font-size:10px;color:var(--text-tertiary)">${dateStr}</div>${timeStr}</div>
     </div>`;
   }).join('')}</div>`;
+}
+function _buildBadgesLog(){
+  const catChips=`<button class="badge-chip${!badgesLogCatFilter?' selected':''}" onclick="setBadgesLogCatFilter(null)">All</button>`+
+    BADGE_CATS.map(cat=>`<button class="badge-chip${badgesLogCatFilter===cat.label?' selected':''}" onclick="setBadgesLogCatFilter('${cat.label}')">${cat.label}</button>`).join('');
+  return`<div class="lbl" style="margin-top:0">Filter by category</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${catChips}</div>
+    <div class="search-bar" style="margin-bottom:10px"><input type="text" id="badges-log-search-input" placeholder="Search by badge name…" value="${_esc(badgesLogSearchQuery)}" oninput="onBadgesLogSearchInput()"/></div>
+    <div id="badges-log-results">${_buildBadgesLogRows()}</div>`;
+}
+function setBadgesLogCatFilter(label){
+  badgesLogCatFilter=label;
+  const sub=document.getElementById('badges-sub-log');
+  if(sub)sub.innerHTML=_buildBadgesLog();
+}
+function onBadgesLogSearchInput(){
+  const el=document.getElementById('badges-log-search-input');
+  badgesLogSearchQuery=el?el.value:'';
+  clearTimeout(badgesLogSearchDebounceTimer);
+  // Targeted update of just the results — never re-injects the search input itself, so it
+  // never loses focus/cursor position mid-typing the way a full #badges-sub-log replace would.
+  badgesLogSearchDebounceTimer=setTimeout(()=>{
+    const results=document.getElementById('badges-log-results');
+    if(results)results.innerHTML=_buildBadgesLogRows();
+  },250);
 }
 
 function badgesTab(tab,btn){
