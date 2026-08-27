@@ -121,7 +121,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .home-pill:active{background:var(--bg-primary)}
 /* ── QUICK ACTION TILES ── */
 .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.qa-tile{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:16px;padding:16px 14px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:background .12s;text-align:left;font-family:inherit;width:100%}
+.qa-tile{position:relative;background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:16px;padding:16px 14px;display:flex;flex-direction:column;gap:10px;cursor:pointer;transition:background .12s;text-align:left;font-family:inherit;width:100%}
+.qa-tile-count{position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;color:#fff;font-size:12px;font-weight:700;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid var(--bg-primary)}
 .qa-tile:active{background:var(--bg-secondary)}
 .qa-tile-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
 .qa-tile-label{font-size:14px;font-weight:600;color:var(--text-primary)}
@@ -1051,10 +1052,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <button id="home-tile-badges" class="qa-tile" onclick="showPane('badges',null)">
         <div class="qa-tile-icon" style="background:rgba(124,58,237,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C5CFC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><rect x="5" y="6" width="14" height="16" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M8 19h8"/></svg></div>
         <div><div class="qa-tile-label">Badges</div><div class="qa-tile-sub" id="qa-badges-sub">Badge sign-out log</div></div>
+        <span id="badges-out-count" class="qa-tile-count"></span>
       </button>
       <button id="home-tile-keys" class="qa-tile" onclick="showPane('keys',null)">
         <div class="qa-tile-icon" style="background:rgba(186,117,23,.1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
         <div><div class="qa-tile-label">Keys</div><div class="qa-tile-sub" id="qa-keys-sub">Key sign-out log</div></div>
+        <span id="keys-out-count" class="qa-tile-count"></span>
       </button>
     </div>
 
@@ -2104,6 +2107,11 @@ function updateHomeTiles(){
       keysTile.style.border='0.5px solid var(--border-secondary)';
       keysTile.style.boxShadow='';
     }
+    const keysCountEl=document.getElementById('keys-out-count');
+    if(keysCountEl){
+      if(outCount>0){keysCountEl.textContent=outCount>99?'99+':outCount;keysCountEl.style.background='var(--orange)';keysCountEl.style.display='flex';}
+      else{keysCountEl.style.display='none';}
+    }
   }
   const badgesEl=document.getElementById('qa-badges-sub');
   if(badgesEl)badgesEl.textContent='Badge sign-out log';
@@ -2116,6 +2124,11 @@ function updateHomeTiles(){
     }else{
       badgesTile.style.border='0.5px solid var(--border-secondary)';
       badgesTile.style.boxShadow='';
+    }
+    const badgesCountEl=document.getElementById('badges-out-count');
+    if(badgesCountEl){
+      if(outCount>0){badgesCountEl.textContent=outCount>99?'99+':outCount;badgesCountEl.style.background='var(--purple)';badgesCountEl.style.display='flex';}
+      else{badgesCountEl.style.display='none';}
     }
   }
 }
@@ -2210,7 +2223,19 @@ function _applyOfficerToUI(n){
   const nod=document.getElementById('nm-officer-display');if(nod)nod.value=n;
 }
 function prunePassDowns(){passDowns=passDowns.filter(p=>Date.now()-new Date(p.time)<SEVEN_DAYS);}
+function pruneReturnedItemsPassDowns(){
+  passDowns=passDowns.filter(p=>{
+    const hasKeyTags=p.key_ids&&p.key_ids.length;
+    const hasBadgeTags=p.badge_ids&&p.badge_ids.length;
+    if(!hasKeyTags&&!hasBadgeTags)return true; // not a checkout-related note, leave it alone
+    const keysStillOut=hasKeyTags&&p.key_ids.some(kid=>keyCheckedOut[kid]);
+    const badgesStillOut=hasBadgeTags&&p.badge_ids.some(bid=>badgeCheckedOut[bid]);
+    return keysStillOut||badgesStillOut; // keep the note if ANYTHING it's tagged with is still out
+  });
+}
 function seedDemoPassDowns(){}
+let _pdAutoKeysBlock='';
+let _pdAutoBadgesBlock='';
 let activeOfficerNames=new Set();
 async function refreshActiveOfficers(){
   if(window._supabase){
@@ -2234,36 +2259,73 @@ function openPassDownModal(){
   loadBadgeState();
   const textarea=document.getElementById('pd-textarea');
   const outEntries=Object.values(keyCheckedOut);
-  let prefix='';
+  const outBadgeEntries=Object.values(badgeCheckedOut);
+  _pdAutoKeysBlock='';
+  _pdAutoBadgesBlock='';
   if(outEntries.length){
     const byPerson={};
     outEntries.forEach(e=>{if(!byPerson[e.person])byPerson[e.person]=[];byPerson[e.person].push(e);});
-    prefix='🔑 KEYS STILL OUT:\n';
+    let block='🔑 KEYS STILL OUT:\n';
     Object.entries(byPerson).forEach(([person,entries])=>{
       const keys=entries.map(e=>e.keyLabel).join(', ');
       const s=entries[0];
-      prefix+=`- ${keys} — out to ${person}${s.company?' ('+s.company+')':''}${s.phone?', '+s.phone:''}. Issued ${fmt(s.time)} by ${s.issuedBy}.\n`;
+      block+=`- ${keys} — out to ${person}${s.company?' ('+s.company+')':''}${s.phone?', '+s.phone:''}. Issued ${fmt(s.time)} by ${s.issuedBy}.\n`;
     });
-    prefix+='\n';
+    _pdAutoKeysBlock=block;
   }
-  const badgeOutEntries=Object.values(badgeCheckedOut);
-  if(badgeOutEntries.length){
+  if(outBadgeEntries.length){
     const byPerson={};
-    badgeOutEntries.forEach(e=>{if(!byPerson[e.person])byPerson[e.person]=[];byPerson[e.person].push(e);});
-    prefix+='🪪 BADGES STILL OUT:\n';
+    outBadgeEntries.forEach(e=>{if(!byPerson[e.person])byPerson[e.person]=[];byPerson[e.person].push(e);});
+    let block='🪪 BADGES STILL OUT:\n';
     Object.entries(byPerson).forEach(([person,entries])=>{
       const badges=entries.map(e=>e.badgeLabel).join(', ');
       const s=entries[0];
-      prefix+=`- ${badges} — out to ${person}${s.company?' ('+s.company+')':''}${s.phone?', '+s.phone:''}. Issued ${fmt(s.time)} by ${s.issuedBy}.\n`;
+      block+=`- ${badges} — out to ${person}${s.company?' ('+s.company+')':''}${s.phone?', '+s.phone:''}. Issued ${fmt(s.time)} by ${s.issuedBy}.\n`;
     });
-    prefix+='\n';
+    _pdAutoBadgesBlock=block;
   }
+  const prefix=(_pdAutoKeysBlock?_pdAutoKeysBlock+'\n':'')+(_pdAutoBadgesBlock?_pdAutoBadgesBlock+'\n':'');
   textarea.value=prefix;
   document.getElementById('pd-submit-btn').disabled=!textarea.value.trim();
   document.getElementById('pd-modal').classList.add('open');
 }
 function closePassDownModal(){document.getElementById('pd-modal').classList.remove('open');}
-async function submitPassDown(){const text=document.getElementById('pd-textarea').value.trim();if(!text)return;const time=new Date().toISOString();let pdId='pd-'+Date.now();try{if(window._supabase){const{data:{session}}=await window._supabase.auth.getSession();if(session){const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:text,created_at:time}).select('id').single();if(!error&&data)pdId=String(data.id);}}}catch(e){console.warn('submitPassDown error:',e.message);}const pd={id:pdId,officer,text,time};if(text.includes('🔑 KEYS STILL OUT:')){pd.key_ids=Object.keys(keyCheckedOut);}if(text.includes('🪪 BADGES STILL OUT:')){pd.badge_ids=Object.keys(badgeCheckedOut);}passDowns.unshift(pd);saveStorage();closePassDownModal();finalizeShift();}
+async function submitPassDown(){
+  const fullText=document.getElementById('pd-textarea').value.trim();
+  if(!fullText)return;
+  const time=new Date().toISOString();
+
+  let extra=fullText;
+  if(_pdAutoKeysBlock)extra=extra.replace(_pdAutoKeysBlock.trim(),'').trim();
+  if(_pdAutoBadgesBlock)extra=extra.replace(_pdAutoBadgesBlock.trim(),'').trim();
+
+  const notesToCreate=[];
+  if(_pdAutoKeysBlock)notesToCreate.push({text:_pdAutoKeysBlock.trim(),key_ids:Object.keys(keyCheckedOut)});
+  if(_pdAutoBadgesBlock)notesToCreate.push({text:_pdAutoBadgesBlock.trim(),badge_ids:Object.keys(badgeCheckedOut)});
+  if(extra)notesToCreate.push({text:extra});
+  if(!notesToCreate.length)notesToCreate.push({text:fullText}); // officer deleted the auto text and wrote something else entirely
+
+  for(const note of notesToCreate){
+    let pdId='pd-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+    try{
+      if(window._supabase){
+        const{data:{session}}=await window._supabase.auth.getSession();
+        if(session){
+          const{data,error}=await window._supabase.from('pass_downs').insert({user_id:session.user.id,officer_name:officer,message:note.text,created_at:time}).select('id').single();
+          if(!error&&data)pdId=String(data.id);
+        }
+      }
+    }catch(e){console.warn('submitPassDown error:',e.message);}
+    const pd={id:pdId,officer,text:note.text,time};
+    if(note.key_ids)pd.key_ids=note.key_ids;
+    if(note.badge_ids)pd.badge_ids=note.badge_ids;
+    passDowns.unshift(pd);
+  }
+
+  saveStorage();
+  closePassDownModal();
+  finalizeShift();
+}
 function skipPassDown(){closePassDownModal();finalizeShift();}
 function renderPassDownsBanner(){prunePassDowns();const banner=document.getElementById('pd-banner');if(!passDowns.length){banner.style.display='none';return;}banner.style.display='block';document.getElementById('pd-banner-count').textContent=passDowns.length;document.getElementById('pd-banner-items').innerHTML=passDowns.map(p=>`<div class="pd-item-preview"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:8px"':''}><div class="pd-preview-from">${p.officer} · ${fmtRelative(p.time)}</div><div class="pd-preview-text">${p.text}</div></div>`).join('');}
 function renderPassDownsPage(){prunePassDowns();const list=document.getElementById('pd-full-list');if(!passDowns.length){list.innerHTML='<div class="pd-empty">No active pass downs.</div>';return;}list.innerHTML=passDowns.map(p=>`<div class="pd-full-item"${p.auto_nm?' style="border-left:3px solid #E24B4A;padding-left:12px;background:rgba(226,75,74,0.04)"':''}><div style="display:flex;align-items:center;justify-content:space-between"><div class="pd-full-from">${p.officer}</div><div class="pd-full-time">${fmtRelative(p.time)}</div></div><div class="pd-full-text">${p.text}</div><div class="pd-expires">Expires in ${daysUntilExpiry(p.time)} day${daysUntilExpiry(p.time)!==1?'s':''}</div></div>`).join('');}
@@ -5450,7 +5512,7 @@ async function confirmKeyReturn(){
     }
   }catch(e){console.warn('key_log return insert exception:',e.message);}
 
-  passDowns=passDowns.filter(p=>!(p.key_ids&&p.key_ids.length&&p.key_ids.every(kid=>!keyCheckedOut[kid])));
+  pruneReturnedItemsPassDowns();
   saveStorage();
   renderPassDownsBanner();
   if(paneVisible('passdowns'))renderPassDownsPage();
@@ -6116,7 +6178,7 @@ async function confirmBadgeReturn(){
     }
   }catch(e){console.warn('badge_log return insert exception:',e.message);}
 
-  passDowns=passDowns.filter(p=>!(p.badge_ids&&p.badge_ids.length&&p.badge_ids.every(bid=>!badgeCheckedOut[bid])));
+  pruneReturnedItemsPassDowns();
   saveStorage();
   renderPassDownsBanner();
   if(paneVisible('passdowns'))renderPassDownsPage();
