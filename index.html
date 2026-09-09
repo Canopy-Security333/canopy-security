@@ -3273,7 +3273,8 @@ if (window._supabase) {
           building: report.building,
           categories: report.cats,
           description: report.desc,
-          time: report.time
+          time: report.time,
+          photo: report.photo || null
         }
       })
     }).catch(function(err) {
