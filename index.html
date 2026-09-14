@@ -1587,6 +1587,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     <div id="admin-unlocked" style="display:none">
       <div class="toast" id="admin-toast">Changes saved</div>
       <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('officer-roster')">Security officer roster<span class="chevron" id="officer-roster-chev">›</span></div><div class="patrol-body" id="officer-roster-body"><div id="officer-list"></div><div class="lbl" style="margin-top:12px">Add officer</div><div class="add-officer-row"><input type="text" id="new-officer-name" placeholder="Full name..."/><button class="add-officer-btn" onclick="addOfficer()">Add</button></div></div></div>
+      <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('rename-contact')">Rename contact<span class="chevron" id="rename-contact-chev">›</span></div><div class="patrol-body" id="rename-contact-body">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Fix a typo in a saved key/badge contact. Corrects key_contacts and every matching key/badge log &amp; active checkout row.</div>
+        <div class="form-group" style="position:relative"><label>Search contact</label><input type="text" id="rc-search-input" placeholder="Search by name or company..." autocomplete="off" oninput="onRenameContactSearchInput()" onblur="hideRenameContactResults()"><div class="key-contact-suggestions" id="rc-search-results"></div></div>
+        <div id="rc-selected-wrap" style="display:none">
+          <div class="lbl">Correct the details</div>
+          <div class="form-group"><label>Name</label><input type="text" id="rc-name-input" oninput="updateRenameContactBtn()"></div>
+          <div class="form-group"><label>Company / Tenant</label><input type="text" id="rc-company-input" oninput="updateRenameContactBtn()"></div>
+          <div class="form-group"><label>Phone</label><input type="text" id="rc-phone-input" oninput="updateRenameContactBtn()"></div>
+          <button class="add-officer-btn" id="rc-save-btn" style="width:100%" onclick="saveRenameContact()" disabled>Save correction</button>
+        </div>
+      </div></div>
       <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('nm-compliance')">Monthly near miss compliance<span class="chevron" id="nm-compliance-chev">›</span></div><div class="patrol-body" id="nm-compliance-body"><div id="nm-compliance-admin-list"></div></div></div>
       <div class="admin-section"><div class="admin-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="togglePatrol('mst-compliance')">Monthly safety tip<span class="chevron" id="mst-compliance-chev">›</span></div><div class="patrol-body" id="mst-compliance-body"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px" id="mst-admin-sub"></div><div id="mst-compliance-admin-list"></div></div></div>
       <div class="admin-section"><div class="admin-section-title">Patrol section order</div><div style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Drag to reorder how patrol sections appear on the Patrols tab.</div><div id="patrol-order-list"></div></div>
@@ -4049,6 +4060,106 @@ function poDragEnd(){document.querySelectorAll('.patrol-order-item').forEach(el=
 function applyPatrolOrder(){const pane=document.getElementById('pane-patrols');if(!pane)return;const sectionMap={boiler:'.boiler-section',['meters-patrol']:'.meters-section',fe:'.fe-section'};patrolOrder.forEach((id,i)=>{const sel=sectionMap[id];if(!sel)return;const el=pane.querySelector(sel);if(el)pane.appendChild(el);});const boilerEl=pane.querySelector('.boiler-section');if(boilerEl)boilerEl.style.display=boilerActive?'':'none';}
 async function addOfficer(){const inp=document.getElementById('new-officer-name');const v=inp.value.trim();if(!v)return;if(window._supabase){try{await window._supabase.from('officers').insert({name:v});}catch(e){console.warn('addOfficer Supabase error:',e);}}officers.push(v);officers.sort((a,b)=>a.localeCompare(b));inp.value='';renderOfficerList();populateSelect();showToast('admin-toast');}
 async function removeOfficer(name){if(window._supabase){try{await window._supabase.from('officers').delete().eq('name',name);}catch(e){console.warn('removeOfficer Supabase error:',e);}}const i=officers.indexOf(name);if(i>-1)officers.splice(i,1);renderOfficerList();populateSelect();showToast('admin-toast');}
+
+// ── RENAME CONTACT (admin tool — calls the rename_contact RPC to fix a typo across key_contacts + all key/badge log & active checkout rows) ──
+let rcSearchDebounce=null;
+let rcSearchResults=[];
+let rcSelectedContact=null;
+function onRenameContactSearchInput(){
+  rcSelectedContact=null;
+  document.getElementById('rc-selected-wrap').style.display='none';
+  clearTimeout(rcSearchDebounce);
+  rcSearchDebounce=setTimeout(runRenameContactSearch,250);
+}
+async function runRenameContactSearch(){
+  const dd=document.getElementById('rc-search-results');
+  const term=document.getElementById('rc-search-input').value.trim().toLowerCase();
+  if(!term){dd.classList.remove('show');dd.innerHTML='';return;}
+  if(!window._supabase)return;
+  try{
+    const{data,error}=await window._supabase
+      .from('key_contacts')
+      .select('name,company,phone')
+      .or(`name_normalized.ilike.%${term}%,company_normalized.ilike.%${term}%`)
+      .order('last_used_at',{ascending:false})
+      .limit(8);
+    if(error||!data||!data.length){dd.classList.remove('show');dd.innerHTML='';return;}
+    rcSearchResults=data;
+    dd.innerHTML=data.map((c,i)=>{
+      const label=c.company?`${_esc(c.name)} — ${_esc(c.company)}`:_esc(c.name);
+      return`<div class="key-contact-suggestion-item" onmousedown="event.preventDefault()" onclick="selectRenameContact(${i})">${label}</div>`;
+    }).join('');
+    dd.classList.add('show');
+  }catch(e){console.warn('rename_contact search exception:',e.message);}
+}
+function hideRenameContactResults(){setTimeout(()=>{const dd=document.getElementById('rc-search-results');if(dd)dd.classList.remove('show');},200);}
+function selectRenameContact(i){
+  const c=(rcSearchResults||[])[i];
+  if(!c)return;
+  rcSelectedContact=c;
+  document.getElementById('rc-search-input').value=c.company?`${c.name} — ${c.company}`:c.name;
+  document.getElementById('rc-search-results').classList.remove('show');
+  document.getElementById('rc-name-input').value=c.name||'';
+  document.getElementById('rc-company-input').value=c.company||'';
+  document.getElementById('rc-phone-input').value=c.phone||'';
+  document.getElementById('rc-selected-wrap').style.display='block';
+  updateRenameContactBtn();
+}
+function updateRenameContactBtn(){
+  const btn=document.getElementById('rc-save-btn');
+  if(!btn)return;
+  const nameVal=document.getElementById('rc-name-input').value.trim();
+  btn.disabled=!rcSelectedContact||!nameVal;
+}
+function _renameContactSummary(d){
+  d=d||{};
+  const pick=(...keys)=>{for(const k of keys){if(d[k]!=null&&!isNaN(d[k]))return Number(d[k]);}return 0;};
+  const activeKeys=pick('key_checked_out_current','active_keys','active_keys_updated','keys_active');
+  const keyLog=pick('key_log','key_log_updated','key_log_rows');
+  const activeBadges=pick('badge_checked_out_current','active_badges','active_badges_updated','badges_active');
+  const badgeLog=pick('badge_log','badge_log_updated','badge_log_rows');
+  return`Updated ${activeKeys} active key${activeKeys!==1?'s':''}, ${keyLog} key log row${keyLog!==1?'s':''}, ${activeBadges} active badge${activeBadges!==1?'s':''}, ${badgeLog} badge log row${badgeLog!==1?'s':''}.`;
+}
+async function saveRenameContact(){
+  if(!rcSelectedContact||!window._supabase)return;
+  const nameInput=document.getElementById('rc-name-input');
+  const companyInput=document.getElementById('rc-company-input');
+  const phoneInput=document.getElementById('rc-phone-input');
+  const newName=nameInput.value.trim();
+  if(!newName)return;
+  const btn=document.getElementById('rc-save-btn');
+  btn.disabled=true;
+  try{
+    const{data,error}=await window._supabase.rpc('rename_contact',{
+      old_name:rcSelectedContact.name,
+      old_company:rcSelectedContact.company||'',
+      new_name:newName,
+      new_company:companyInput.value.trim(),
+      new_phone:phoneInput.value.trim()||null
+    });
+    if(error){
+      console.warn('rename_contact error:',error.message);
+      showToast('admin-toast','Error: '+error.message);
+      btn.disabled=false;
+      return;
+    }
+    showToast('admin-toast','✓ '+_renameContactSummary(data));
+    document.getElementById('rc-search-input').value='';
+    document.getElementById('rc-selected-wrap').style.display='none';
+    rcSelectedContact=null;
+    rcSearchResults=[];
+    await loadKeyCheckedOutFromSupabase();
+    await loadBadgeCheckedOutFromSupabase();
+    await loadKeyLogFromSupabase();
+    await loadBadgeLogFromSupabase();
+    if(paneVisible('keys'))renderKeysPane();
+    if(paneVisible('badges'))renderBadgesPane();
+  }catch(e){
+    console.warn('rename_contact exception:',e.message);
+    showToast('admin-toast','Error: '+e.message);
+    btn.disabled=false;
+  }
+}
 function changePin(){const v=document.getElementById('new-pin').value.trim();if(v.length===4&&/^\d{4}$/.test(v)){adminPin=v;document.getElementById('new-pin').value='';showToast('admin-toast');}}
 function toggleBoiler(){const btn=document.getElementById('boiler-toggle');btn.textContent=btn.textContent==='Active'?'Inactive':'Active';boilerActive=btn.textContent==='Active';localStorage.setItem('boiler_active',String(boilerActive));applyPatrolOrder();}
 function clearPinErr(){document.getElementById('pin-err').classList.remove('show');}
