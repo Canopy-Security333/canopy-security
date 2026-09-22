@@ -1881,14 +1881,16 @@ function requestMeterPreview() {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + session.access_token,
       },
-      body: JSON.stringify({ reportType: 'meter-preview', period: 'current' }),
+      body: JSON.stringify({ manual: true, reports: ['meters'], period: 'current' }),
     })
     .then(function(res) { return res.json().then(function(json) { return { status: res.status, json: json }; }); })
     .then(function(r) {
-      if (r.status === 200 && r.json.ok) {
-        _showMeterPreviewStatus('ok', '✓ Report sent to security@canopyus.com (' + (r.json.rows || 0) + ' records)');
+      var meterResult = r.json && r.json.results && r.json.results.meters;
+      if (r.status === 200 && meterResult && meterResult.ok) {
+        _showMeterPreviewStatus('ok', '✓ Report sent to security@canopyus.com (' + (meterResult.rows || 0) + ' records)');
       } else {
-        _showMeterPreviewStatus('error', 'Error: ' + (r.json.error || 'Unknown error'));
+        var errMsg = (meterResult && meterResult.error) || (r.json && r.json.error) || 'Unknown error';
+        _showMeterPreviewStatus('error', 'Error: ' + errMsg);
       }
     })
     .catch(function(err) {
