@@ -1803,7 +1803,7 @@ function sendMonthlyReports() {
         'Content-Type':  'application/json',
         'Authorization': 'Bearer ' + session.access_token
       },
-      body: JSON.stringify({ reports: selected, period: _reportPeriod })
+      body: JSON.stringify({ manual: true, reports: selected, period: _reportPeriod })
     })
     .then(function(res) {
       return res.json().then(function(json) { return { status: res.status, json: json }; });
