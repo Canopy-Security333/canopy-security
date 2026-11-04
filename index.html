@@ -1232,6 +1232,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       <div><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Pass downs</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px" id="reports-pd-sub">Active notes from last shift</div></div>
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="margin-left:auto;opacity:.35"><path d="M6 4l4 4-4 4"/></svg>
     </button>
+    <button onclick="showPane('boiler-history',null)" style="width:100%;background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:inherit;text-align:left;margin-bottom:8px;transition:background .12s">
+      <div style="width:42px;height:42px;border-radius:12px;background:rgba(55,138,221,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></div>
+      <div><div style="font-size:14px;font-weight:600;color:var(--text-primary)">Boiler history</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Temperature readings – Canopy 1, 3 &amp; 5</div></div>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="margin-left:auto;opacity:.35"><path d="M6 4l4 4-4 4"/></svg>
+    </button>
     <div class="bottom-nav">
       <button class="home-pill" onclick="showPane('home',null)">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
@@ -1431,6 +1436,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       </div>
       <div id="pd-hist-list" style="margin-top:8px"></div>
     </div>
+    <div class="bottom-nav" style="gap:12px">
+      <button class="home-pill" onclick="showPane('reports',null)" style="padding:10px 20px">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4l-4 4 4 4"/></svg>
+        Reports
+      </button>
+      <button class="home-pill" onclick="showPane('home',null)" style="padding:10px 20px">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L8 2l6 4.5V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6.5z"/><path d="M6 15V9h4v6"/></svg>
+        Home
+      </button>
+    </div>
+  </div>
+
+  <!-- BOILER HISTORY PANE — rendered by loadBoilerHistory() -->
+  <div id="pane-boiler-history" class="pane" style="display:none">
+    <div class="toast" id="bh-toast">✓ Copied – ready to paste</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">
+      <div><div style="font-size:17px;font-weight:600;color:var(--text-primary)">Boiler History</div><div style="font-size:12px;color:var(--text-secondary);margin-top:2px" id="bh-sub"></div></div>
+      <button id="bh-copy-btn" onclick="copyBoilerHistory()" title="Copy report" aria-label="Copy report" style="width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:none;border:0.5px solid var(--border-primary);border-radius:var(--radius-md);cursor:pointer;color:var(--text-primary)"></button>
+    </div>
+    <div class="cat-pills" id="bh-range-pills" style="margin-bottom:6px"></div>
+    <div class="cat-pills" id="bh-bldg-pills" style="margin-bottom:10px"></div>
+    <div id="bh-list"></div>
     <div class="bottom-nav" style="gap:12px">
       <button class="home-pill" onclick="showPane('reports',null)" style="padding:10px 20px">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4l-4 4 4 4"/></svg>
@@ -2088,6 +2115,7 @@ function showPane(id,btn){
   if(id==='badges'){loadBadgeLogFromSupabase();renderBadgesPane();}
   if(id==='patrols'){loadBoilerChecksForShift();renderRisers();renderMeters();updateFEEntryCard();}
   if(id==='nearmiss'){renderNMList();renderNMComplianceBanner();}
+  if(id==='boiler-history'){loadBoilerHistory();}
   if(id==='passdowns')renderPassDownsPage();
   if(id==='fe-schedule')renderFESchedule();
 }
@@ -3084,6 +3112,27 @@ function scanBoilerQR(i){
 function setBoilerAlarm(i,val){boilerCP[i].alarm=val;if(!val)boilerCP[i].afterReset=null;renderBoiler();setTimeout(()=>{const el=[document.getElementById('btemp-'+i),document.getElementById('btemp-p-'+i)].find(e=>e&&e.offsetParent);if(el)el.focus();},30);}
 function setBoilerAfterReset(i,val){boilerCP[i].afterReset=val;renderBoiler();}
 async function saveBoiler(i){const c=boilerCP[i];if(!c.temp||c.alarm===null)return;if(c.alarm===true&&c.afterReset===null)return;if(c._saving)return;const checkNum=c.checks.length+1;let detail='Temp: '+c.temp+'°F. ';let alarmSummary='No alarms';if(c.alarm===false){detail+='No alarms.';}else if(c.afterReset===false){detail+='Alarm present — reset performed, alarm cleared.';alarmSummary='Alarm — cleared after reset';}else if(c.afterReset===true){detail+='Alarm present — reset performed, alarm STILL ACTIVE. Facilities contacted.';alarmSummary='⚠ Alarm still active';}if(!window._supabase||!officer||!shiftId){console.error('Boiler check not saved: no active shift or Supabase client',{officer,shiftId,hasClient:!!window._supabase});_boilerToast('⚠ Boiler check not saved — no active shift',true);return;}c._saving=true;let row;try{const{data,error}=await window._supabase.from('boiler_checks').insert({building:c.building,temp_f:Number(c.temp),alarm:c.alarm,alarm_after_reset:c.alarm===true?c.afterReset:null,alarm_summary:alarmSummary,officer_name:officer,shift_id:shiftId}).select('id,checked_at').single();if(error)throw error;row=data;}catch(err){c._saving=false;console.error('Boiler check insert failed:',err,{building:c.building,officer,shiftId});_boilerToast('⚠ Boiler check not saved — try again',true);return;}c._saving=false;if(!c.checks.some(x=>x.id===row.id))c.checks.push({id:row.id,checkedAt:row.checked_at,time:fmt(row.checked_at),temp:c.temp,alarmSummary});addEntry('boiler','Boiler check #'+checkNum+' — '+c.building,detail);stats.patrols++;updateStats();c.scanned=false;c.saved=false;c.temp='';c.alarm=null;c.afterReset=null;renderBoiler();_boilerToast('✓ Boiler check saved');}
+// ── Boiler history report (read-only from boiler_checks) ──
+let bhRange=7,bhBldg='all',bhRows=[],bhLoading=false,bhLoadSeq=0,bhStart=new Date();
+const BH_BLDGS={all:'All buildings',C1:'Canopy 1',C3:'Canopy 3',C5:'Canopy 5'};
+const BH_ICON_COPY='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const BH_ICON_CHECK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+function _bhShortBldg(b){const m=String(b||'').match(/(\d+)\s*$/);return m?'C'+m[1]:String(b||'');}
+function _bhTime(d){return fmt(d).replace(/^0/,'');}
+function _bhDay(d){return new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function _bhRangeLabel(){const a=bhStart,b=new Date();const sameYear=a.getFullYear()===b.getFullYear();const fa=a.toLocaleDateString('en-US',sameYear?{month:'short',day:'numeric'}:{month:'short',day:'numeric',year:'numeric'});const fb=b.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});return fa+' – '+fb;}
+function _bhStatus(r){if(!r.alarm)return{text:'OK',color:'var(--text-secondary)'};if(r.alarm_after_reset===false)return{text:'Alarm – cleared',color:'var(--text-warning)'};return{text:'Alarm – ACTIVE',color:'var(--text-danger)'};}
+function _bhFirstName(n){return String(n||'').trim().split(/\s+/)[0]||'';}
+function _bhTemp(v){return(v===null||v===undefined||v==='')?'—':String(Number(v))+'°F';}
+function _bhGroups(){const groups=[];let cur=null;bhRows.forEach(r=>{const day=_bhDay(r.checked_at);if(!cur||cur.day!==day){cur={day,rows:[]};groups.push(cur);}cur.rows.push(r);});return groups;}
+function _bhSetCopyIcon(done){const b=document.getElementById('bh-copy-btn');if(b)b.innerHTML=done?BH_ICON_CHECK:BH_ICON_COPY;}
+function renderBoilerHistory(){const sub=document.getElementById('bh-sub');if(sub)sub.textContent=_bhRangeLabel()+' · '+BH_BLDGS[bhBldg];const rp=document.getElementById('bh-range-pills');if(rp)rp.innerHTML=[7,14,30].map(n=>'<button class="cat-pill'+(bhRange===n?' active-security':'')+'" onclick="setBoilerHistoryRange('+n+')">'+n+' days</button>').join('');const bp=document.getElementById('bh-bldg-pills');if(bp)bp.innerHTML=['all','C1','C3','C5'].map(k=>'<button class="cat-pill'+(bhBldg===k?' active-security':'')+'" onclick="setBoilerHistoryBldg(\''+k+'\')">'+(k==='all'?'All':k)+'</button>').join('');const btn=document.getElementById('bh-copy-btn');if(btn&&!btn.innerHTML)btn.innerHTML=BH_ICON_COPY;const list=document.getElementById('bh-list');if(!list)return;if(bhLoading){list.innerHTML='<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">Loading…</div>';return;}if(!bhRows.length){list.innerHTML='<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No boiler checks in this range.</div>';return;}list.innerHTML=_bhGroups().map(g=>'<div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:12px 0 2px">'+_esc(g.day)+'</div>'+g.rows.map(r=>{const st=_bhStatus(r);return '<div style="display:flex;align-items:baseline;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border-secondary);font-size:13px;color:var(--text-primary)"><span style="width:62px;flex-shrink:0;color:var(--text-secondary);font-size:12px">'+_esc(_bhTime(r.checked_at))+'</span><span style="width:24px;flex-shrink:0">'+_esc(_bhShortBldg(r.building))+'</span><span style="width:44px;flex-shrink:0;font-weight:700">'+_esc(_bhTemp(r.temp_f))+'</span><span style="flex:1;min-width:0;color:'+st.color+(r.alarm?';font-weight:600':'')+'">'+st.text+'</span><span style="flex-shrink:0;color:var(--text-secondary);font-size:12px">'+_esc(_bhFirstName(r.officer_name))+'</span></div>';}).join('')).join('');}
+async function loadBoilerHistory(){const seq=++bhLoadSeq;bhStart=new Date();bhStart.setHours(0,0,0,0);bhStart.setDate(bhStart.getDate()-(bhRange-1));bhLoading=true;bhRows=[];renderBoilerHistory();if(!window._supabase){bhLoading=false;renderBoilerHistory();return;}try{let q=window._supabase.from('boiler_checks').select('id,checked_at,building,temp_f,alarm,alarm_after_reset,alarm_summary,officer_name,shift_id').gte('checked_at',bhStart.toISOString());if(bhBldg!=='all')q=q.eq('building',BH_BLDGS[bhBldg]);const{data,error}=await q.order('checked_at',{ascending:false}).limit(500);if(error)throw error;if(seq!==bhLoadSeq)return;bhRows=data||[];}catch(err){if(seq!==bhLoadSeq)return;console.error('Failed to load boiler history:',err);bhRows=[];}bhLoading=false;renderBoilerHistory();}
+function setBoilerHistoryRange(n){bhRange=n;loadBoilerHistory();}
+function setBoilerHistoryBldg(k){bhBldg=k;loadBoilerHistory();}
+function buildBoilerHistoryText(){const lines=['Canopy Boiler History',_bhRangeLabel()+(bhBldg!=='all'?' · '+BH_BLDGS[bhBldg]+' only':'')];const groups=_bhGroups();if(!groups.length){lines.push('','No boiler checks in this range.');}groups.forEach(g=>{lines.push('',g.day);g.rows.forEach(r=>{lines.push(_bhShortBldg(r.building)+'  '+_bhTime(r.checked_at)+'  '+_bhTemp(r.temp_f)+'  '+_bhStatus(r).text+'  ('+_bhFirstName(r.officer_name)+')');});});return lines.join('\n');}
+function _bhCopyFallback(text){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='0';ta.style.left='0';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{ta.setSelectionRange(0,text.length);}catch(e){}let ok=false;try{ok=document.execCommand('copy');}catch(e){ok=false;}document.body.removeChild(ta);return ok;}
+async function copyBoilerHistory(){if(bhLoading)return;const text=buildBoilerHistoryText();let ok=false;try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);ok=true;}}catch(e){ok=false;}if(!ok)ok=_bhCopyFallback(text);if(ok){showToast('bh-toast','✓ Copied – ready to paste');_bhSetCopyIcon(true);setTimeout(()=>_bhSetCopyIcon(false),2000);}else{console.error('Boiler history copy failed');showToast('bh-toast','Copy failed');}}
 function togglePatrol(id){const body=document.getElementById(id+'-body');const chev=document.getElementById(id+'-chev');if(body)body.classList.toggle('open');if(chev)chev.classList.toggle('open');}
 let pavilionPatrolCount=0;
 let pavilionMicRecognition=null;
