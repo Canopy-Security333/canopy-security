@@ -2337,7 +2337,8 @@ function openPassDownModal(){
       entries.forEach(e=>{
         const cat=String(e.catLabel||'').trim();const key=String(e.keyLabel||'').trim();
         const label=(cat&&!key.toLowerCase().includes(cat.toLowerCase()))?cat+' – '+key:key;
-        block+=`• ${label} — ${person}\n`;
+        const co=String(e.company||'').trim();
+        block+=`• ${label} — ${person}${co?' ('+co+')':''}\n`;
       });
     });
     _pdAutoKeysBlock=block;
@@ -2348,7 +2349,8 @@ function openPassDownModal(){
     let block='🪪 BADGES STILL OUT:\n';
     Object.entries(byPerson).forEach(([person,entries])=>{
       const badges=_pdShortenLabels(entries.map(e=>String(e.badgeLabel||'').trim()));
-      block+=`• ${badges} — ${person}\n`;
+      const co=String((entries.find(e=>String(e.company||'').trim())||{}).company||'').trim();
+      block+=`• ${badges} — ${person}${co?' ('+co+')':''}\n`;
     });
     _pdAutoBadgesBlock=block;
   }
@@ -2402,7 +2404,9 @@ function _pdTruncWords(s,max){s=String(s||'').replace(/\s+/g,' ').trim();if(s.le
 // Pass down text → HTML: keeps line breaks, bold header line (multi-line notes only), hanging-indent bullets.
 // Badges tile icon (same as Home → Badges) shown in place of the 🪪 emoji in the "BADGES STILL OUT" header (stored text keeps the emoji).
 const _PD_BADGE_SVG='<svg width="1.1em" height="1.1em" viewBox="0 0 24 24" fill="none" stroke="#7C5CFC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.2em;margin-right:1px"><path d="M9 2h6v3a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><rect x="5" y="6" width="14" height="16" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M8 19h8"/></svg>';
-function _fmtPdText(text){const lines=String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);return lines.map((l,i)=>{if(i===0&&lines.length>1&&(/^\p{Extended_Pictographic}/u.test(l)||l.endsWith(':'))){let h=_esc(l.replace(/:$/,''));if(h.startsWith('🪪'))h=_PD_BADGE_SVG+h.slice(2);return `<div style="font-weight:600;margin-bottom:2px">${h}</div>`;}const b=/^(•|-)\s+(.*)$/.exec(l);if(b)return `<div style="display:flex;gap:6px;padding-left:4px;margin-top:2px"><span style="flex-shrink:0">•</span><span style="min-width:0">${_esc(b[2])}</span></div>`;return `<div>${_esc(l)}</div>`;}).join('');}
+// Display-only cleanup of old-format keys/badges bullets: drop phone, "Issued … by …", and "out to".
+function _pdCleanAutoLine(s){s=String(s||'');s=s.replace(/\.?\s*Issued\s+.*?\s+by\s+[^.]*\.?\s*$/i,'');s=s.replace(/\.?\s*Issued\s+\S+(?:\s?[AP]M)?\s+by\s+[^.,;]+\.?/gi,'');s=s.replace(/,?\s*\+?\(?\d[\d\s().-]{8,}\d\)?/g,m=>m.replace(/\D/g,'').length>=10?'':m);s=s.replace(/—\s*out to\s+/i,'— ');return s.replace(/\s{2,}/g,' ').replace(/[\s.,;]+$/,'').trim();}
+function _fmtPdText(text){const lines=String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(Boolean);const autoKind=['keys','badges'].includes(_pdKind({text}));return lines.map((l,i)=>{if(i===0&&lines.length>1&&(/^\p{Extended_Pictographic}/u.test(l)||l.endsWith(':'))){let h=_esc(l.replace(/:$/,''));if(h.startsWith('🪪'))h=_PD_BADGE_SVG+h.slice(2);return `<div style="font-weight:600;margin-bottom:2px">${h}</div>`;}const b=/^(•|-)\s+(.*)$/.exec(l);if(b){const body=(autoKind&&b[2].includes(' — '))?_pdCleanAutoLine(b[2]):b[2];return `<div style="display:flex;gap:6px;padding-left:4px;margin-top:2px"><span style="flex-shrink:0">•</span><span style="min-width:0">${_esc(body)}</span></div>`;}return `<div>${_esc(l)}</div>`;}).join('');}
 // ── Live pass down de-dupe (display only; History/export still show everything) ──
 // Kind is read from the text at render time — polling sync rebuilds passDowns without stored flags.
 const _PD_KEYS_HDR='🔑 KEYS STILL OUT:',_PD_BADGES_HDR='🪪 BADGES STILL OUT:';
