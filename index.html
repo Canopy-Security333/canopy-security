@@ -1943,15 +1943,15 @@ function requestMeterPreview() {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + session.access_token,
       },
-      body: JSON.stringify({ manual: true, reports: ['meters'], period: 'current' }),
+      body: JSON.stringify({ reportType: 'meter-preview', period: 'current' }),
     })
     .then(function(res) { return res.json().then(function(json) { return { status: res.status, json: json }; }); })
     .then(function(r) {
-      var meterResult = r.json && r.json.results && r.json.results.meters;
-      if (r.status === 200 && meterResult && meterResult.ok) {
-        _showMeterPreviewStatus('ok', '✓ Report sent to security@canopyus.com (' + (meterResult.rows || 0) + ' records)');
+      if (r.status === 200 && r.json && r.json.ok) {
+        var sentTo = (r.json.recipients && r.json.recipients.length) ? r.json.recipients.join(' and ') : 'the security team';
+        _showMeterPreviewStatus('ok', '✓ Report sent to ' + sentTo + ' (' + (r.json.rows || 0) + ' records)');
       } else {
-        var errMsg = (meterResult && meterResult.error) || (r.json && r.json.error) || 'Unknown error';
+        var errMsg = (r.json && (r.json.error || r.json.reason)) || 'Unknown error';
         _showMeterPreviewStatus('error', 'Error: ' + errMsg);
       }
     })
