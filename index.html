@@ -137,6 +137,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 .stat{background:var(--bg-primary);border:0.5px solid var(--border-secondary);border-radius:16px;padding:14px 12px}
 .stat-n{font-size:28px;font-weight:600;color:var(--text-primary);letter-spacing:-.5px}
 .stat-l{font-size:11px;color:var(--text-secondary);margin-top:2px}
+/* ── SHIFT OVERVIEW (v2) ── */
+.so-grid .so-tile{display:flex;flex-direction:column;min-width:0;padding:12px}
+.so-wide{grid-column:1 / -1}
+.so-hdr{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;min-width:0}
+.so-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.so-grid .stat-n{line-height:1.1}
+.so-sub{font-size:11px;color:var(--text-secondary);margin-top:3px;line-height:1.3}
+.so-muted{color:var(--text-secondary)!important}
+.so-split{display:flex;align-items:stretch;gap:12px}
+.so-split-col{min-width:0}
+.so-split-div{width:0.5px;background:var(--border-primary);align-self:stretch}
+.so-pill{align-self:flex-start;margin-top:6px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.so-pill:empty{display:none}
+.so-pill.ok{background:var(--bg-success);color:var(--text-success)}
+.so-pill.warn{background:var(--bg-warning);color:var(--text-warning)}
+.so-pill.bad{background:var(--bg-danger);color:var(--text-danger)}
+.so-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.so-row .so-hdr{margin-bottom:0}
+.so-total{font-size:15px;font-weight:600;color:var(--text-primary)}
+.so-boilers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+.so-bpill{border-radius:var(--radius-md);padding:7px 8px;background:var(--bg-primary);border:0.5px solid var(--border-secondary);min-width:0}
+.so-bpill b{display:block;font-size:12px;font-weight:600;color:var(--text-primary)}
+.so-bpill span{display:block;font-size:10.5px;color:var(--text-secondary);margin-top:2px;line-height:1.3}
+.so-bpill.done{background:var(--bg-success);border-color:rgba(29,158,117,.35)}
+.so-bpill.done span{color:var(--text-success)}
+.so-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:10px;background:var(--border-secondary)}
+.so-bar i{display:block;height:100%}
+.so-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px 12px;margin-top:10px}
+.so-leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);min-width:0}
+.so-leg .so-dot{width:8px;height:8px;border-radius:2px}
+.so-leg em{font-style:normal;margin-left:auto;font-weight:600;color:var(--text-primary)}
+.so-empty{font-size:12px;color:var(--text-secondary);margin-top:8px}
 /* ── PANES ── */
 .pane{padding:14px;padding-bottom:80px;display:none}.pane.act{display:block}
 .lbl{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px}
@@ -1084,13 +1116,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
 
     <div class="fe-section">
       <div class="lbl">Fire extinguisher inspection</div>
-      <div class="fe-entry-card" onclick="openFESchedule()">
+      <div class="fe-entry-card" onclick="openFESchedule()" style="margin-bottom:16px">
         <div class="fe-entry-inner"><div class="fe-icon">🧯</div><div class="fe-info"><div class="fe-title">Fire Extinguishers</div><div class="fe-meta" id="fe-entry-meta">Monthly inspection · Tap to view schedule</div></div><div class="fe-chevron">›</div></div>
         <div class="fe-progress-mini"><div class="fe-progress-mini-fill" id="fe-mini-bar" style="width:0%"></div></div>
       </div>
     </div>
 
-    <div class="fe-entry-card" id="nm-open-card" onclick="openUnresolvedNearMiss()" style="margin-bottom:10px">
+    <div class="fe-entry-card" id="nm-open-card" onclick="openUnresolvedNearMiss()" style="margin-bottom:16px">
       <div class="fe-entry-inner">
         <div class="fe-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <div class="fe-info" style="min-width:0"><div class="fe-title">Open Near Miss Reports</div><div class="fe-meta" id="nm-open-meta">Loading…</div></div>
@@ -1100,7 +1132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
     </div>
 
     <!-- Monthly Safety Tip Banner -->
-    <div id="mst-banner-wrap" style="margin-bottom:10px">
+    <div id="mst-banner-wrap" style="margin-bottom:16px">
       <div id="mst-banner" style="border:1px solid var(--green);background:var(--bg-success);border-radius:var(--radius-lg);padding:12px 14px;transition:background .2s,border-color .2s">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <div style="flex:1;min-width:0">
@@ -1112,11 +1144,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-s
       </div>
     </div>
     <div class="lbl">Shift overview</div>
-    <div class="stat-grid">
-      <div class="stat"><div class="stat-n" id="stat-patrols">0</div><div class="stat-l">Patrols logged</div></div>
-      <div class="stat"><div class="stat-n" id="stat-nm">0</div><div class="stat-l">Near miss reports</div></div>
-      <div class="stat"><div class="stat-n" id="stat-checks">0</div><div class="stat-l">Checkpoints cleared</div></div>
-      <div class="stat"><div class="stat-n" id="stat-entries">0</div><div class="stat-l">DAR entries</div></div>
+    <div class="stat-grid so-grid" id="shift-overview">
+      <div class="stat so-tile">
+        <div class="so-hdr"><span class="so-dot" style="background:var(--blue)"></span>Patrols</div>
+        <div class="stat-n" id="so-patrols-n">0</div>
+        <div class="so-sub" id="so-patrols-sub">None yet</div>
+      </div>
+      <div class="stat so-tile">
+        <div class="so-hdr"><span class="so-dot" style="background:var(--red)"></span>Near miss</div>
+        <div class="so-split">
+          <div class="so-split-col"><div class="stat-n" id="so-nm-shift">0</div><div class="so-sub">this shift</div></div>
+          <div class="so-split-div"></div>
+          <div class="so-split-col"><div class="stat-n so-muted" id="so-nm-month">0</div><div class="so-sub">this month</div></div>
+        </div>
+      </div>
+      <div class="stat so-tile">
+        <div class="so-hdr"><span class="so-dot" style="background:var(--blue)"></span>Data center</div>
+        <div class="stat-n" id="so-dc-n">0</div>
+        <span class="so-pill" id="so-dc-pill"></span>
+      </div>
+      <div class="stat so-tile">
+        <div class="so-hdr"><span class="so-dot" style="background:var(--orange)"></span>Bunker</div>
+        <div class="stat-n" id="so-bk-n">0</div>
+        <span class="so-pill" id="so-bk-pill"></span>
+      </div>
+      <div class="stat so-tile so-wide" id="so-boiler-tile">
+        <div class="so-row"><div class="so-hdr"><span class="so-dot" style="background:var(--orange)"></span>Boiler checks</div><span class="so-total" id="so-boiler-count">0/3</span></div>
+        <div class="so-boilers" id="so-boilers"></div>
+      </div>
+      <div class="stat so-tile so-wide">
+        <div class="so-row"><div class="so-hdr">DAR entries this shift</div><span class="so-total" id="so-dar-total">0</span></div>
+        <div id="so-dar-body"></div>
+      </div>
     </div>
     <div class="lbl">Shift</div>
     <button class="end-shift-btn" onclick="menuEndShift()">
@@ -2158,6 +2217,7 @@ function showPane(id,btn){
 function paneVisible(id){return document.getElementById('pane-'+id)?.classList.contains('act')||false;}
 function adminComplianceVisible(){return (document.getElementById('screen-admin')?.classList.contains('act')||false)&&document.getElementById('admin-unlocked')?.style.display!=='none';}
 function updateHomeTiles(){
+  renderShiftOverview();
   renderMSTBanner();
   updateNMOpenCard();
   const nmEl=document.getElementById('qa-nm-sub');
@@ -2269,8 +2329,7 @@ function restoreActiveShift(){
         if(s.bpScanned)Object.assign(bpScanned,s.bpScanned);
         if(s.nmReports)nmReports=s.nmReports;
         _applyOfficerToUI(officer);
-        ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
-        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=currentShiftEntries().length;
+        renderShiftOverview();
         timerInt=setInterval(()=>{
           const d=Math.floor((Date.now()-shiftStart)/1000);
           const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;
@@ -2328,7 +2387,7 @@ async function refreshActiveOfficers(){
 }
 function populateSelect(){const s=document.getElementById('ci-sel');s.innerHTML='<option value="">Select your name...</option>'+officers.map(o=>{const isActive=activeOfficerNames.has(o)&&o!==officer;return`<option value="${o}"${isActive?' disabled':''}>${o}${isActive?' (checked in)':''}</option>`;}).join('')+'<option disabled>──────────────</option><option value="Admin">Admin</option>';}
 function ciReady(){document.getElementById('ci-btn').disabled=!document.getElementById('ci-sel').value}
-async function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+officerSlug(n)+'-'+Date.now();resetBoilerState();loadBoilerChecksForShift();darLog=await _loadDarEntriesForMonth();_rebuildHourlyState();stats={patrols:0,nm:0,checks:0};feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);['stat-patrols','stat-nm','stat-checks'].forEach(id=>document.getElementById(id).textContent=0);const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=currentShiftEntries().length;addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();saveActiveShift();saveShiftToSupabase();}
+async function doCheckin(){const n=document.getElementById('ci-sel').value;if(!n)return;officer=n;shiftStart=new Date();shiftId='shift-'+officerSlug(n)+'-'+Date.now();resetBoilerState();loadBoilerChecksForShift();darLog=await _loadDarEntriesForMonth();_rebuildHourlyState();stats={patrols:0,nm:0,checks:0};feCheckState={};localStorage.setItem('current_officer',n);_applyOfficerToUI(n);renderShiftOverview();addEntry('checkin','Shift started','Officer '+n+' signed in. Patrol shift began.');timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),s=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(s)+' on shift';},1000);_shiftRestored=true;saveActiveShift();saveShiftToSupabase();prevScreen='main';showScreen('main');showPane('home',null);updateHomeTiles();saveActiveShift();saveShiftToSupabase();}
 function updatePdBtn(){document.getElementById('pd-submit-btn').disabled=!document.getElementById('pd-textarea').value.trim();}
 function updateAddPdBtn(){document.getElementById('add-pd-submit-btn').disabled=!document.getElementById('add-pd-textarea').value.trim();}
 function openAddPassDownSheet(){document.getElementById('add-pd-sheet').classList.add('open');document.getElementById('add-pd-textarea').value='';document.getElementById('add-pd-submit-btn').disabled=true;}
@@ -2460,7 +2519,7 @@ function finalizeShift(){const _endingOfficer=officer;clearShiftFromSupabase(_en
   clearShiftFromSupabase(_endingOfficer);
   clearInterval(window._pollInterval);
   _supabaseUserId=null;
-  clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};resetBoilerState();showScreen('eos');}
+  clearActiveShift();officer=null;shiftStart=null;shiftId=null;darLog=[];stats={patrols:0,nm:0,checks:0};clearInterval(_soInt);_soInt=null;resetBoilerState();renderShiftOverview();showScreen('eos');}
 function returnToCheckin(){
   renderPassDownsBanner();
   const sel=document.getElementById('ci-sel');
@@ -2495,6 +2554,86 @@ function _rebuildHourlyState() {
   renderDARBanner();
 }
 
+// ── Shift overview (v2): every tile computed from this shift's DAR entries, nmHistory and boilerCP ──
+let _soInt=null;
+function _soDur(min){min=Math.max(0,Math.round(min));if(min<60)return min+'m';const h=Math.floor(min/60),m=min%60;return h+'h'+(m?' '+m+'m':'');}
+function _soRound(entries,title,hrs,nId,pillId){
+  const list=entries.filter(e=>e.type==='check'&&e.title===title);
+  const nEl=document.getElementById(nId);if(nEl)nEl.textContent=list.length;
+  const pill=document.getElementById(pillId);if(!pill)return;
+  if(!officer||!shiftStart){pill.textContent='';pill.className='so-pill';return;}
+  const last=list.reduce((m,e)=>Math.max(m,new Date(e.time).getTime()),0);
+  const due=(last||shiftStart.getTime())+hrs*3600000;
+  const mins=(due-Date.now())/60000;
+  if(mins<0){pill.className='so-pill bad';pill.textContent='Overdue '+_soDur(-mins);}
+  else if(mins<=15){pill.className='so-pill warn';pill.textContent='Due in '+_soDur(mins);}
+  else{pill.className='so-pill ok';pill.textContent='Next in '+_soDur(mins);}
+}
+function renderShiftOverview(){
+  if(officer&&shiftStart&&!_soInt)_soInt=setInterval(renderShiftOverview,60000);
+  if((!officer||!shiftStart)&&_soInt){clearInterval(_soInt);_soInt=null;}
+  const root=document.getElementById('shift-overview');if(!root)return;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const entries=currentShiftEntries();
+  const isRiser=e=>e.type==='patrol'&&String(e.title||'').startsWith('Fire riser check');
+  // 1. Patrols
+  const patrols=entries.filter(e=>e.type==='patrol'&&!isRiser(e)&&e.title!=='Security camera review'&&e.title!=='Badge created');
+  const bldN=patrols.filter(e=>String(e.title||'').startsWith('Building patrol')).length;
+  const pavN=patrols.filter(e=>e.title==='Pavilion patrol').length;
+  set('so-patrols-n',patrols.length);
+  set('so-patrols-sub',patrols.length===0?'None yet':[bldN?'Buildings '+bldN:'',pavN?'Pavilion '+pavN:''].filter(Boolean).join(' · ')||'Other patrols');
+  // 2. Near miss (same officer field as the compliance check)
+  const now=new Date();
+  const mine=officer?nmHistory.filter(r=>r.officer===officer):[];
+  set('so-nm-shift',shiftStart?mine.filter(r=>new Date(r.time).getTime()>=shiftStart.getTime()).length:0);
+  set('so-nm-month',mine.filter(r=>{const t=new Date(r.time);return t.getFullYear()===now.getFullYear()&&t.getMonth()===now.getMonth();}).length);
+  // 3–4. Data Center (2h) and Bunker (4h) rounds
+  _soRound(entries,'Data Center Patrol',2,'so-dc-n','so-dc-pill');
+  _soRound(entries,'Bunker Patrol',4,'so-bk-n','so-bk-pill');
+  // 5. Boilers — Nov through Apr only
+  const bTile=document.getElementById('so-boiler-tile');
+  const mo=now.getMonth();
+  if(bTile){
+    const season=mo>=10||mo<=3;
+    bTile.style.display=season?'':'none';
+    if(season){
+      const start=shiftStart?shiftStart.getTime():0;
+      let done=0;
+      const html=boilerCP.map(c=>{
+        const ks=c.checks.filter(k=>!k.checkedAt||new Date(k.checkedAt).getTime()>=start);
+        const k=ks[ks.length-1];
+        const name=_bEscHtml(_bhShortBldg(c.building));
+        if(!k)return '<div class="so-bpill"><b>'+name+'</b><span>Not checked</span></div>';
+        done++;
+        const t=k.checkedAt?fmt(k.checkedAt).replace(/^0/,''):String(k.time||'').replace(/^0/,'');
+        return '<div class="so-bpill done"><b>'+name+'</b><span>✓ '+_bEscHtml(t)+' · '+_bEscHtml(k.temp)+'°</span></div>';
+      }).join('');
+      const bl=document.getElementById('so-boilers');if(bl)bl.innerHTML=html;
+      set('so-boiler-count',done+'/'+boilerCP.length);
+    }
+  }
+  // 6. DAR breakdown
+  const cats=[
+    {k:'Patrols',c:'var(--blue)',t:e=>e.type==='patrol'&&!isRiser(e)},
+    {k:'DC / Bunker',c:'#5B9BD5',t:e=>e.type==='check'},
+    {k:'Fire riser',c:'#2BB3A6',t:isRiser},
+    {k:'Boiler',c:'var(--orange)',t:e=>e.type==='boiler'},
+    {k:'Notes',c:'#C9963A',t:e=>e.type==='note'},
+    {k:'Keys / Badges',c:'var(--purple)',t:e=>e.type==='key'||e.type==='badge'},
+    {k:'Near miss',c:'var(--red)',t:e=>e.type==='nearmiss'},
+  ];
+  const counts=cats.map(()=>0);let other=0;
+  entries.forEach(e=>{const i=cats.findIndex(x=>x.t(e));if(i<0)other++;else counts[i]++;});
+  const rows=cats.map((x,i)=>({k:x.k,c:x.c,n:counts[i]})).concat([{k:'Other',c:'var(--text-tertiary)',n:other}]).filter(r=>r.n>0);
+  const total=entries.length;
+  set('so-dar-total',total);
+  const body=document.getElementById('so-dar-body');
+  if(body){
+    body.innerHTML=total===0?'<div class="so-empty">No entries yet</div>':
+      '<div class="so-bar">'+rows.map(r=>'<i style="width:'+(r.n/total*100)+'%;background:'+r.c+'"></i>').join('')+'</div>'+
+      '<div class="so-legend">'+rows.map(r=>'<div class="so-leg"><span class="so-dot" style="background:'+r.c+'"></span>'+r.k+'<em>'+r.n+'</em></div>').join('')+'</div>';
+  }
+}
 function currentShiftEntries(){
   if(!shiftStart)return darLog;
   const start=shiftStart.getTime();
@@ -2588,7 +2727,7 @@ function addEntry(type,title,detail){
   darLog.push(entry);
   hourEntryCount++;
   hourEntries.unshift(entry);
-  const el=document.getElementById('stat-entries');if(el)el.textContent=currentShiftEntries().length;
+  renderShiftOverview();
   renderDARBanner();
   openDARDrawer();
   saveActiveShift();
@@ -2638,7 +2777,7 @@ function addNote(){const inp=document.getElementById('note-input');const v=inp.v
 function addDARNote(){const inp=document.getElementById('dar-note-input');const v=inp.value.trim();if(!v)return;addEntry('note','Officer note',v);inp.value='';renderCurrentDAR();showToast('dar-note-toast');}
 function editDAREntry(idx){const e=currentShiftEntries()[idx];if(!e||e.type!=='note')return;const container=document.getElementById('dar-entries');if(!container)return;const entryEls=container.querySelectorAll('.dar-entry');const entryEl=entryEls[idx];if(!entryEl)return;const body=entryEl.querySelector('.dar-entry-body');if(!body)return;const escaped=(e.detail||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");body.innerHTML=`<div class="dar-title">${e.title}</div><div class="dar-edit-row"><textarea class="dar-edit-textarea" id="dar-edit-ta-${idx}">${escaped}</textarea><div class="dar-edit-actions"><button class="dar-edit-save" onclick="saveDAREdit(${idx})">Save</button><button class="dar-edit-cancel" onclick="renderCurrentDAR()">Cancel</button></div></div>`;const ta=document.getElementById('dar-edit-ta-'+idx);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}}
 function saveDAREdit(idx){const ta=document.getElementById('dar-edit-ta-'+idx);if(!ta)return;const v=ta.value.trim();if(!v)return;const e=currentShiftEntries()[idx];if(!e)return;e.detail=v;saveActiveShift();saveShiftToSupabase();renderCurrentDAR();showToast('dar-note-toast','✓ Entry updated');}
-function updateStats(){document.getElementById('stat-patrols').textContent=stats.patrols;document.getElementById('stat-nm').textContent=stats.nm;document.getElementById('stat-checks').textContent=stats.checks;document.getElementById('stat-entries').textContent=currentShiftEntries().length;updateHomePatrolCounts();saveActiveShift();}
+function updateStats(){renderShiftOverview();updateHomePatrolCounts();saveActiveShift();}
 function updateHomePatrolCounts(){const dcN=(typeof dcPatrol!=='undefined')?dcPatrol.scans.length:0;const dcC=document.getElementById('datacenter-count');if(dcC)dcC.textContent=dcN>0?dcN+' round'+(dcN!==1?'s':''):'';const bkN=(typeof bkrPatrol!=='undefined')?bkrPatrol.scans.length:0;const bkC=document.getElementById('bunker-count');if(bkC)bkC.textContent=bkN>0?bkN+' round'+(bkN!==1?'s':''):'';}
 function goToPatrol(sectionId){const bodyId=sectionId==='bp'?'bp-body':sectionId+'-body';const chevId=sectionId==='bp'?'bp-chev':sectionId+'-chev';const body=document.getElementById(bodyId);const chev=document.getElementById(chevId);if(body&&!body.classList.contains('open')){body.classList.add('open');if(chev)chev.classList.add('open');}setTimeout(()=>{if(body)body.scrollIntoView({behavior:'smooth',block:'nearest'});},60);}
 function renderEntries(entries,container,editable,showDate,highlightQuery){const hl=highlightQuery?(t=>t.replace(new RegExp('('+highlightQuery.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="search-highlight">$1</span>')):(t=>t);container.innerHTML=entries.length?entries.map((e,i)=>{const c=TC[e.type]||TC.note;const isNote=e.type==='note';const editBtn=(editable&&isNote)?`<button class="dar-edit-btn" onclick="editDAREntry(${i})">Edit</button>`:'';const dateLine=showDate?`<div style="font-size:10px;color:var(--text-tertiary)">${fmtShortDate(e.time)}</div>`:'';return`<div class="dar-entry${isNote?' dar-entry-note':''}"><div class="dar-time">${dateLine}${fmt(e.time)}<div style="font-size:10px;color:var(--text-tertiary)">${e.officer||'—'}</div></div><div class="dar-dot ${c.dot}"></div><div class="dar-entry-body" style="flex:1"><div class="dar-title">${hl(e.title)}</div>${e.detail?`<div class="dar-detail">${hl(e.detail)}</div>`:''}<div class="dar-entry-footer"><span class="dtag ${c.tag}">${c.label}</span>${editBtn}</div></div></div>`;}).join(''):'<div style="font-size:13px;color:var(--text-secondary);padding:8px 0">No entries yet.</div>';}
@@ -3213,7 +3352,7 @@ function _boilerHomeNotice(){const el=document.getElementById('qa-patrols-boiler
 function _boilerLeaveGuard(id,btn){if(_boilerLeaveBypass||id==='home-bp'||id==='patrols'||!_boilerCardVisible())return false;const open=boilerCP.filter(_boilerHasData);if(!open.length)return false;_boilerPendingNav={id,btn};const names=open.map(c=>c.building);const txt=document.getElementById('boiler-leave-text');if(txt)txt.innerHTML=`The ${_bEscHtml(_boilerJoin(names))} ${names.length===1?"reading hasn't":"readings haven't"} been logged to the DAR yet.`+(open.some(c=>_boilerRule(c)==='call')?' <strong style="color:var(--text-danger)">This check requires a call to Cody Holt.</strong>':'');const m=document.getElementById('boiler-leave-modal');if(!m)return false;m.classList.add('open');return true;}
 function boilerLeaveStay(){const m=document.getElementById('boiler-leave-modal');if(m)m.classList.remove('open');_boilerPendingNav=null;const i=boilerCP.findIndex(_boilerHasData);if(i<0)return;const el=['bact-'+i,'bact-p-'+i].map(x=>document.getElementById(x)).find(e=>e&&e.offsetParent);if(el)el.closest('.boiler-form').scrollIntoView({behavior:'smooth',block:'center'});}
 function boilerLeaveGo(){const m=document.getElementById('boiler-leave-modal');if(m)m.classList.remove('open');const n=_boilerPendingNav;_boilerPendingNav=null;if(!n)return;_boilerLeaveBypass=true;try{showPane(n.id,n.btn);}finally{_boilerLeaveBypass=false;}}
-function renderBoiler(){if(_boilerCardVisible())fetchBoilerWeather();['boiler-wx','boiler-p-wx'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=_boilerWxStripHtml();});const doneCount=boilerCP.filter(c=>c.checks.length>0).length;const allDone=doneCount===boilerCP.length;['boiler-count','boiler-p-count'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.textContent=doneCount+'/'+boilerCP.length+' done'+(allDone?' ✓':'');el.style.color=allDone?'var(--text-success)':'var(--text-secondary)';});const _bEsc=v=>String(v==null?'':v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));const buildList=pfx=>boilerCP.map((c,i)=>{const checkCount=c.checks.length;const rowHtml=`<div class="patrol-card" id="bbox-${pfx}${i}"${_boilerHasData(c)?' style="border-color:var(--red)"':''}><div class="patrol-hdr" style="padding:11px 12px;display:flex;align-items:center;justify-content:space-between"><div><div class="patrol-title">${c.building} — Boiler Room</div><div class="patrol-meta" id="bstat-${pfx}${i}">${_boilerStatusHtml(c)}</div></div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${checkCount>0&&!(c.scanned&&!c.saved)?'<span style="font-size:18px">✅</span>':''}${c.scanned&&!c.saved?'':`<button class="cp-btn" onclick="scanBoilerQR(${i})">${checkCount>0?'Re-check':'Scan QR'}</button>`}</div></div>${checkCount>0&&!(c.scanned&&!c.saved)?`<div style="padding:4px 12px 8px;border-top:0.5px solid var(--border-secondary)">${c.checks.map((ck,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:11px;font-weight:600;color:var(--text-info);min-width:24px">C${ci+1}</span><span style="font-size:12px;color:var(--text-primary);flex:1">${_bEsc(ck.temp)}°F · ${_bEsc(ck.alarmSummary)}</span><span style="font-size:11px;color:var(--text-secondary)">${_bEsc(ck.time)}</span></div>`).join('')}</div>`:''}`;let formHtml='';if(c.scanned&&!c.saved){let alarmGuidance='';if(c.alarm===true){alarmGuidance=`<div class="alarm-guidance"><div class="alarm-step alarm-warn"><div class="alarm-step-hdr">⚠️ Alarm present — action required</div>Reset the boiler using the reset button on the unit. Wait for it to fully restart before checking again.</div></div><div style="margin-top:10px"><div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:6px">After reset — is the alarm still present?</div><div class="boiler-yn-row"><button class="yn-btn yes ${c.afterReset===true?'active':''}" onclick="setBoilerAfterReset(${i},true)">Yes — still alarming</button><button class="yn-btn no ${c.afterReset===false?'active':''}" onclick="setBoilerAfterReset(${i},false)">No — alarm cleared</button></div>${c.afterReset===true?`<div class="alarm-danger alarm-step" style="margin-top:10px"><div class="alarm-step-hdr">🚨 Contact facilities immediately</div>The alarm persists after reset. Do not operate the boiler. Notify facilities management right away.</div><a href="tel:+18014204789" class="facilities-btn" onclick="boilerAlarmCall(${i})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2h4l1.5 4-2.5 1.5a10 10 0 0 0 3.5 3.5L10 8.5l4 1.5v4a1 1 0 0 1-1 1A14 14 0 0 1 1 3a1 1 0 0 1 1-1z"/></svg>Call Cody Holt — Facilities</a>`:''}</div>`;}const checkNum=checkCount+1;formHtml=`<div class="boiler-form"><div class="boiler-form-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>${c.building} — Check #${checkNum}</div>${(()=>{const oh=`<div id="bofld-${pfx}${i}" data-mode="${_boilerOutsideMode(c)}">${_boilerOutsideFieldHtml(c,i,pfx)}</div>`,th=`<div class="form-group" style="margin-bottom:10px"><label>Water temperature (°F)</label><input type="number" id="btemp-${pfx}${i}" placeholder="e.g. 185" value="${c.temp}" oninput="boilerCP[${i}].temp=this.value;_boilerOnEdit(${i})" style="font-size:16px"${c.callMade?' readonly':''}></div>`;return _bWx.status==='fail'?th+oh:oh+th;})()}<div class="form-group" style="margin-bottom:0"><label>Any alarms active?</label><div class="boiler-yn-row"><button class="yn-btn yes ${c.alarm===true?'active':''}" onclick="setBoilerAlarm(${i},true)">Yes</button><button class="yn-btn no ${c.alarm===false?'active':''}" onclick="setBoilerAlarm(${i},false)">No</button></div></div>${alarmGuidance}<div id="bact-${pfx}${i}">${_boilerActionHtml(c,i)}</div><div style="text-align:center;margin-top:10px"><button onclick="boilerCancelCheck(${i})" style="background:none;border:none;padding:4px;font-family:inherit;font-size:12px;color:var(--text-secondary);text-decoration:underline;cursor:pointer">Cancel this check</button></div></div>`;}return rowHtml+formHtml+'</div>';}).join('');const homeList=document.getElementById('boiler-list');if(homeList)homeList.innerHTML=buildList('');const patList=document.getElementById('boiler-p-list');if(patList)patList.innerHTML=buildList('p-');_boilerHomeNotice();}
+function renderBoiler(){renderShiftOverview();if(_boilerCardVisible())fetchBoilerWeather();['boiler-wx','boiler-p-wx'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=_boilerWxStripHtml();});const doneCount=boilerCP.filter(c=>c.checks.length>0).length;const allDone=doneCount===boilerCP.length;['boiler-count','boiler-p-count'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.textContent=doneCount+'/'+boilerCP.length+' done'+(allDone?' ✓':'');el.style.color=allDone?'var(--text-success)':'var(--text-secondary)';});const _bEsc=v=>String(v==null?'':v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));const buildList=pfx=>boilerCP.map((c,i)=>{const checkCount=c.checks.length;const rowHtml=`<div class="patrol-card" id="bbox-${pfx}${i}"${_boilerHasData(c)?' style="border-color:var(--red)"':''}><div class="patrol-hdr" style="padding:11px 12px;display:flex;align-items:center;justify-content:space-between"><div><div class="patrol-title">${c.building} — Boiler Room</div><div class="patrol-meta" id="bstat-${pfx}${i}">${_boilerStatusHtml(c)}</div></div><div style="display:flex;align-items:center;gap:8px;flex-shrink:0">${checkCount>0&&!(c.scanned&&!c.saved)?'<span style="font-size:18px">✅</span>':''}${c.scanned&&!c.saved?'':`<button class="cp-btn" onclick="scanBoilerQR(${i})">${checkCount>0?'Re-check':'Scan QR'}</button>`}</div></div>${checkCount>0&&!(c.scanned&&!c.saved)?`<div style="padding:4px 12px 8px;border-top:0.5px solid var(--border-secondary)">${c.checks.map((ck,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid var(--border-secondary)"><span style="font-size:11px;font-weight:600;color:var(--text-info);min-width:24px">C${ci+1}</span><span style="font-size:12px;color:var(--text-primary);flex:1">${_bEsc(ck.temp)}°F · ${_bEsc(ck.alarmSummary)}</span><span style="font-size:11px;color:var(--text-secondary)">${_bEsc(ck.time)}</span></div>`).join('')}</div>`:''}`;let formHtml='';if(c.scanned&&!c.saved){let alarmGuidance='';if(c.alarm===true){alarmGuidance=`<div class="alarm-guidance"><div class="alarm-step alarm-warn"><div class="alarm-step-hdr">⚠️ Alarm present — action required</div>Reset the boiler using the reset button on the unit. Wait for it to fully restart before checking again.</div></div><div style="margin-top:10px"><div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:6px">After reset — is the alarm still present?</div><div class="boiler-yn-row"><button class="yn-btn yes ${c.afterReset===true?'active':''}" onclick="setBoilerAfterReset(${i},true)">Yes — still alarming</button><button class="yn-btn no ${c.afterReset===false?'active':''}" onclick="setBoilerAfterReset(${i},false)">No — alarm cleared</button></div>${c.afterReset===true?`<div class="alarm-danger alarm-step" style="margin-top:10px"><div class="alarm-step-hdr">🚨 Contact facilities immediately</div>The alarm persists after reset. Do not operate the boiler. Notify facilities management right away.</div><a href="tel:+18014204789" class="facilities-btn" onclick="boilerAlarmCall(${i})"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 2h4l1.5 4-2.5 1.5a10 10 0 0 0 3.5 3.5L10 8.5l4 1.5v4a1 1 0 0 1-1 1A14 14 0 0 1 1 3a1 1 0 0 1 1-1z"/></svg>Call Cody Holt — Facilities</a>`:''}</div>`;}const checkNum=checkCount+1;formHtml=`<div class="boiler-form"><div class="boiler-form-title"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M8 5v6"/></svg>${c.building} — Check #${checkNum}</div>${(()=>{const oh=`<div id="bofld-${pfx}${i}" data-mode="${_boilerOutsideMode(c)}">${_boilerOutsideFieldHtml(c,i,pfx)}</div>`,th=`<div class="form-group" style="margin-bottom:10px"><label>Water temperature (°F)</label><input type="number" id="btemp-${pfx}${i}" placeholder="e.g. 185" value="${c.temp}" oninput="boilerCP[${i}].temp=this.value;_boilerOnEdit(${i})" style="font-size:16px"${c.callMade?' readonly':''}></div>`;return _bWx.status==='fail'?th+oh:oh+th;})()}<div class="form-group" style="margin-bottom:0"><label>Any alarms active?</label><div class="boiler-yn-row"><button class="yn-btn yes ${c.alarm===true?'active':''}" onclick="setBoilerAlarm(${i},true)">Yes</button><button class="yn-btn no ${c.alarm===false?'active':''}" onclick="setBoilerAlarm(${i},false)">No</button></div></div>${alarmGuidance}<div id="bact-${pfx}${i}">${_boilerActionHtml(c,i)}</div><div style="text-align:center;margin-top:10px"><button onclick="boilerCancelCheck(${i})" style="background:none;border:none;padding:4px;font-family:inherit;font-size:12px;color:var(--text-secondary);text-decoration:underline;cursor:pointer">Cancel this check</button></div></div>`;}return rowHtml+formHtml+'</div>';}).join('');const homeList=document.getElementById('boiler-list');if(homeList)homeList.innerHTML=buildList('');const patList=document.getElementById('boiler-p-list');if(patList)patList.innerHTML=buildList('p-');_boilerHomeNotice();}
 function scanBoilerQR(i){
   if(_bWx.status==='fail')fetchBoilerWeather(true);
   const b=boilerCP[i];
@@ -3627,6 +3766,7 @@ async function resolveNearMiss(id, notes) {
     saveNMHistory();
     renderNMHistory();
     updateNMOpenCard();
+    renderShiftOverview();
   } catch (e) {
     console.warn('resolveNearMiss exception:', e.message);
   }
@@ -4492,8 +4632,7 @@ async function _initApp(){
     _rebuildHourlyState();
     stats=remoteShift.stats||{patrols:0,nm:0,checks:0};
     _applyOfficerToUI(officer);
-    ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
-    const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=currentShiftEntries().length;
+    renderShiftOverview();
     clearInterval(timerInt);
     timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
     loadBoilerChecksForShift();
@@ -4730,6 +4869,7 @@ async function loadNearMissFromSupabase() {
     }));
     saveNMHistory();
     updateNMOpenCard();
+    renderShiftOverview();
     renderNMComplianceBanner();
     if(adminComplianceVisible())renderNMComplianceAdmin();
   } catch (e) {
@@ -4761,6 +4901,7 @@ async function loadAllNearMissFromSupabase() {
     saveNMHistory();
     renderNMHistory();
     updateNMOpenCard();
+    renderShiftOverview();
     if(adminComplianceVisible())renderNMComplianceAdmin();
   } catch (e) {
     console.warn('loadAllNearMissFromSupabase exception:', e.message);
@@ -4814,7 +4955,7 @@ function _setupRealtimeListeners(){
           clearInterval(timerInt);timerInt=null;
           clearActiveShift();
           officer=null;shiftStart=null;shiftId=null;darLog=[];
-          stats={patrols:0,nm:0,checks:0};
+          stats={patrols:0,nm:0,checks:0};clearInterval(_soInt);_soInt=null;renderShiftOverview();
           _shiftRestored=false;
           showScreen('checkin');
           return;
@@ -4830,8 +4971,7 @@ function _setupRealtimeListeners(){
           darLog=await _loadDarEntriesForMonth();
           stats=ins.stats||{patrols:0,nm:0,checks:0};
           _applyOfficerToUI(officer);
-          ['patrols','nm','checks'].forEach(k=>{const el=document.getElementById('stat-'+k);if(el)el.textContent=stats[k]||0;});
-          const entEl2=document.getElementById('stat-entries');if(entEl2)entEl2.textContent=currentShiftEntries().length;
+          renderShiftOverview();
           clearInterval(timerInt);
           timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
           saveActiveShift();
@@ -4881,7 +5021,6 @@ function _setupRealtimeListeners(){
           hourEntryCount++;
           hourEntries.unshift(newEntry);
         }
-        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=currentShiftEntries().length;
         updateHomeTiles();
         renderDARBanner();
         if(paneVisible('dar')){renderCurrentDAR();}
@@ -4960,6 +5099,7 @@ function _setupRealtimeListeners(){
         if(nmHistory.some(x=>x.id===r.id))return; // deduplicate
         nmHistory.unshift({id:r.id,officer:r.officer_name||'',building:r.building||'',cats:r.categories||[],desc:r.description||'',photo:r.photo||null,time:new Date(r.submitted_at||Date.now()).toISOString()});
         saveNMHistory();
+        renderShiftOverview();
         if(paneVisible('nearmiss')){renderNMHistory();}
         if(adminComplianceVisible())renderNMComplianceAdmin();
       }catch(e){}
@@ -5060,7 +5200,7 @@ function _startPolling(){
         clearInterval(timerInt);timerInt=null;
         clearActiveShift();
         officer=null;shiftStart=null;shiftId=null;darLog=[];
-        stats={patrols:0,nm:0,checks:0};
+        stats={patrols:0,nm:0,checks:0};clearInterval(_soInt);_soInt=null;renderShiftOverview();
         _shiftRestored=false;
         showScreen('checkin');
         return;
@@ -5073,8 +5213,7 @@ function _startPolling(){
         darLog=await _loadDarEntriesForMonth();
         stats=shiftData.stats||{patrols:0,nm:0,checks:0};
         _applyOfficerToUI(officer);
-        ['stat-patrols','stat-nm','stat-checks'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=stats[id.replace('stat-','')]||0;});
-        const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=currentShiftEntries().length;
+        renderShiftOverview();
         clearInterval(timerInt);
         timerInt=setInterval(()=>{const d=Math.floor((Date.now()-shiftStart)/1000);const h=Math.floor(d/3600),m=Math.floor((d%3600)/60),sec=d%60;const p=v=>String(v).padStart(2,'0');document.getElementById('hdr-timer').textContent=p(h)+':'+p(m)+':'+p(sec)+' on shift';},1000);
         saveActiveShift();
@@ -5095,7 +5234,6 @@ function _startPolling(){
         if(darData&&darData.length!==darLog.length){
           darLog=darData.map(e=>({type:e.type||'note',title:e.title||'',detail:e.detail||'',time:new Date(e.created_at||Date.now()),officer:e.officer||''}));
           _rebuildHourlyState();
-          const entEl=document.getElementById('stat-entries');if(entEl)entEl.textContent=darLog.length;
           updateHomeTiles();
           if(paneVisible('dar')) renderCurrentDAR();
         }
@@ -5174,6 +5312,7 @@ function _startPolling(){
           }));
           saveNMHistory();
           updateNMOpenCard();
+          renderShiftOverview();
           if(paneVisible('nearmiss')) renderNMHistory();
         }
       }
